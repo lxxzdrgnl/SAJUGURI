@@ -14,7 +14,7 @@ AI Agent 오케스트레이션 서버. MCP 도구를 활용해 사주 분석 리
     │     └─ 10개 결론형 헤드라인 생성
     │
     │ [탭 클릭]
-    └─→ Writer Agent (Claude Sonnet)
+    └─→ Writer Agent (GPT-4o)
           ├─ saju-rag MCP 호출 → 관련 명리 지식
           └─ SSE 스트리밍 리포트 생성
 ```
@@ -27,7 +27,7 @@ AI Agent 오케스트레이션 서버. MCP 도구를 활용해 사주 분석 리
 |---|---|
 | Framework | FastAPI |
 | Agent | LangChain / LangGraph |
-| LLM | GPT-4o (Planner), Claude Sonnet (Writer) |
+| LLM | GPT-4o (Planner), GPT-4o (Writer) |
 | Streaming | Server-Sent Events (SSE) |
 | MCP Client | MCP SDK (Python) |
 

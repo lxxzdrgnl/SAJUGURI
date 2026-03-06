@@ -70,7 +70,7 @@ AI가 근거 있는 답변을 하기 위해 **Vector DB(ChromaDB)**에 저장될
 | Language | Python 3.10+ (Main), TypeScript (Frontend) |
 | Frontend | Vue.js 3, Pinia, Nuxt.js, Tailwind CSS |
 | Backend | FastAPI, LangChain/LangGraph, MCP SDK |
-| AI / LLM | GPT-4o (Planner), Claude 3.5 Sonnet (Writer) |
+| AI / LLM | GPT-4o (Planner + Writer) |
 | Database | ChromaDB (Vector), PostgreSQL (User History) |
 | DevOps | Docker, MCP Inspector, Monorepo (Git) |
 

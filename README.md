@@ -7,7 +7,7 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat-square&logo=fastapi&logoColor=white)
 ![LangChain](https://img.shields.io/badge/LangChain-0.3-1C3C3C?style=flat-square&logo=langchain&logoColor=white)
 ![OpenAI](https://img.shields.io/badge/GPT--4o-Planner-412991?style=flat-square&logo=openai&logoColor=white)
-![Claude](https://img.shields.io/badge/Claude_Sonnet-Writer-D97757?style=flat-square&logo=anthropic&logoColor=white)
+![OpenAI](https://img.shields.io/badge/GPT--4o-Writer-412991?style=flat-square&logo=openai&logoColor=white)
 ![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector_DB-FF6B35?style=flat-square&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-History-4169E1?style=flat-square&logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Monorepo-2496ED?style=flat-square&logo=docker&logoColor=white)
@@ -17,6 +17,63 @@
 
 > "재물운" (X)
 > "30대 중반, 바위 틈에서 물이 솟구치듯 재물이 터질 팔자" (O)
+
+---
+
+## 아키텍처
+
+MCP(Model Context Protocol)로 **계산**과 **해석**을 철저히 분리한 3-Tier 구조입니다.
+
+### 요청 흐름
+
+```
+Frontend (Vue.js)
+    │ 생년월일시 + 성별 + 고민
+    ▼
+Backend (FastAPI)
+    │
+    ├─→ saju-calc MCP
+    │       calculate_saju() 호출
+    │       → {4기둥, 신살, 격국, 용신, reason 구조체...} 반환
+    │
+    ├─→ Planner Agent (GPT-4o)
+    │       saju-calc 결과 + 고민을 받아
+    │       → 10개 헤드라인 탭 목록 생성
+    │       → Frontend에 탭 목록 먼저 반환  ← 빠른 초기 응답
+    │
+    │   [사용자가 탭 클릭]
+    │
+    ├─→ saju-rag MCP
+    │       reason 구조체 + 탭 주제로 RAG 검색
+    │       → 관련 명리학 지식 청크 반환
+    │
+    └─→ Writer Agent (GPT-4o)
+            saju-calc 데이터 + saju-rag 지식 합쳐서
+            → 스트리밍으로 탭 리포트 생성
+    ▼
+Frontend
+    스트리밍 텍스트 렌더링
+```
+
+### 레이어별 역할
+
+| 레이어 | 입력 | 출력 |
+|---|---|---|
+| **saju-calc** | 생년월일시 | 순수 계산 데이터 (숫자·간지·구조체) |
+| **saju-rag** | `reason` 구조체 + 탭 주제 | 관련 명리학 지식 텍스트 청크 |
+| **Writer Agent** | calc 데이터 + rag 지식 | 사용자용 해석 문장 (스트리밍) |
+
+> `reason`은 문장이 아닌 구조화 데이터로 반환됩니다 (`{"trigger": "day_stem", "yang_in_branch": "자"}`).
+> Writer Agent가 이 데이터를 보고 자기 언어로 해석을 생성합니다.
+
+### 코드 구조
+
+| 레이어 | 링크 | 역할 |
+|---|---|---|
+| Frontend | [frontend/](./frontend) | Vue.js 3 + Nuxt.js 탭 UI |
+| Backend | [backend/](./backend) | FastAPI + AI Agent 오케스트레이션 |
+| Saju-Calc MCP | [mcp-servers/saju-calc/](./mcp-servers/saju-calc) | 만세력 계산 엔진 |
+| Saju-RAG MCP | [mcp-servers/saju-rag/](./mcp-servers/saju-rag) | 명리학 지식 RAG |
 
 ---
 
@@ -31,17 +88,6 @@
 | 월주(月柱) | 태어난 달의 천간·지지 | 부모·청년운 (16~30세) |
 | 일주(日柱) | 태어난 날의 천간·지지 | 자신·배우자·중년운 (31~45세) |
 | 시주(時柱) | 태어난 시의 천간·지지 | 자녀·말년운 (46세~) |
-
----
-
-## 기존 사주 서비스의 한계
-
-기존 서비스는 미리 작성된 정적 텍스트를 보여줄 뿐입니다.
-
-- "재물운: 이달은 지출을 조심하세요." — 모든 사람에게 같은 말
-- "연애운: 새로운 인연이 찾아올 수 있습니다." — 고민과 무관한 일반론
-
-**인사이트 사주는 다릅니다.**
 
 ---
 
@@ -79,12 +125,12 @@ AI Planner (GPT-4o)
   → 사주 데이터 + 고민을 결합해 10개 헤드라인 기획
         │
         ▼
-AI Writer (Claude Sonnet)
+AI Writer (GPT-4o)
   → 명리학 지식 베이스에서 근거를 찾아 각 탭 내용 집필
         │
         ▼ [완성된 리포트 수신]
 탭 1 | 탭 2 | 탭 3 | ... | 탭 10
-  클릭하면 즉시 전환 — 일반 웹사이트처럼
+  클릭하면 즉시 전환
 ```
 
 ---
@@ -105,28 +151,6 @@ AI Writer (Claude Sonnet)
 
 ---
 
-## 아키텍처
-
-MCP(Model Context Protocol)로 **계산**과 **해석**을 철저히 분리한 3-Tier 구조입니다.
-
-```
-Frontend (Vue.js 3 / Nuxt.js)
-        │
-        ▼
-Backend (FastAPI + LangGraph)
-  ├─→ saju-calc MCP  ←  순수 계산만 담당 (숫자·간지 반환)
-  └─→ saju-rag MCP   ←  해석 텍스트만 담당 (명리학 지식 RAG)
-```
-
-| 레이어 | 링크 | 역할 |
-|---|---|---|
-| Frontend | [frontend/](./frontend) | Vue.js 3 + Nuxt.js 탭 UI |
-| Backend | [backend/](./backend) | FastAPI + AI Agent 오케스트레이션 |
-| Saju-Calc MCP | [mcp-servers/saju-calc/](./mcp-servers/saju-calc) | 만세력 계산 엔진 |
-| Saju-RAG MCP | [mcp-servers/saju-rag/](./mcp-servers/saju-rag) | 명리학 지식 RAG |
-
----
-
 ## 기술 스택
 
 | 구분 | 기술 |
@@ -134,7 +158,7 @@ Backend (FastAPI + LangGraph)
 | Language | Python 3.10+, TypeScript |
 | Frontend | Vue.js 3, Pinia, Nuxt.js, Tailwind CSS |
 | Backend | FastAPI, LangChain / LangGraph, MCP SDK |
-| AI / LLM | GPT-4o (Planner), Claude Sonnet (Writer) |
+| AI / LLM | GPT-4o (Planner), GPT-4o (Writer) |
 | Database | ChromaDB (Vector DB), PostgreSQL (이력) |
 | Package Manager | uv (Python), pnpm (Node.js) |
 | DevOps | Docker, Docker Compose, MCP Inspector |
