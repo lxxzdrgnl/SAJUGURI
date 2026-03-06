@@ -26,6 +26,28 @@
 
 ---
 
+## 실행
+
+### 로컬 개발
+
+```bash
+# 의존성 설치
+pnpm install
+
+# 개발 서버 실행
+pnpm dev
+# → http://localhost:3000
+```
+
+### Docker
+
+```bash
+# 루트 디렉토리에서
+docker compose up frontend
+```
+
+---
+
 ## 구현 예정
 
 > 현재 MCP 서버 및 Backend 구현 완료 후 진행 예정

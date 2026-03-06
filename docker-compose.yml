@@ -1,0 +1,87 @@
+services:
+  # ── MCP Servers ──────────────────────────────
+  saju-calc:
+    build:
+      context: ./mcp-servers/saju-calc
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  saju-rag:
+    build:
+      context: ./mcp-servers/saju-rag
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - chroma_data:/app/chroma_db
+    restart: unless-stopped
+    depends_on:
+      - chromadb
+
+  # ── Databases ────────────────────────────────
+  chromadb:
+    image: chromadb/chroma:latest
+    ports:
+      - "8003:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: sajunara
+      POSTGRES_USER: sajunara
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sajunara_dev}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # ── Backend ──────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - SAJU_CALC_URL=http://saju-calc:8000/sse
+      - SAJU_RAG_URL=http://saju-rag:8000/sse
+      - DATABASE_URL=postgresql://sajunara:${POSTGRES_PASSWORD:-sajunara_dev}@postgres:5432/sajunara
+    restart: unless-stopped
+    depends_on:
+      - saju-calc
+      - saju-rag
+      - postgres
+
+  # ── Frontend ─────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NUXT_PUBLIC_API_BASE=http://localhost:8000
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+volumes:
+  chroma_data:
+  postgres_data:

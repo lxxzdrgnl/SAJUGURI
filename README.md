@@ -136,15 +136,44 @@ Backend (FastAPI + LangGraph)
 | Backend | FastAPI, LangChain / LangGraph, MCP SDK |
 | AI / LLM | GPT-4o (Planner), Claude Sonnet (Writer) |
 | Database | ChromaDB (Vector DB), PostgreSQL (이력) |
-| DevOps | Docker, MCP Inspector, Monorepo |
+| Package Manager | uv (Python), pnpm (Node.js) |
+| DevOps | Docker, Docker Compose, MCP Inspector |
 
 ---
 
 ## 빠른 시작
 
+### Docker (전체 스택)
+
 ```bash
-# saju-calc MCP 서버 실행
+# .env 설정
+cp .env.example .env
+# OPENAI_API_KEY, ANTHROPIC_API_KEY 입력
+
+# 전체 서비스 실행
+docker compose up -d
+
+# 서비스 포트
+#   frontend   → http://localhost:3000
+#   backend    → http://localhost:8000
+#   saju-calc  → http://localhost:8001
+#   saju-rag   → http://localhost:8002
+```
+
+### 로컬 개발 (saju-calc MCP)
+
+```bash
+# uv 설치 (최초 1회)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
 cd mcp-servers/saju-calc
-pip install -r requirements.txt
-fastmcp dev main.py
+
+# 의존성 설치
+uv sync --group dev
+
+# MCP Inspector로 개발 테스트
+uv run fastmcp dev main.py
+
+# 단위 테스트
+uv run pytest tests/
 ```

@@ -33,6 +33,35 @@ AI Agent 오케스트레이션 서버. MCP 도구를 활용해 사주 분석 리
 
 ---
 
+## 실행
+
+### 로컬 개발
+
+```bash
+# uv 설치 (최초 1회)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 의존성 설치
+uv sync --group dev
+
+# 환경 변수 설정
+cp .env.example .env
+# OPENAI_API_KEY, ANTHROPIC_API_KEY, SAJU_CALC_URL, DATABASE_URL 입력
+
+# 개발 서버 실행
+uv run uvicorn main:app --reload
+# → http://localhost:8000
+```
+
+### Docker
+
+```bash
+# 루트 디렉토리에서
+docker compose up backend
+```
+
+---
+
 ## 구현 예정
 
 > 현재 MCP 서버 구현 완료 후 진행 예정

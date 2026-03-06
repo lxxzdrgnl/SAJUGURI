@@ -16,19 +16,40 @@
 
 ## 설치 및 실행
 
-```bash
-# 가상환경 생성
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+### uv (권장)
 
-# 패키지 설치
-pip install -r requirements.txt
+```bash
+# uv 설치 (최초 1회)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 의존성 설치
+uv sync
 
 # MCP Inspector로 개발 테스트
-fastmcp dev main.py
+uv run fastmcp dev main.py
 
 # 프로덕션 실행
-python main.py
+uv run python main.py
+
+# 테스트
+uv run pytest tests/
+
+# 개발 의존성 포함 설치
+uv sync --group dev
+```
+
+### Docker
+
+```bash
+# 단일 서비스 실행
+docker build -t saju-calc .
+docker run -p 8001:8000 saju-calc
+
+# 전체 스택 (루트 디렉토리에서)
+docker compose up saju-calc
+
+# 전체 스택 실행
+docker compose up -d
 ```
 
 ---
@@ -205,8 +226,8 @@ python main.py
 ```
 saju-calc/
 ├── main.py                  # FastMCP 서버 진입점
-├── requirements.txt
-├── pyproject.toml
+├── pyproject.toml           # uv 의존성 관리
+├── Dockerfile
 ├── data/
 │   ├── heavenly_stems.py    # 천간 10개
 │   ├── earthly_branches.py  # 지지 12개 + 지장간 + 삼합/삼형/육해/충/합
