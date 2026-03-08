@@ -19,6 +19,10 @@ from data.wuxing import WUXING_GENERATION, WUXING_DESTRUCTION
 from data.earthly_branches import SAM_HYEONG as _SAM_HYEONG
 from lib.structure_patterns import detect_structure_patterns
 from lib.dynamics import build_dynamics
+from lib.synergy import compute_synergy_tags
+from lib.behavior_synthesizer import synthesize_behavior_profile
+from lib.context_ranker import rank_context
+from lib.life_domain_mapper import map_life_domains
 
 # sin_sal type → priority
 _SAL_PRIORITY: dict[str, str] = {
@@ -195,6 +199,20 @@ def handle_calculate_saju(
         "month_element": month_el, "day_element_relation": _season_relation,
     }
 
+    # 반복 연산 방지: 결과를 로컬 변수에 캐싱
+    _structure_patterns = detect_structure_patterns(ten_gods_dist_filtered, strength["level"], wuxing_pct)
+    _dynamics = build_dynamics(saju, branch_rel, wuxing_pct)
+    _synergy = compute_synergy_tags(_structure_patterns, _dynamics)
+
+    # ⑩ 행동 프로파일 — 십성 분포 → 원자적 행동 벡터 합성
+    _behavior_profile = synthesize_behavior_profile(ten_gods_dist_filtered)
+
+    # ⑪ 컨텍스트 랭킹 — Writer에게 전달할 핵심·보조 컨텍스트 선별
+    _context_ranking = rank_context(_structure_patterns, sin_sals, synergy=_synergy)
+
+    # ⑫ 생활 도메인 매핑 — 연애·직업·돈·성격별 핵심 태그 자동 분류
+    _life_domains = map_life_domains(_behavior_profile, _context_ranking)
+
     return {
         # ① meta — 계산 기준 먼저
         "meta": {
@@ -222,7 +240,7 @@ def handle_calculate_saju(
         # ⑤ 십성 분포 % (총합 ~100) + 결핍 카테고리 (표면 없음 + 지장간 잠재력 대조)
         "ten_gods_distribution": ten_gods_dist_filtered,
         "ten_gods_void_info": ten_gods_void_info,
-        "structure_patterns": detect_structure_patterns(ten_gods_dist_filtered, strength["level"]),
+        "structure_patterns": _structure_patterns,
         # ⑥ 특이사항
         "sin_sals": sin_sals,
         "branch_relations": branch_rel,
@@ -232,5 +250,13 @@ def handle_calculate_saju(
         "dae_un_list": dae_un_list,
         "current_dae_un": current_dae_un,
         # ⑧ 동역학 — 기둥 간 상호작용 (천간합·통근·지지관계위치·오행흐름)
-        "dynamics": build_dynamics(saju, branch_rel, wuxing_pct),
+        "dynamics": _dynamics,
+        # ⑨ 시너지 — 구조 패턴 × 동역학 교차점 (Writer Agent 추가 해석 힌트)
+        "synergy": _synergy,
+        # ⑩ 행동 프로파일 — 십성 → 원자적 행동 벡터 (RAG 쿼리 seed)
+        "behavior_profile": _behavior_profile,
+        # ⑪ 컨텍스트 랭킹 — Writer 전달 핵심·보조 컨텍스트 (primary 3 + secondary 2)
+        "context_ranking": _context_ranking,
+        # ⑫ 생활 도메인 — 연애·직업·돈·성격 도메인별 핵심 태그 (Planner Agent RAG 쿼리 seed)
+        "life_domains": _life_domains,
     }
