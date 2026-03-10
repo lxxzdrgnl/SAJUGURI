@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: #1a1a2e;
+    --color-secondary: #16213e;
+    --color-accent: #e94560;
+  }
+
+  body {
+    @apply bg-[#0f0f1a] text-gray-100 antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-2.5 rounded-lg transition-colors;
+  }
+
+  .card {
+    @apply bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5;
+  }
+
+  /* 오행 색상 */
+  .element-목 { @apply text-green-400; }
+  .element-화 { @apply text-red-400; }
+  .element-토 { @apply text-yellow-500; }
+  .element-금 { @apply text-gray-300; }
+  .element-수 { @apply text-blue-400; }
+
+  /* 음양 색상 */
+  .yin  { @apply text-blue-300; }
+  .yang { @apply text-red-300; }
+}
