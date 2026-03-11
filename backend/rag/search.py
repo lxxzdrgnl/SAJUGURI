@@ -65,34 +65,45 @@ def handle_search_by_context(
     life_domains: dict,
     day_pillar: str | None = None,
     concern: str | None = None,
+    # 추가 calc 필드
+    branch_relations: dict | None = None,
+    dynamics: dict | None = None,
+    day_master_strength: dict | None = None,
+    yong_sin: dict | None = None,
     n_per_domain: int = 2,
 ) -> dict:
     """
-    saju-calc 출력(context_ranking + life_domains) → Writer용 RAG 청크 조립.
+    saju-calc 출력 전체 → Writer용 RAG 청크 조립.
 
     Args:
-        context_ranking : calc의 context_ranking 필드
-                          {"primary_context": [{id, type, score}], "secondary_context": [...]}
-        life_domains    : calc의 life_domains 필드
-                          {"career": [...], "relationship": [...], "wealth": [...], "personality": [...]}
-        day_pillar      : 일주 간지 (예: "경오") — ilju 직접 조회용
-        concern         : 사용자 고민 원문 — concern 시맨틱 검색에 추가
-        n_per_domain    : 도메인별 시맨틱 검색 결과 수 (기본 2)
+        context_ranking      : {"primary_context": [...], "secondary_context": [...]}
+        life_domains         : {"career": [...], "relationship": [...], ...}
+        day_pillar           : 일주 간지 (예: "경오")
+        concern              : 사용자 고민 원문
+        branch_relations     : 충·합·형·해·파 관계 dict
+        dynamics             : 천간합·통근·충합 위치 정보
+        day_master_strength  : {"level_8": "중화신강", "score": 62, ...}
+        yong_sin             : {"primary": "금", "logic_type": "억부", ...}
+        n_per_domain         : 도메인별 시맨틱 검색 결과 수
 
     Returns:
         {
-          "career":       [RAG chunk, ...],
-          "relationship": [RAG chunk, ...],
-          "wealth":       [RAG chunk, ...],
-          "personality":  [RAG chunk, ...],
-          "context":      [RAG chunk, ...],   # primary_context 직접 조회
-          "ilju":         {일주 전체 지식} or None,
-          "concern":      [RAG chunk, ...]    # concern 기반 검색 (있을 때)
+          "career":        [RAG chunk, ...],
+          "relationship":  [RAG chunk, ...],
+          "wealth":        [RAG chunk, ...],
+          "personality":   [RAG chunk, ...],
+          "context":       [RAG chunk, ...],   # primary_context 직접 조회
+          "ilju":          {일주 전체 지식} or None,
+          "concern":       [RAG chunk, ...],
+          "dynamics":      [RAG chunk, ...],   # 합충 관계 기반 검색
+          "strength":      str | None,         # 신강/신약 레이블 (Writer 참고용)
+          "yong_sin_summary": str | None,      # 용신 요약 (Writer 참고용)
         }
     """
     result: dict = {
         "career": [], "relationship": [], "wealth": [], "personality": [],
         "context": [], "ilju": None, "concern": [],
+        "dynamics": [], "strength": None, "yong_sin_summary": None,
     }
 
     # 1. life_domain별 시맨틱 검색 (ten_gods + structure_patterns + wuxing)
@@ -100,12 +111,11 @@ def handle_search_by_context(
     for domain, tags in life_domains.items():
         if domain not in result or not tags:
             continue
-        query = " ".join(tags[:4])  # 상위 4개 태그를 쿼리로
+        query = " ".join(tags[:4])
         chunks = []
         for col in domain_collections:
             hits = search(col, query, n_per_domain)
             chunks.extend(hits)
-        # distance 기준 정렬, 상위 n_per_domain * 2개 유지
         chunks.sort(key=lambda x: x.get("distance") or 1.0)
         result[domain] = chunks[: n_per_domain * 2]
 
@@ -118,7 +128,7 @@ def handle_search_by_context(
         ctx_id   = ctx.get("id", "")
         ctx_type = ctx.get("type", "")
         if ctx_type == "pattern":
-            entry = handle_get_structure_pattern(ctx_id)   # sp_ prefix 자동 처리
+            entry = handle_get_structure_pattern(ctx_id)
         elif ctx_type == "sin_sal":
             entry = _find_by_field("sin_sal", "name", ctx_id)
         else:
@@ -130,13 +140,61 @@ def handle_search_by_context(
     if day_pillar:
         result["ilju"] = _find_by_field("ilju", "ilju", day_pillar)
 
-    # 4. concern 시맨틱 검색 (있을 때)
+    # 4. concern 시맨틱 검색
     if concern:
         concern_chunks = search_multi(concern, ["ten_gods", "sin_sal", "ilju"], 2)
         for hits in concern_chunks.values():
             result["concern"].extend(hits)
         result["concern"].sort(key=lambda x: x.get("distance") or 1.0)
         result["concern"] = result["concern"][:4]
+
+    # 5. 충·합·형·해·파 기반 dynamics 검색
+    if branch_relations or dynamics:
+        _dyn_keywords: list[str] = []
+
+        br = branch_relations or {}
+        # 합화 관계 → 합화 오행 키워드
+        for hap in br.get("yuk_hap", []):
+            if hap.get("is_effective") and hap.get("element"):
+                _dyn_keywords.append(f"육합 {hap['element']}화")
+        if br.get("sam_hap"):
+            sh = br["sam_hap"]
+            _dyn_keywords.append(f"삼합 {sh.get('element', '')}화")
+        if br.get("cheon_gan_hap"):
+            for h in br["cheon_gan_hap"]:
+                _dyn_keywords.append(f"천간합 {h.get('name', '')}")
+        # 충
+        for pair in br.get("chung", []):
+            _dyn_keywords.append(f"{''.join(pair)}충")
+        # 형
+        for name in br.get("sam_hyeong", []):
+            _dyn_keywords.append(f"{name}")
+
+        # dynamics 천간합·통근 추가
+        if dynamics:
+            for sh in dynamics.get("stem_hap", []):
+                _dyn_keywords.append(sh.get("name", ""))
+            if dynamics.get("rooting_map"):
+                _dyn_keywords.append("통근 통기")
+
+        if _dyn_keywords:
+            dyn_query = " ".join(filter(None, _dyn_keywords[:6]))
+            dyn_hits = search_multi(dyn_query, ["dynamics", "structure_patterns"], n_per_domain)
+            for hits in dyn_hits.values():
+                result["dynamics"].extend(hits)
+            result["dynamics"].sort(key=lambda x: x.get("distance") or 1.0)
+            result["dynamics"] = result["dynamics"][:4]
+
+    # 6. 신강/신약 레이블 → Writer 직접 참고용 (RAG 검색 아님, 메타데이터)
+    if day_master_strength:
+        result["strength"] = day_master_strength.get("level_8")
+
+    # 7. 용신 요약 → Writer 직접 참고용
+    if yong_sin:
+        primary = yong_sin.get("primary", "")
+        logic   = yong_sin.get("logic_type", "")
+        xi_sin  = "·".join(yong_sin.get("xi_sin", []))
+        result["yong_sin_summary"] = f"용신:{primary} ({logic}), 희신:{xi_sin}"
 
     return result
 

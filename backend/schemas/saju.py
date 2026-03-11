@@ -98,6 +98,7 @@ class PillarInfo(BaseModel):
     stem_ten_god: str = Field(description="천간 십성", examples=["상관"])
     branch_ten_god: str = Field(description="지지 대표 십성", examples=["편인"])
     twelve_wun: str = Field(description="12운성", examples=["목욕"])
+    twelve_sin_sal: str = Field(default="", description="12신살", examples=["역마살"])
 
 
 class DayMasterStrength(BaseModel):
@@ -106,6 +107,10 @@ class DayMasterStrength(BaseModel):
     level: str = Field(
         description="강약 등급 (strong/medium/weak → 신강/중화/신약)",
         examples=["medium"],
+    )
+    level_8: str = Field(
+        description="8단계 강약 (극약/태약/신약/중화신약/중화신강/신강/태강/극왕)",
+        examples=["중화신약"],
     )
     score: int = Field(description="강약 점수 (0~100)", examples=[55])
     raw_score: int = Field(description="보정 전 원점수", examples=[55])
@@ -122,6 +127,10 @@ class DayMasterStrength(BaseModel):
         description="월령(得令) 등급 (strong/medium/weak)",
         examples=["medium"],
     )
+    deuk_ryeong: bool = Field(description="득령(得令) 여부", examples=[False])
+    deuk_ji: bool = Field(description="득지(得地) 여부", examples=[True])
+    deuk_si: bool = Field(description="득시(得時) 여부", examples=[False])
+    deuk_se: bool = Field(description="득세(得勢) 여부", examples=[True])
 
 
 class YongSin(BaseModel):
@@ -144,6 +153,10 @@ class YongSin(BaseModel):
     logic_type: str = Field(
         description="용신 선정 로직 분류",
         examples=["balanced_weakest_supplement"],
+    )
+    yong_sin_label: str = Field(
+        description="용신 종류 레이블 (억부용신/통관용신)",
+        examples=["억부용신"],
     )
     reasoning_priority: str = Field(
         description="용신 선정 우선 방식 (억부/통관/조후 등)",
@@ -262,6 +275,18 @@ class SajuCalcResponse(BaseModel):
         description="오행별 비율(%) — 8글자 기준, 결핍 오행(0%)도 포함",
         examples=[{"목": 25.0, "화": 37.5, "토": 0.0, "금": 25.0, "수": 12.5}],
     )
+    wuxing_count_hap: dict[str, float] = Field(
+        description="육합·삼합 합화 적용 오행 비율(%)",
+        examples=[{"목": 25.0, "화": 25.0, "토": 0.0, "금": 12.5, "수": 37.5}],
+    )
+    wuxing_chars: list[dict[str, str]] = Field(
+        description="8글자 위치별 오행 [{pillar, type, element}] — 궁성 가중치 계산·RAG용",
+        examples=[[{"pillar": "year", "type": "stem", "element": "목"}]],
+    )
+    wuxing_chars_hap: list[dict[str, str]] = Field(
+        description="합화 적용 위치별 오행 [{pillar, type, element}]",
+        examples=[[{"pillar": "year", "type": "branch", "element": "수"}]],
+    )
     dominant_elements: list[str] = Field(
         description="강한 오행 목록",
         examples=[["화", "금"]],
@@ -290,6 +315,10 @@ class SajuCalcResponse(BaseModel):
     )
 
     # ⑥ 특이사항
+    gong_mang: dict[str, list[str]] = Field(
+        description="공망(空亡) — 일주 기준 공망 지지 2개 + 해당 기둥",
+        examples=[{"vacant_branches": ["자", "축"], "affected_pillars": ["month"]}],
+    )
     sin_sals: list[SinSalEntry] = Field(description="신살 목록")
     branch_relations: dict[str, Any] = Field(
         description="지지 관계 (충·합·형·해·파). 없는 관계는 키 자체 제거됨",
@@ -365,12 +394,17 @@ class SajuCalcResponse(BaseModel):
                 },
                 "day_master_strength": {
                     "level": "medium",
+                    "level_8": "중화신약",
                     "score": 55,
                     "raw_score": 55,
                     "score_range": [0, 100],
                     "factors": {"wol_ryeong": 20, "bigeop": -10, "inseong": 0, "seolgi": -5},
                     "analysis": "월령 중립. 비겁 없음. 재관식상 많음",
                     "wol_ryeong": "medium",
+                    "deuk_ryeong": False,
+                    "deuk_ji": True,
+                    "deuk_si": False,
+                    "deuk_se": True,
                 },
                 "yong_sin": {
                     "primary": "수",
@@ -378,6 +412,7 @@ class SajuCalcResponse(BaseModel):
                     "xi_sin": ["수", "목"],
                     "ji_sin": ["화"],
                     "logic_type": "balanced_weakest_supplement",
+                    "yong_sin_label": "통관용신",
                     "reasoning_priority": "억부",
                 },
                 "gyeok_guk": {
@@ -434,6 +469,7 @@ class SajuCalcResponse(BaseModel):
                 "ten_gods_distribution": {"편관": 40.0, "비견": 20.0, "정인": 20.0, "편재": 20.0},
                 "ten_gods_void_info": [{"category": "식상", "hidden_in_ji_jang_gan": {}}],
                 "structure_patterns": [{"pattern_id": "gwan_in_sang_saeng", "name": "관인상생", "strength": "high"}],
+                "gong_mang": {"vacant_branches": ["자", "축"], "affected_pillars": ["month"]},
                 "sin_sals": [
                     {
                         "name": "도화살",

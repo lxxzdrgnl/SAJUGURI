@@ -10,7 +10,9 @@ export interface SajuCalcRequest {
 /** 기둥 하나 */
 export interface Pillar {
   stem: string
+  stem_hanja: string
   branch: string
+  branch_hanja: string
   stem_element: string
   branch_element: string
   yin_yang: string
@@ -54,6 +56,7 @@ export interface DaeUnEntry {
   ganji_name: string
   stem_ten_god?: string
   branch_ten_god?: string
+  twelve_wun?: string
 }
 
 /** 신살 */
@@ -96,7 +99,10 @@ export interface SajuCalcResponse {
   month_pillar: Pillar
   day_pillar: Pillar
   hour_pillar: Pillar
-  wuxing_count: Record<string, number>
+  wuxing_count:     Record<string, number>
+  wuxing_count_hap: Record<string, number>
+  wuxing_chars:     { pillar: string; type: string; element: string }[]
+  wuxing_chars_hap: { pillar: string; type: string; element: string }[]
   dominant_elements: string[]
   weak_elements: string[]
   yin_yang_ratio: { yang: number; yin: number }
@@ -120,6 +126,19 @@ export interface SajuCalcResponse {
 /** 월운 항목 */
 export interface WolUnEntry {
   month: number
+  stem: string
+  branch: string
+  stem_element: string
+  branch_element: string
+  ganji_name: string
+  stem_ten_god: string
+  branch_ten_god: string
+  twelve_wun: string
+}
+
+/** 년운 항목 */
+export interface YeonUnEntry {
+  year: number
   stem: string
   branch: string
   stem_element: string

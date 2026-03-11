@@ -50,86 +50,121 @@ function onSubmit() {
 </script>
 
 <template>
-  <form class="card space-y-5 max-w-lg w-full" @submit.prevent="onSubmit">
-    <h2 class="text-lg font-bold text-indigo-300 tracking-wide">사주 정보 입력</h2>
-
-    <!-- 생년월일 -->
-    <div class="space-y-1">
-      <label class="text-sm text-gray-400">생년월일</label>
-      <input
-        v-model="form.birth_date"
-        type="date"
-        min="1900-01-01"
-        max="2100-12-31"
-        required
-        class="w-full bg-[#0f0f1a] border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
-      />
+  <form
+    class="relative overflow-hidden w-full space-y-6 rounded-2xl px-6 py-7"
+    style="background: #ffffff; border: 1px solid #e8e2db;"
+    @submit.prevent="onSubmit"
+  >
+    <!-- Decorative background 四柱 text -->
+    <div
+      class="pointer-events-none absolute -right-3 -top-4 font-serif text-[7rem] leading-none font-bold select-none"
+      style="color: rgba(166,124,82,0.05); letter-spacing: 0.05em;"
+      aria-hidden="true"
+    >
+      四柱
     </div>
 
-    <!-- 음양력 -->
-    <div class="space-y-1">
-      <label class="text-sm text-gray-400">달력 종류</label>
-      <div class="flex gap-3">
-        <button
-          type="button"
-          :class="form.calendar === 'solar' ? 'bg-indigo-600 text-white' : 'bg-[#0f0f1a] text-gray-400 border border-gray-600'"
-          class="flex-1 py-2 rounded-lg text-sm font-medium transition-colors"
-          @click="form.calendar = 'solar'; form.is_leap_month = false"
-        >양력</button>
-        <button
-          type="button"
-          :class="form.calendar === 'lunar' ? 'bg-indigo-600 text-white' : 'bg-[#0f0f1a] text-gray-400 border border-gray-600'"
-          class="flex-1 py-2 rounded-lg text-sm font-medium transition-colors"
-          @click="form.calendar = 'lunar'"
-        >음력</button>
+    <div class="relative space-y-6">
+      <!-- 생년월일 -->
+      <div class="space-y-1.5">
+        <label class="text-xs tracking-wider uppercase" style="color: #aaaaaa;">생년월일</label>
+        <input
+          v-model="form.birth_date"
+          type="date"
+          min="1900-01-01"
+          max="2100-12-31"
+          required
+          class="input-underline"
+        />
       </div>
-      <label v-if="form.calendar === 'lunar'" class="flex items-center gap-2 text-sm text-gray-400 mt-1 cursor-pointer">
-        <input v-model="form.is_leap_month" type="checkbox" class="accent-indigo-500" />
-        윤달
-      </label>
-    </div>
 
-    <!-- 출생 시각 -->
-    <div class="space-y-1">
-      <label class="text-sm text-gray-400">출생 시각</label>
-      <select
-        class="w-full bg-[#0f0f1a] border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
-        @change="onHourSelect"
-      >
-        <option v-for="opt in HOUR_OPTIONS" :key="opt.value" :value="opt.value">
-          {{ opt.label }}
-        </option>
-      </select>
-      <input
-        v-if="isCustom"
-        type="time"
-        :value="customTime"
-        class="w-full bg-[#0f0f1a] border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500 mt-1"
-        @input="onCustomTime"
-      />
-    </div>
-
-    <!-- 성별 -->
-    <div class="space-y-1">
-      <label class="text-sm text-gray-400">성별</label>
-      <div class="flex gap-3">
-        <button
-          type="button"
-          :class="form.gender === 'male' ? 'bg-blue-700 text-white' : 'bg-[#0f0f1a] text-gray-400 border border-gray-600'"
-          class="flex-1 py-2 rounded-lg text-sm font-medium transition-colors"
-          @click="form.gender = 'male'"
-        >남성</button>
-        <button
-          type="button"
-          :class="form.gender === 'female' ? 'bg-pink-700 text-white' : 'bg-[#0f0f1a] text-gray-400 border border-gray-600'"
-          class="flex-1 py-2 rounded-lg text-sm font-medium transition-colors"
-          @click="form.gender = 'female'"
-        >여성</button>
+      <!-- 음양력 -->
+      <div class="space-y-2">
+        <label class="text-xs tracking-wider uppercase" style="color: #aaaaaa;">달력 종류</label>
+        <div class="flex gap-2 p-1 rounded-full" style="background: #f0ece8;">
+          <button
+            type="button"
+            class="pill-toggle"
+            :class="form.calendar === 'solar' ? 'pill-toggle-active' : 'pill-toggle-inactive'"
+            @click="form.calendar = 'solar'; form.is_leap_month = false"
+          >
+            양력
+          </button>
+          <button
+            type="button"
+            class="pill-toggle"
+            :class="form.calendar === 'lunar' ? 'pill-toggle-active' : 'pill-toggle-inactive'"
+            @click="form.calendar = 'lunar'"
+          >
+            음력
+          </button>
+        </div>
+        <label
+          v-if="form.calendar === 'lunar'"
+          class="flex items-center gap-2 text-xs mt-1 cursor-pointer select-none"
+          style="color: #888888;"
+        >
+          <input
+            v-model="form.is_leap_month"
+            type="checkbox"
+            class="w-3.5 h-3.5 rounded"
+            style="accent-color: #3a3a3a;"
+          />
+          <span>윤달</span>
+        </label>
       </div>
-    </div>
 
-    <button type="submit" class="btn-primary w-full mt-2">
-      사주 계산하기
-    </button>
+      <!-- 출생 시각 -->
+      <div class="space-y-1.5">
+        <label class="text-xs tracking-wider uppercase" style="color: #aaaaaa;">출생 시각</label>
+        <select
+          class="select-underline"
+          @change="onHourSelect"
+        >
+          <option
+            v-for="opt in HOUR_OPTIONS"
+            :key="opt.value"
+            :value="opt.value"
+            style="background: #ffffff; color: #1a1a1a;"
+          >
+            {{ opt.label }}
+          </option>
+        </select>
+        <input
+          v-if="isCustom"
+          type="time"
+          :value="customTime"
+          class="input-underline mt-1"
+          @input="onCustomTime"
+        />
+      </div>
+
+      <!-- 성별 -->
+      <div class="space-y-2">
+        <label class="text-xs tracking-wider uppercase" style="color: #aaaaaa;">성별</label>
+        <div class="flex gap-2 p-1 rounded-full" style="background: #f0ece8;">
+          <button
+            type="button"
+            class="pill-toggle"
+            :class="form.gender === 'male' ? 'pill-toggle-active' : 'pill-toggle-inactive'"
+            @click="form.gender = 'male'"
+          >
+            남성
+          </button>
+          <button
+            type="button"
+            class="pill-toggle"
+            :class="form.gender === 'female' ? 'pill-toggle-active' : 'pill-toggle-inactive'"
+            @click="form.gender = 'female'"
+          >
+            여성
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary mt-2 text-base">
+        사주 계산하기
+      </button>
+    </div>
   </form>
 </template>
