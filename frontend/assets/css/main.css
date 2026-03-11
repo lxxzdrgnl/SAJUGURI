@@ -4,33 +4,266 @@
 
 @layer base {
   :root {
-    --color-primary: #1a1a2e;
-    --color-secondary: #16213e;
-    --color-accent: #e94560;
+    --bg-base:        #f4efea;
+    --surface-1:      #ffffff;
+    --surface-2:      #f7f4f1;
+    --surface-3:      #f0ece8;
+    --border-subtle:  #e8e2db;
+    --border-default: #ddd7d0;
+    --border-hover:   #3a3a3a;
+    --text-primary:   #1a1a1a;
+    --text-secondary: #666666;
+    --text-muted:     #aaaaaa;
+    --text-label:     #888888;
+
+    /* ── 오행 색상 ── 여기만 바꾸면 전체 반영 */
+    --el-목: #4a9490;  /* 청록 */
+    --el-화: #c04838;  /* 벽돌 빨강 */
+    --el-토: #8b5e30;  /* 갈색 */
+    --el-금: #b89020;  /* 황금색 */
+    --el-수: #3858b0;  /* 남색/인디고 */
+
+    /* ── 글씨 크기 ── 여기만 바꾸면 전체 반영 */
+    --fs-tiny:        11px;    /* 달력 내부 극소 텍스트 (절기·음력 등) */
+    --fs-label:       13px;    /* 작은 레이블 (십성·신살·운성 등) */
+    --fs-sub:         14px;    /* 보조 텍스트 */
+    --fs-body:        15px;    /* 본문 */
+    --fs-section:     20px;    /* 카드 섹션 타이틀 (오행 분석, 사주팔자 등) */
+    --fs-tile:        2rem;    /* 대운·연운·월운 타일 간지 */
+    --fs-ganji:       2.8rem;  /* 사주 테이블 천간·지지 */
+    --fs-ganji-hanja: 1.4rem;  /* 사주 테이블 한자 */
   }
 
   body {
-    @apply bg-[#0f0f1a] text-gray-100 antialiased;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: 'Noto Sans KR', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer components {
+
+  /* ── Buttons ── */
   .btn-primary {
-    @apply bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-2.5 rounded-lg transition-colors;
+    background: #3a3a3a;
+    color: white;
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-weight: 600;
+    font-size: 15px;
+    transition: background 0.2s ease;
+    border: none;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+  .btn-primary:hover {
+    background: #1a1a1a;
+  }
+  .btn-primary:active {
+    background: #111111;
   }
 
+  /* ── Cards ── */
   .card {
-    @apply bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5;
+    background: #ffffff;
+    border: 1px solid #e8e2db;
+    border-radius: 12px;
+    padding: 20px;
   }
 
-  /* 오행 색상 */
-  .element-목 { @apply text-green-400; }
-  .element-화 { @apply text-red-400; }
-  .element-토 { @apply text-yellow-500; }
-  .element-금 { @apply text-gray-300; }
-  .element-수 { @apply text-blue-400; }
+  .card-elevated {
+    background: #f7f4f1;
+    border: 1px solid #e8e2db;
+    border-radius: 12px;
+    padding: 20px;
+  }
 
-  /* 음양 색상 */
-  .yin  { @apply text-blue-300; }
-  .yang { @apply text-red-300; }
+  /* ── Section labels ── */
+  .label-section {
+    font-size: var(--fs-section);
+    color: var(--text-secondary);
+    letter-spacing: 0.05em;
+    font-weight: 700;
+  }
+
+  /* ── 간지 typography ── */
+  .ganji {
+    font-family: 'Noto Serif KR', Georgia, serif;
+    letter-spacing: 0.02em;
+  }
+
+  .ganji-lg {
+    font-size: 2.2rem;
+    font-family: 'Noto Serif KR', Georgia, serif;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+
+  .ganji-dim {
+    font-family: 'Noto Serif KR', Georgia, serif;
+    letter-spacing: 0.02em;
+    color: #aaaaaa;
+  }
+
+  /* ── 오행 colors ── --el-* 변수에서 자동 참조 */
+  .element-목 { color: var(--el-목); }
+  .element-화 { color: var(--el-화); }
+  .element-토 { color: var(--el-토); }
+  .element-금 { color: var(--el-금); }
+  .element-수 { color: var(--el-수); }
+
+  .element-bg-목 { background-color: color-mix(in srgb, var(--el-목) 8%, transparent); border-color: color-mix(in srgb, var(--el-목) 30%, transparent); }
+  .element-bg-화 { background-color: color-mix(in srgb, var(--el-화) 8%, transparent); border-color: color-mix(in srgb, var(--el-화) 30%, transparent); }
+  .element-bg-토 { background-color: color-mix(in srgb, var(--el-토) 8%, transparent); border-color: color-mix(in srgb, var(--el-토) 30%, transparent); }
+  .element-bg-금 { background-color: color-mix(in srgb, var(--el-금) 8%, transparent); border-color: color-mix(in srgb, var(--el-금) 30%, transparent); }
+  .element-bg-수 { background-color: color-mix(in srgb, var(--el-수) 8%, transparent); border-color: color-mix(in srgb, var(--el-수) 30%, transparent); }
+
+  /* ── 음양 colors ── */
+  .yang { color: #d43f3f; }
+  .yin  { color: #2878c8; }
+
+  /* ── Input underline style ── */
+  .input-underline {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #ddd7d0;
+    color: #1a1a1a;
+    padding: 8px 0;
+    width: 100%;
+    outline: none;
+    font-size: 15px;
+    transition: border-bottom-color 0.2s ease;
+  }
+  .input-underline:focus {
+    border-bottom-color: #3a3a3a;
+  }
+  .input-underline::placeholder {
+    color: #aaaaaa;
+  }
+
+  /* ── Select underline style ── */
+  .select-underline {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #ddd7d0;
+    color: #1a1a1a;
+    padding: 8px 0;
+    width: 100%;
+    outline: none;
+    font-size: 15px;
+    transition: border-bottom-color 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 4px center;
+    padding-right: 20px;
+    cursor: pointer;
+  }
+  .select-underline:focus {
+    border-bottom-color: #3a3a3a;
+  }
+
+  /* ── Pill toggle button ── */
+  .pill-toggle {
+    flex: 1;
+    padding: 8px;
+    border-radius: 9999px;
+    font-size: 14px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+    cursor: pointer;
+  }
+  .pill-toggle-active {
+    background: #3a3a3a;
+    color: #ffffff;
+    border-color: #3a3a3a;
+  }
+  .pill-toggle-inactive {
+    color: #888888;
+    background: transparent;
+    border-color: #e8e2db;
+  }
+  .pill-toggle-inactive:hover {
+    border-color: #aaaaaa;
+    color: #333333;
+  }
+
+  /* ── Tab pill ── */
+  .tab-pill {
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-size: 13px;
+    border: 1px solid #e8e2db;
+    color: #888888;
+    background: white;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .tab-pill:hover {
+    border-color: #aaaaaa;
+    color: #333333;
+  }
+  .tab-pill.active {
+    background: #3a3a3a;
+    color: white;
+    border-color: #3a3a3a;
+  }
+
+  /* ── Ten god badge ── */
+  .ten-god-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #f0ece8;
+    color: #666666;
+    border: 1px solid #e8e2db;
+    display: inline-block;
+  }
+
+  /* ── 글씨 크기 유틸리티 ── --fs-* 변수에서 자동 참조 */
+  .fs-tiny  { font-size: var(--fs-tiny); }
+  .fs-label { font-size: var(--fs-label); }
+  .fs-sub   { font-size: var(--fs-sub); }
+  .fs-body  { font-size: var(--fs-body); }
+  .fs-tile  { font-size: var(--fs-tile); }
+  .fs-ganji       { font-size: var(--fs-ganji); }
+  .fs-ganji-hanja { font-size: var(--fs-ganji-hanja); }
+
+  /* ── Scrollbar ── */
+  .scrollbar-thin::-webkit-scrollbar { height: 4px; width: 4px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #ddd7d0; border-radius: 2px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #c8c2bb; }
+}
+
+@layer utilities {
+  /* ── Fade-up animation ── */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-up {
+    animation: fadeInUp 0.4s ease both;
+  }
+
+  .animate-delay-100 { animation-delay: 0.1s; opacity: 0; }
+  .animate-delay-200 { animation-delay: 0.2s; opacity: 0; }
+  .animate-delay-300 { animation-delay: 0.3s; opacity: 0; }
+  .animate-delay-400 { animation-delay: 0.4s; opacity: 0; }
+  .animate-delay-500 { animation-delay: 0.5s; opacity: 0; }
+  .animate-delay-600 { animation-delay: 0.6s; opacity: 0; }
+  .animate-delay-700 { animation-delay: 0.7s; opacity: 0; }
 }

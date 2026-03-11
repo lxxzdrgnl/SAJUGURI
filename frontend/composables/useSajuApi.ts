@@ -1,4 +1,4 @@
-import type { SajuCalcRequest, SajuCalcResponse, WolUnEntry, IlJinEntry } from '~/types/saju'
+import type { SajuCalcRequest, SajuCalcResponse, WolUnEntry, YeonUnEntry, IlJinEntry } from '~/types/saju'
 
 export function useSajuApi() {
   const config = useRuntimeConfig()
@@ -18,11 +18,17 @@ export function useSajuApi() {
     })
   }
 
+  async function getYeonUn(startYear: number, count: number, dayStem: string): Promise<YeonUnEntry[]> {
+    return $fetch<YeonUnEntry[]>(`${base}/api/saju/yeon-un`, {
+      query: { start_year: startYear, count, day_stem: dayStem },
+    })
+  }
+
   async function getIlJin(year: number, month: number): Promise<IlJinEntry[]> {
     return $fetch<IlJinEntry[]>(`${base}/api/saju/il-jin`, {
       query: { year, month },
     })
   }
 
-  return { calcSaju, getWolUn, getIlJin }
+  return { calcSaju, getWolUn, getYeonUn, getIlJin }
 }
