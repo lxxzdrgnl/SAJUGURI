@@ -148,7 +148,7 @@ def check_sam_hap(branches: list[str]) -> dict | None:
     branch_set = set(branches)
     for name, data in SAM_HAP.items():
         if all(b in branch_set for b in data["branches"]):
-            return {"name": name, "element": data["element"], "label": data["name"]}
+            return {"name": name, "element": data["element"], "label": data["name"], "branches": data["branches"]}
     return None
 
 

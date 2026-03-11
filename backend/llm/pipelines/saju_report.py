@@ -1,0 +1,85 @@
+"""
+사주 리포트 파이프라인.
+
+흐름:
+  1. Engine.calculate_saju() — 동기 함수, ThreadPoolExecutor로 비동기 래핑
+  2. llm.rag_builder.build_rag_context() — 동기 (ChromaDB + JSON 직접 조회)
+  3. llm.writer.generate_report() — 비동기 (LLM ainvoke)
+
+반환: (saju_dict, WriterOutput)
+"""
+
+from __future__ import annotations
+import asyncio
+import functools
+import logging
+from concurrent.futures import ThreadPoolExecutor
+
+from engine.handlers.calculate_saju import handle_calculate_saju
+from llm.rag_builder import build_rag_context
+from llm.writer import WriterOutput, generate_report
+
+logger = logging.getLogger(__name__)
+
+# 동기 계산 함수 전용 스레드 풀 (CPU-bound 아니라 I/O-light 이지만 chromadb도 동기)
+_executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="saju-pipeline")
+
+
+async def run_saju_report(
+    birth_date: str,
+    birth_time: str,
+    gender: str,
+    calendar: str = "solar",
+    is_leap_month: bool = False,
+    concern: str | None = None,
+    llm_provider: str | None = None,
+) -> tuple[dict, WriterOutput]:
+    """
+    사주 계산 → RAG 조회 → Writer LLM 생성을 순차 실행한다.
+
+    Args:
+        birth_date     : 'YYYY-MM-DD'
+        birth_time     : 'HH:MM'
+        gender         : 'male' | 'female'
+        calendar       : 'solar' | 'lunar'
+        is_leap_month  : 음력 윤달 여부
+        concern        : 사용자 고민 원문 (없으면 None)
+        llm_provider   : LLM provider 오버라이드
+
+    Returns:
+        (saju_dict, WriterOutput)
+    """
+    loop = asyncio.get_event_loop()
+
+    # ── 1. Engine 계산 (동기 → executor) ──
+    logger.info("사주 계산 시작: %s %s %s", birth_date, birth_time, gender)
+    calc_fn = functools.partial(
+        handle_calculate_saju,
+        birth_date=birth_date,
+        birth_time=birth_time,
+        gender=gender,
+        calendar=calendar,
+        is_leap_month=is_leap_month,
+    )
+    saju: dict = await loop.run_in_executor(_executor, calc_fn)
+    logger.info("사주 계산 완료: 일주=%s%s",
+                saju.get("day_pillar", {}).get("stem", ""),
+                saju.get("day_pillar", {}).get("branch", ""))
+
+    # ── 2. RAG 컨텍스트 조립 (동기, 빠름) ──
+    logger.info("RAG 컨텍스트 조립 시작")
+    rag_ctx_fn = functools.partial(build_rag_context, saju, concern)
+    rag_ctx: dict = await loop.run_in_executor(_executor, rag_ctx_fn)
+    logger.info(
+        "RAG 조립 완료: ilju=%s, context=%d개, concern=%d개",
+        "있음" if rag_ctx.get("ilju") else "없음",
+        len(rag_ctx.get("context", [])),
+        len(rag_ctx.get("concern", [])),
+    )
+
+    # ── 3. Writer LLM 호출 (비동기) ──
+    logger.info("Writer LLM 호출 시작")
+    writer_output: WriterOutput = await generate_report(saju, rag_ctx, concern, llm_provider)
+    logger.info("Writer LLM 완료: 탭 %d개 생성", len(writer_output.tabs))
+
+    return saju, writer_output
