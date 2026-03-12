@@ -1,4 +1,4 @@
-# SajuBon - AI 사주 상담 서비스
+# 사주구리 - AI 사주 상담 서비스
 
 ## 1. 프로젝트 핵심 컨셉: "Headline-Driven Insights"
 
@@ -104,7 +104,7 @@ Embedding: Gemini embedding-001
 ## 6. 프로젝트 구조
 
 ```
-SajuBon/
+SajuNara/
 ├── CLAUDE.md
 ├── README.md
 ├── frontend/           # Vue.js 3 + Nuxt.js (구현 예정)

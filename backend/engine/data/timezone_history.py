@@ -73,6 +73,33 @@ def get_solar_correction_minutes(dt: datetime) -> int:
     return _SOLAR_OFFSET_MIN - get_kst_offset_minutes(dt)
 
 
+def get_solar_correction_for_location(
+    dt: datetime,
+    longitude: float | None = None,
+    utc_offset_minutes: int | None = None,
+) -> int:
+    """
+    출생지 경도 기반 진태양시 보정값 반환 (분).
+
+    - longitude + utc_offset_minutes 둘 다 제공: 해외 도시 공식 적용
+      correction = round(longitude × 4) − utc_offset_minutes
+    - longitude만 제공 (한국 도시): 역사적 KST 테이블로 legal offset 계산
+    - 둘 다 미제공: 기본 서울 보정 반환
+    """
+    if longitude is None:
+        return get_solar_correction_minutes(dt)
+
+    solar_offset = round(longitude * 4)
+
+    if utc_offset_minutes is not None:
+        legal_offset = utc_offset_minutes
+    else:
+        # 경도만 제공 → 한국 도시로 간주, 역사적 KST 사용
+        legal_offset = get_kst_offset_minutes(dt)
+
+    return solar_offset - legal_offset
+
+
 def get_historical_note(dt: datetime) -> str:
     """보정 근거 메모 반환."""
     kst = get_kst_offset_minutes(dt)

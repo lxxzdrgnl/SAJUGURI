@@ -3,6 +3,7 @@
 자·축·인·묘·진·사·오·미·신·유·술·해 — 12개
 + 지장간(支藏干), 삼합(三合), 삼형(三刑), 육해(六害), 충(沖), 육합(六合)
 """
+from typing import Callable, Any
 
 EARTHLY_BRANCHES: list[dict] = [
     {"korean": "자", "hanja": "子", "element": "수", "yin_yang": "양", "animal": "쥐",  "month": 11, "direction": "북",   "index": 0},
@@ -105,6 +106,40 @@ YUK_HAE: list[tuple] = [
 ]
 
 # ──────────────────────────────────────────
+# 방합(方合) — 같은 방위 3지지: 목/화/금/수 방합
+# ──────────────────────────────────────────
+BANG_HAP: dict[str, dict] = {
+    "인묘진": {"branches": ["인", "묘", "진"], "element": "목", "name": "인묘진 방합"},
+    "사오미": {"branches": ["사", "오", "미"], "element": "화", "name": "사오미 방합"},
+    "신유술": {"branches": ["신", "유", "술"], "element": "금", "name": "신유술 방합"},
+    "해자축": {"branches": ["해", "자", "축"], "element": "수", "name": "해자축 방합"},
+}
+
+# ──────────────────────────────────────────
+# 원진(怨嗔) — 서로 원망하는 6쌍
+# ──────────────────────────────────────────
+WON_JIN_PAIRS: list[tuple] = [
+    ("자", "미"),
+    ("축", "오"),
+    ("인", "유"),
+    ("묘", "신"),
+    ("진", "해"),
+    ("사", "술"),
+]
+
+# ──────────────────────────────────────────
+# 파(破) — 서로 방해·파괴하는 6쌍
+# ──────────────────────────────────────────
+PA_PAIRS: list[tuple] = [
+    ("자", "유"),
+    ("축", "진"),
+    ("인", "해"),
+    ("사", "신"),
+    ("오", "묘"),
+    ("술", "미"),
+]
+
+# ──────────────────────────────────────────
 # 공망(空亡) — 일주 기준 빈 지지 쌍
 # ──────────────────────────────────────────
 GONG_MANG_TABLE: dict[str, list] = {
@@ -143,34 +178,100 @@ def get_ji_jang_gan(branch: str) -> list[str]:
     return result
 
 
-def check_sam_hap(branches: list[str]) -> dict | None:
-    """삼합 확인. 3개 모두 있으면 화국 정보 반환, 없으면 None"""
-    branch_set = set(branches)
-    for name, data in SAM_HAP.items():
-        if all(b in branch_set for b in data["branches"]):
-            return {"name": name, "element": data["element"], "label": data["name"]}
-    return None
+# ──────────────────────────────────────────
+# 공통 헬퍼 — Registry/Strategy 패턴
+# ──────────────────────────────────────────
+
+def _resolve_labels(labels: list[str] | None, branches: list[str]) -> list[str]:
+    return labels if labels is not None else [str(i) for i in range(len(branches))]
 
 
-def check_yuk_hap(branches: list[str]) -> list[dict]:
-    """육합 확인. 합이 되는 쌍과 합화 오행 목록 반환"""
-    branch_set = set(branches)
+def _find_pair_entries(
+    branches: list[str],
+    labels: list[str],
+    pairs: list,
+    *,
+    get_pair: "Callable[[Any], tuple]" = lambda x: x,
+    get_extra: "Callable[[Any], dict]" = lambda x: {},
+) -> list[dict]:
+    """쌍(pair) 기반 관계 검사 공통 로직.
+    동일 쌍이 여러 기둥 조합에 걸쳐 성립하면 각각 별도 항목으로 반환.
+    """
     result = []
-    for item in YUK_HAP:
-        a, b = item["pair"]
-        if a in branch_set and b in branch_set:
-            result.append({"pair": (a, b), "element": item["element"]})
+    for item in pairs:
+        a, b = get_pair(item)
+        a_pos = [labels[i] for i, br in enumerate(branches) if br == a]
+        b_pos = [labels[i] for i, br in enumerate(branches) if br == b]
+        for al in a_pos:
+            for bl in b_pos:
+                result.append({"pair": (a, b), "pillars": [al, bl], **get_extra(item)})
     return result
 
 
-def check_chung(branches: list[str]) -> list[tuple]:
-    """충 확인. 충 관계인 쌍 목록 반환"""
+def _check_group_hap(branches: list[str], hap_table: dict) -> list[dict]:
+    """3지지 합(삼합·방합) 공통 검사 로직: 완합(3개) / 반합(2개)."""
     branch_set = set(branches)
-    return [pair for pair in CHUNG_PAIRS if pair[0] in branch_set and pair[1] in branch_set]
+    results = []
+    for _, data in hap_table.items():
+        present = [b for b in data["branches"] if b in branch_set]
+        if len(present) == 3:
+            results.append({
+                "name": data["name"], "element": data["element"],
+                "label": data["name"], "branches": data["branches"], "type": "완합",
+            })
+        elif len(present) == 2:
+            results.append({
+                "name": f"{''.join(present)}반합",
+                "element": data["element"],
+                "label": f"{''.join(present)}반합 ({data['name']})",
+                "branches": present, "type": "반합",
+            })
+    return results
+
+
+# ── 공개 check 함수들 (Registry: 각 관계 유형별 전략) ──────────────────────
+
+def check_sam_hap(branches: list[str]) -> list[dict]:
+    """삼합/반합 확인."""
+    return _check_group_hap(branches, SAM_HAP)
+
+
+def check_bang_hap(branches: list[str]) -> list[dict]:
+    """방합/방합반합 확인."""
+    return _check_group_hap(branches, BANG_HAP)
+
+
+def check_yuk_hap(branches: list[str], labels: list[str] | None = None) -> list[dict]:
+    """육합 확인 (합화 오행 포함)."""
+    return _find_pair_entries(
+        branches, _resolve_labels(labels, branches), YUK_HAP,
+        get_pair=lambda x: x["pair"],
+        get_extra=lambda x: {"element": x["element"]},
+    )
+
+
+def check_chung(branches: list[str], labels: list[str] | None = None) -> list[dict]:
+    """충 확인."""
+    return _find_pair_entries(branches, _resolve_labels(labels, branches), CHUNG_PAIRS)
+
+
+def check_yuk_hae(branches: list[str], labels: list[str] | None = None) -> list[dict]:
+    """육해 확인."""
+    return _find_pair_entries(branches, _resolve_labels(labels, branches), YUK_HAE)
+
+
+def check_pa(branches: list[str], labels: list[str] | None = None) -> list[dict]:
+    """파 확인."""
+    return _find_pair_entries(branches, _resolve_labels(labels, branches), PA_PAIRS)
+
+
+def check_won_jin(branches: list[str], labels: list[str] | None = None) -> list[dict]:
+    """원진 확인."""
+    return _find_pair_entries(branches, _resolve_labels(labels, branches), WON_JIN_PAIRS)
 
 
 def check_sam_hyeong(branches: list[str]) -> list[str]:
-    """삼형 확인. 해당되는 형 이름 목록 반환"""
+    """삼형 확인. 해당되는 형 이름 목록 반환."""
     branch_set = set(branches)
     result = []
     for name, members in SAM_HYEONG.items():
@@ -182,25 +283,22 @@ def check_sam_hyeong(branches: list[str]) -> list[str]:
     return result
 
 
-def check_yuk_hae(branches: list[str]) -> list[tuple]:
-    """육해 확인. 해 관계인 쌍 목록 반환"""
-    branch_set = set(branches)
-    return [pair for pair in YUK_HAE if pair[0] in branch_set and pair[1] in branch_set]
-
-
 def check_gong_mang(day_branch: str, branches: list[str]) -> list[str]:
     """공망 확인. 일주 기준 공망인 지지 목록 반환"""
     gong_mang = GONG_MANG_TABLE[day_branch]
     return [b for b in branches if b in gong_mang]
 
 
-def analyze_branch_relations(branches: list[str], day_branch: str) -> dict:
+def analyze_branch_relations(branches: list[str], day_branch: str, labels: list[str] | None = None) -> dict:
     """4기둥 지지 전체 관계 종합 분석"""
     return {
-        "sam_hap":   check_sam_hap(branches),
-        "yuk_hap":   check_yuk_hap(branches),
-        "chung":     check_chung(branches),
+        "sam_hap":    check_sam_hap(branches),
+        "bang_hap":   check_bang_hap(branches),
+        "yuk_hap":    check_yuk_hap(branches, labels),
+        "chung":      check_chung(branches, labels),
+        "pa":         check_pa(branches, labels),
         "sam_hyeong": check_sam_hyeong(branches),
-        "yuk_hae":   check_yuk_hae(branches),
-        "gong_mang": check_gong_mang(day_branch, branches),
+        "yuk_hae":    check_yuk_hae(branches, labels),
+        "won_jin":    check_won_jin(branches, labels),
+        "gong_mang":  check_gong_mang(day_branch, branches),
     }

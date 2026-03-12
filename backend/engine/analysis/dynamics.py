@@ -24,6 +24,15 @@ _STEM_ELEMENT: dict[str, str] = {
     "임": "수", "계": "수",
 }
 
+# 천간충 (쌍, 이름) — 인덱스 차 6 기준: 갑경/을신/병임/정계/무갑
+_STEM_CHUNG_TABLE: list[tuple[frozenset, str]] = [
+    (frozenset({"갑", "경"}), "갑경충"),
+    (frozenset({"을", "신"}), "을신충"),
+    (frozenset({"병", "임"}), "병임충"),
+    (frozenset({"정", "계"}), "정계충"),
+    (frozenset({"무", "갑"}), "무갑충"),
+]
+
 # 천간합 (쌍, 이름, 합화 오행)
 _STEM_HAP_TABLE: list[tuple[frozenset, str, str]] = [
     (frozenset({"갑", "기"}), "갑기합", "토"),
@@ -54,12 +63,14 @@ def _calc_stem_hap(saju: dict) -> list[dict]:
     stems = {
         label: saju[key]["stem"]
         for label, key in zip(_PILLAR_LABELS, _PILLAR_KEYS)
+        if saju.get(key) is not None
     }
     results = []
+    active_labels = list(stems.keys())
     pairs = [
         (l1, l2)
-        for i, l1 in enumerate(_PILLAR_LABELS)
-        for l2 in _PILLAR_LABELS[i + 1:]
+        for i, l1 in enumerate(active_labels)
+        for l2 in active_labels[i + 1:]
     ]
     for l1, l2 in pairs:
         s1, s2 = stems[l1], stems[l2]
@@ -71,6 +82,35 @@ def _calc_stem_hap(saju: dict) -> list[dict]:
                     "pillars": [l1, l2],
                     "stems": [s1, s2],
                     "result_element": result_el,
+                })
+    return results
+
+
+# ─── 1b. 천간충 ─────────────────────────────────────────────────
+
+def _calc_stem_chung(saju: dict) -> list[dict]:
+    """천간충 — 4기둥 천간 간 충 검사."""
+    stems = {
+        label: saju[key]["stem"]
+        for label, key in zip(_PILLAR_LABELS, _PILLAR_KEYS)
+        if saju.get(key) is not None
+    }
+    results = []
+    active_labels = list(stems.keys())
+    pairs = [
+        (l1, l2)
+        for i, l1 in enumerate(active_labels)
+        for l2 in active_labels[i + 1:]
+    ]
+    for l1, l2 in pairs:
+        s1, s2 = stems[l1], stems[l2]
+        for pair_set, name in _STEM_CHUNG_TABLE:
+            if frozenset({s1, s2}) == pair_set:
+                results.append({
+                    "type": "stem_chung",
+                    "name": name,
+                    "pillars": [l1, l2],
+                    "stems": [s1, s2],
                 })
     return results
 
@@ -89,6 +129,8 @@ def _calc_rooting_map(saju: dict) -> dict:
     rooted: list[dict] = []
 
     for label, key in zip(_PILLAR_LABELS, _PILLAR_KEYS):
+        if saju.get(key) is None:
+            continue
         branch = saju[key]["branch"]
         branch_el = saju[key]["branch_element"]
 
@@ -130,6 +172,8 @@ def _branch_to_pillar_map(saju: dict) -> dict[str, list[str]]:
     """지지 → 기둥 레이블 매핑 (중복 지지 허용)."""
     result: dict[str, list[str]] = {}
     for label, key in zip(_PILLAR_LABELS, _PILLAR_KEYS):
+        if saju.get(key) is None:
+            continue
         b = saju[key]["branch"]
         result.setdefault(b, []).append(label)
     return result
@@ -155,25 +199,39 @@ def _calc_active_relations(saju: dict, branch_relations: dict) -> list[dict]:
     b2p = _branch_to_pillar_map(saju)
     results: list[dict] = []
 
-    # 삼합
-    sam_hap = branch_relations.get("sam_hap")
-    if sam_hap:
-        branches = sam_hap["branches"]
+    # 삼합 (완합 + 반합 모두 리스트)
+    for sam in branch_relations.get("sam_hap", []):
+        branches_sam = sam["branches"]
         results.append({
             "type": "sam_hap",
-            "name": sam_hap["name"],
-            "pillars": _branches_to_pillars(branches, b2p),
-            "branches": branches,
-            "result_element": sam_hap["element"],
+            "name": sam["name"],
+            "pillars": _branches_to_pillars(branches_sam, b2p),
+            "branches": branches_sam,
+            "result_element": sam["element"],
+            "hap_type": sam.get("type", "완합"),
+        })
+
+    # 방합 (완합 + 반합 모두 리스트)
+    for bang in branch_relations.get("bang_hap", []):
+        branches_bang = bang["branches"]
+        results.append({
+            "type": "bang_hap",
+            "name": bang["name"],
+            "pillars": _branches_to_pillars(branches_bang, b2p),
+            "branches": branches_bang,
+            "result_element": bang["element"],
+            "hap_type": bang.get("type", "완합"),
         })
 
     # 육합 (is_effective 포함)
     for h in branch_relations.get("yuk_hap", []):
         pair = list(h["pair"])
+        # 백엔드가 제공한 기둥 위치 정보 우선 사용, 없으면 branch 역조회
+        pillars = h["pillars"] if "pillars" in h else _branches_to_pillars(pair, b2p)
         entry: dict = {
             "type": "yuk_hap",
             "name": f"{''.join(pair)}합",
-            "pillars": _branches_to_pillars(pair, b2p),
+            "pillars": pillars,
             "branches": pair,
             "result_element": h["element"],
         }
@@ -183,12 +241,14 @@ def _calc_active_relations(saju: dict, branch_relations: dict) -> list[dict]:
         results.append(entry)
 
     # 충
-    for pair in branch_relations.get("chung", []):
+    for item in branch_relations.get("chung", []):
+        pair = list(item["pair"])
+        pillars = item.get("pillars") or _branches_to_pillars(pair, b2p)
         results.append({
             "type": "chung",
             "name": f"{''.join(pair)}충",
-            "pillars": _branches_to_pillars(pair, b2p),
-            "branches": list(pair),
+            "pillars": pillars,
+            "branches": pair,
         })
 
     # 삼형 — check_sam_hyeong는 이름 문자열 목록 반환; SAM_HYEONG로 지지 역조회
@@ -202,12 +262,14 @@ def _calc_active_relations(saju: dict, branch_relations: dict) -> list[dict]:
         })
 
     # 육해
-    for pair in branch_relations.get("yuk_hae", []):
+    for item in branch_relations.get("yuk_hae", []):
+        pair = list(item["pair"])
+        pillars = item.get("pillars") or _branches_to_pillars(pair, b2p)
         results.append({
             "type": "hae",
             "name": f"{''.join(pair)}해",
-            "pillars": _branches_to_pillars(pair, b2p),
-            "branches": list(pair),
+            "pillars": pillars,
+            "branches": pair,
         })
 
     return results
@@ -291,7 +353,8 @@ def build_dynamics(
         energy_flow      : 오행 에너지 흐름
     """
     return {
-        "stem_hap": _calc_stem_hap(saju),
+        "stem_hap":    _calc_stem_hap(saju),
+        "stem_chung":  _calc_stem_chung(saju),
         "rooting_map": _calc_rooting_map(saju),
         "active_relations": _calc_active_relations(saju, branch_relations),
         "energy_flow": _calc_energy_flow(saju, wuxing_pct),

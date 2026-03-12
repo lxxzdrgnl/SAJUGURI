@@ -1,16 +1,21 @@
 /** 사주 계산 요청 */
 export interface SajuCalcRequest {
+  name?: string             // 이름 (표시용)
   birth_date: string        // 'YYYY-MM-DD'
-  birth_time: string        // 'HH:MM'
+  birth_time: string | null // 'HH:MM' | null (시간 모름)
   gender: 'male' | 'female'
   calendar?: 'solar' | 'lunar'
   is_leap_month?: boolean
+  birth_longitude?: number  // 출생지 경도 (진태양시 보정용)
+  birth_utc_offset?: number // UTC 오프셋(분) — 해외 도시 전용, 한국은 생략
 }
 
 /** 기둥 하나 */
 export interface Pillar {
   stem: string
+  stem_hanja: string
   branch: string
+  branch_hanja: string
   stem_element: string
   branch_element: string
   yin_yang: string
@@ -54,6 +59,7 @@ export interface DaeUnEntry {
   ganji_name: string
   stem_ten_god?: string
   branch_ten_god?: string
+  twelve_wun?: string
 }
 
 /** 신살 */
@@ -76,7 +82,7 @@ export interface SajuCalcResponse {
   meta: {
     gender: string
     birth_date: string
-    birth_time: string
+    birth_time: string | null
     calendar: string
     time_correction_minutes: number
     applied_time: string
@@ -95,8 +101,11 @@ export interface SajuCalcResponse {
   year_pillar: Pillar
   month_pillar: Pillar
   day_pillar: Pillar
-  hour_pillar: Pillar
-  wuxing_count: Record<string, number>
+  hour_pillar: Pillar | null
+  wuxing_count:     Record<string, number>
+  wuxing_count_hap: Record<string, number>
+  wuxing_chars:     { pillar: string; type: string; element: string }[]
+  wuxing_chars_hap: { pillar: string; type: string; element: string }[]
   dominant_elements: string[]
   weak_elements: string[]
   yin_yang_ratio: { yang: number; yin: number }
@@ -120,6 +129,19 @@ export interface SajuCalcResponse {
 /** 월운 항목 */
 export interface WolUnEntry {
   month: number
+  stem: string
+  branch: string
+  stem_element: string
+  branch_element: string
+  ganji_name: string
+  stem_ten_god: string
+  branch_ten_god: string
+  twelve_wun: string
+}
+
+/** 년운 항목 */
+export interface YeonUnEntry {
+  year: number
   stem: string
   branch: string
   stem_element: string

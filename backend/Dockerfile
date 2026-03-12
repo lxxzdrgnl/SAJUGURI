@@ -1,20 +1,15 @@
 FROM python:3.12-slim
 
-# Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
 WORKDIR /app
 
-# Copy dependency files first for layer caching
-COPY pyproject.toml .
-
-# Install dependencies (no dev group)
+# 의존성 레이어 캐싱
+COPY pyproject.toml uv.lock ./
 RUN uv sync --no-dev
 
-# Copy source
 COPY . .
 
 EXPOSE 8000
 
-# Run FastMCP in HTTP/SSE mode
-CMD ["uv", "run", "fastmcp", "run", "main.py", "--transport", "sse", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

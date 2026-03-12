@@ -2,35 +2,336 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Joseon100Years';
+  src: url('https://gcore.jsdelivr.net/gh/projectnoonnu/noonfonts_2206-02@1.0/ChosunCentennial.woff2') format('woff2');
+  font-weight: normal;
+  font-display: swap;
+}
+
 @layer base {
   :root {
-    --color-primary: #1a1a2e;
-    --color-secondary: #16213e;
-    --color-accent: #e94560;
+    --bg-base:        #f7f5f2;
+    --surface-1:      #ffffff;
+    --surface-2:      #f4f2ef;
+    --surface-3:      #eeecea;
+    --border-subtle:  #e4e1dd;
+    --border-default: #d8d4cf;
+    --text-primary:   #1a1816;
+    --text-secondary: #5a5450;
+    --text-muted:     #a09c98;
+    --accent:         #c85c14;
+    --accent-hover:   #a84a0e;
+    --color-good:     #2a7a4f;  /* 길신 — 초록 */
+    --color-bad:      #c03030;  /* 실성 — 빨강 */
+
+    /* ── 오행 색상 ── 여기만 바꾸면 전체 반영 */
+    --el-목: #4a9490;  /* 청록 */
+    --el-화: #c04838;  /* 벽돌 빨강 */
+    --el-토: #8b5e30;  /* 갈색 */
+    --el-금: #b89020;  /* 황금색 */
+    --el-수: #3858b0;  /* 남색/인디고 */
+
+    /* ── 폰트 ── 여기만 바꾸면 전체 반영 */
+    --font-main:  'Joseon100Years', 'Noto Sans KR', sans-serif;
+    --font-ganji: 'Joseon100Years', 'Noto Serif KR', serif;
+
+    /* ── 글씨 크기 ── 여기만 바꾸면 전체 반영 */
+    --fs-tiny:        11px;    /* 달력 내부 극소 텍스트 (절기·음력 등) */
+    --fs-label:       13px;    /* 작은 레이블 (십성·신살·운성 등) */
+    --fs-sub:         14px;    /* 보조 텍스트 */
+    --fs-body:        15px;    /* 본문 */
+    --fs-section:     20px;    /* 카드 섹션 타이틀 (오행 분석, 사주팔자 등) */
+    --fs-tile:        2rem;    /* 대운·연운·월운 타일 간지 */
+    --fs-ganji:       2.8rem;  /* 사주 테이블 천간·지지 */
+    --fs-ganji-hanja: 1.4rem;  /* 사주 테이블 한자 */
   }
 
   body {
-    @apply bg-[#0f0f1a] text-gray-100 antialiased;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer components {
+
+  /* ── Buttons ── */
   .btn-primary {
-    @apply bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-2.5 rounded-lg transition-colors;
+    background: var(--accent);
+    color: white;
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-weight: 600;
+    font-size: 15px;
+    transition: background 0.2s ease;
+    border: none;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+  .btn-primary:hover {
+    background: var(--accent-hover);
+  }
+  .btn-primary:active {
+    background: color-mix(in srgb, var(--accent-hover) 80%, black);
   }
 
+  /* ── Cards ── */
   .card {
-    @apply bg-[#1a1a2e] border border-gray-700/50 rounded-xl p-5;
+    background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 20px;
   }
 
-  /* 오행 색상 */
-  .element-목 { @apply text-green-400; }
-  .element-화 { @apply text-red-400; }
-  .element-토 { @apply text-yellow-500; }
-  .element-금 { @apply text-gray-300; }
-  .element-수 { @apply text-blue-400; }
+  .card-elevated {
+    background: var(--surface-2);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 20px;
+  }
 
-  /* 음양 색상 */
-  .yin  { @apply text-blue-300; }
-  .yang { @apply text-red-300; }
+  /* ── Section labels ── */
+  .label-section {
+    font-size: var(--fs-section);
+    color: var(--text-primary);
+    letter-spacing: 0.05em;
+    font-weight: 700;
+  }
+
+  /* ── 간지 typography ── */
+  .ganji {
+    font-family: var(--font-ganji);
+    letter-spacing: 0.02em;
+  }
+
+  .ganji-lg {
+    font-size: 2.2rem;
+    font-family: var(--font-ganji);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+
+  .ganji-dim {
+    font-family: var(--font-ganji);
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
+  }
+
+  /* ── 오행 colors ── --el-* 변수에서 자동 참조 */
+  .element-목 { color: var(--el-목); }
+  .element-화 { color: var(--el-화); }
+  .element-토 { color: var(--el-토); }
+  .element-금 { color: var(--el-금); }
+  .element-수 { color: var(--el-수); }
+
+  .element-bg-목 { background-color: color-mix(in srgb, var(--el-목) 8%, transparent); border-color: color-mix(in srgb, var(--el-목) 30%, transparent); }
+  .element-bg-화 { background-color: color-mix(in srgb, var(--el-화) 8%, transparent); border-color: color-mix(in srgb, var(--el-화) 30%, transparent); }
+  .element-bg-토 { background-color: color-mix(in srgb, var(--el-토) 8%, transparent); border-color: color-mix(in srgb, var(--el-토) 30%, transparent); }
+  .element-bg-금 { background-color: color-mix(in srgb, var(--el-금) 8%, transparent); border-color: color-mix(in srgb, var(--el-금) 30%, transparent); }
+  .element-bg-수 { background-color: color-mix(in srgb, var(--el-수) 8%, transparent); border-color: color-mix(in srgb, var(--el-수) 30%, transparent); }
+
+  /* ── 음양 colors ── */
+  .yang { color: var(--el-화); }
+  .yin  { color: var(--el-수); }
+
+  /* ── Input underline style ── */
+  .input-underline {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-default);
+    color: var(--text-primary);
+    padding: 8px 0;
+    width: 100%;
+    outline: none;
+    font-size: 15px;
+    transition: border-bottom-color 0.2s ease;
+  }
+  .input-underline:focus {
+    border-bottom-color: var(--text-primary);
+  }
+  .input-underline::placeholder {
+    color: var(--text-muted);
+  }
+
+  /* ── 날짜 분리 입력 세그먼트 ── */
+  .date-seg {
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 4px 0;
+    font-size: 18px;
+    color: var(--text-primary);
+    text-align: center;
+    transition: border-bottom-color 0.2s ease;
+    min-width: 0;
+  }
+  .date-seg:focus { outline: none; }
+  .date-seg::placeholder { color: var(--text-muted); font-size: 15px; }
+  .date-sep { font-size: 13px; color: var(--text-muted); padding: 0 2px; }
+
+  @media (max-width: 400px) {
+    .date-seg { font-size: 18px; }
+    .date-seg::placeholder { font-size: 13px; }
+  }
+
+  /* ── 도시 검색 ── */
+  .city-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    padding: 6px 0;
+    font-size: 14px;
+    color: var(--text-primary);
+  }
+  .city-input::placeholder { color: var(--text-muted); }
+  .city-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    z-index: 50;
+    overflow: hidden;
+  }
+  .city-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 14px;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .city-item:hover { background: var(--surface-2); }
+  .city-item-label { font-size: 14px; color: var(--text-primary); }
+  .city-item-sub   { font-size: 12px; color: var(--text-muted); }
+
+  /* ── Select underline style ── */
+  .select-underline {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-default);
+    color: var(--text-primary);
+    padding: 8px 0;
+    width: 100%;
+    outline: none;
+    font-size: 15px;
+    transition: border-bottom-color 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23857f7a' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 4px center;
+    padding-right: 20px;
+    cursor: pointer;
+  }
+  .select-underline:focus {
+    border-bottom-color: var(--text-primary);
+  }
+
+  /* ── Pill toggle button ── */
+  .pill-toggle {
+    flex: 1;
+    padding: 8px;
+    border-radius: 9999px;
+    font-size: 14px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+    cursor: pointer;
+  }
+  .pill-toggle-active {
+    background: var(--accent);
+    color: var(--surface-1);
+    border-color: var(--accent);
+  }
+  .pill-toggle-inactive {
+    color: var(--text-muted);
+    background: transparent;
+    border-color: var(--border-subtle);
+  }
+  .pill-toggle-inactive:hover {
+    border-color: var(--text-muted);
+    color: var(--text-primary);
+  }
+
+  /* ── Tab pill ── */
+  .tab-pill {
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-size: 13px;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    background: var(--surface-1);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .tab-pill:hover {
+    border-color: var(--text-muted);
+    color: var(--text-primary);
+  }
+  .tab-pill.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  /* ── Ten god badge ── */
+  .ten-god-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--surface-3);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+    display: inline-block;
+  }
+
+  /* ── 글씨 크기 유틸리티 ── --fs-* 변수에서 자동 참조 */
+  .fs-tiny  { font-size: var(--fs-tiny); }
+  .fs-label { font-size: var(--fs-label); }
+  .fs-sub   { font-size: var(--fs-sub); }
+  .fs-body  { font-size: var(--fs-body); }
+  .fs-tile  { font-size: var(--fs-tile); }
+  .fs-ganji       { font-size: var(--fs-ganji); }
+  .fs-ganji-hanja { font-size: var(--fs-ganji-hanja); }
+
+  /* ── Scrollbar ── */
+  .scrollbar-thin::-webkit-scrollbar { height: 4px; width: 4px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 2px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+}
+
+@layer utilities {
+  /* ── Fade-up animation ── */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-up {
+    animation: fadeInUp 0.4s ease both;
+  }
+
+  .animate-delay-100 { animation-delay: 0.1s; opacity: 0; }
+  .animate-delay-200 { animation-delay: 0.2s; opacity: 0; }
+  .animate-delay-300 { animation-delay: 0.3s; opacity: 0; }
+  .animate-delay-400 { animation-delay: 0.4s; opacity: 0; }
+  .animate-delay-500 { animation-delay: 0.5s; opacity: 0; }
+  .animate-delay-600 { animation-delay: 0.6s; opacity: 0; }
+  .animate-delay-700 { animation-delay: 0.7s; opacity: 0; }
 }

@@ -1,0 +1,46 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PC_SSH_KEY }}" > ~/.ssh/pc_key
+          chmod 600 ~/.ssh/pc_key
+          ssh-keyscan -H ${{ secrets.PC_SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Write backend.env
+        env:
+          BACKEND_ENV: ${{ secrets.BACKEND_ENV }}
+        run: |
+          echo "$BACKEND_ENV" > backend.env
+          scp -i ~/.ssh/pc_key backend.env \
+            ${{ secrets.PC_SSH_USER }}@${{ secrets.PC_SSH_HOST }}:~/servers/sajuguri/backend.env
+          rm -f backend.env
+
+      - name: Deploy to server
+        run: |
+          ssh -i ~/.ssh/pc_key \
+            ${{ secrets.PC_SSH_USER }}@${{ secrets.PC_SSH_HOST }} \
+            "cd ~/servers/sajuguri/repo && \
+             git pull && \
+             cd ~/servers && \
+             docker compose up -d --build --no-deps sajuguri-backend && \
+             echo '✅ Backend deployed'"
+
+      - name: Cleanup SSH Key
+        if: always()
+        run: rm -f ~/.ssh/pc_key

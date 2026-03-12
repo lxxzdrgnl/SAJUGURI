@@ -19,12 +19,13 @@ def _is_forward(saju: dict) -> bool:
 
 
 def _manselyeok_age(days: int, hours: int, minutes: int) -> int:
-    """만세력 공식으로 대운 시작 나이 계산."""
-    total_months = days * 4  # 1일 = 4개월
-    total_hours = hours + minutes / 60
-    total_months += total_hours * (20 / 3)  # 1시간 = 20/3 개월
-    years = total_months / 12
-    return max(0, min(10, round(years)))
+    """만세력 공식으로 대운 시작 나이 계산.
+    3일=1년, 1일=4개월, 1시진(2h)=10일(=1/30개월×10=1/3개월) → 1시간=1/6개월
+    ∴ total_days(소수 포함) / 3 = 년수
+    """
+    total_days = days + (hours + minutes / 60) / 24
+    years = total_days / 3
+    return max(1, min(10, round(years)))
 
 
 def _pillar(stem_idx: int, branch_idx: int) -> dict:
@@ -37,6 +38,7 @@ def _pillar(stem_idx: int, branch_idx: int) -> dict:
         "branch": branch["korean"],
         "stem_element": stem["element"],
         "branch_element": branch["element"],
+        "ganji_name": stem["korean"] + branch["korean"],
     }
 
 
@@ -48,7 +50,7 @@ def calculate_dae_un(saju: dict, count: int = 8) -> list[dict]:
         [{start_age, end_age, stem, branch, stem_element, branch_element}, ...]
     """
     y, mo, d = map(int, saju["birth_date"].split("-"))
-    hh, mm = map(int, saju["birth_time"].split(":"))
+    hh, mm = (12, 0) if saju.get("birth_time") is None else map(int, saju["birth_time"].split(":"))
     birth_dt = datetime(y, mo, d, hh, mm, tzinfo=timezone.utc)
 
     forward = _is_forward(saju)

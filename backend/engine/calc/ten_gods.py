@@ -41,10 +41,13 @@ def calculate_ten_god(day_stem: str, target_stem: str) -> str:
 
 
 def generate_ten_gods_list(saju: dict) -> list[str]:
-    """4기둥 천간 각각의 십성 목록 반환 [연·월·일·시]."""
+    """4기둥 천간 각각의 십성 목록 반환 [연·월·일·시]. 시주 없으면 3개."""
     day_stem = saju["day_pillar"]["stem"]
+    keys = ["year_pillar", "month_pillar", "day_pillar"]
+    if saju.get("hour_pillar") is not None:
+        keys.append("hour_pillar")
     result = []
-    for key in ["year_pillar", "month_pillar", "day_pillar", "hour_pillar"]:
+    for key in keys:
         stem = saju[key]["stem"]
         if stem == day_stem and key == "day_pillar":
             result.append("비견")
@@ -68,9 +71,10 @@ def calculate_ten_gods_distribution(saju: dict) -> dict[str, float]:
 
     # 연·월·시 천간 (일간 제외) — 각 1.0
     for key in ["year_pillar", "month_pillar", "hour_pillar"]:
+        if saju.get(key) is None:
+            continue
         stem = saju[key]["stem"]
-        if stem != day_stem:
-            dist[calculate_ten_god(day_stem, stem)] += 1.0
+        dist[calculate_ten_god(day_stem, stem)] += 1.0
 
     # 지지 대표 천간 — 월지 1.5, 나머지 0.5
     branch_weights = {
@@ -80,9 +84,11 @@ def calculate_ten_gods_distribution(saju: dict) -> dict[str, float]:
         "hour_pillar": 0.5,
     }
     for key, weight in branch_weights.items():
+        if saju.get(key) is None:
+            continue
         branch = saju[key]["branch"]
         rep = _BRANCH_TO_STEM.get(branch)
-        if rep and rep != day_stem:
+        if rep:
             dist[calculate_ten_god(day_stem, rep)] += weight
 
     return dist

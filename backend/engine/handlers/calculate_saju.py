@@ -14,9 +14,14 @@ from engine.calc.dae_un import calculate_dae_un
 from engine.calc.twelve_wun import get_twelve_wun
 from engine.calc.validation import validate_birth_input
 from engine.data.heavenly_stems import STEMS_BY_KOREAN
-from engine.data.timezone_history import get_solar_correction_minutes, get_historical_note
+from engine.data.timezone_history import (
+    get_solar_correction_minutes, get_historical_note,
+    get_solar_correction_for_location,
+)
 from engine.data.wuxing import WUXING_GENERATION, WUXING_DESTRUCTION
 from engine.data.earthly_branches import SAM_HYEONG as _SAM_HYEONG, GONG_MANG_TABLE
+from engine.data.earthly_branches import BRANCHES_ORDER as _BRANCHES_ORDER
+from engine.data.earthly_branches import BRANCHES_BY_KOREAN as _BRANCHES_BY_KOREAN
 from engine.analysis.structure_patterns import detect_structure_patterns
 from engine.analysis.dynamics import build_dynamics
 from engine.analysis.synergy import compute_synergy_tags
@@ -35,10 +40,12 @@ _SAL_PRIORITY: dict[str, str] = {
 
 def handle_calculate_saju(
     birth_date: str,
-    birth_time: str,
+    birth_time: str | None,
     gender: str,
     calendar: str = "solar",
     is_leap_month: bool = False,
+    birth_longitude: float | None = None,
+    birth_utc_offset: int | None = None,
 ) -> dict:
     """
     사주팔자 전체 계산 — Pipeline 패턴.
@@ -54,9 +61,11 @@ def handle_calculate_saju(
     ten_gods_list = generate_ten_gods_list(saju)
     twelve_sin_sal = find_twelve_sin_sals_per_pillar(saju)
     pillars_enriched = {}
-    for i, key in enumerate(["year_pillar", "month_pillar", "day_pillar", "hour_pillar"]):
+    _pillar_pairs = [("year_pillar", "year"), ("month_pillar", "month"), ("day_pillar", "day")]
+    if saju.get("hour_pillar") is not None:
+        _pillar_pairs.append(("hour_pillar", "hour"))
+    for i, (key, short) in enumerate(_pillar_pairs):
         p = saju[key]
-        short = ["year", "month", "day", "hour"][i]
         pillars_enriched[key] = {
             **p,
             "stem_ten_god": ten_gods_list[i],
@@ -64,15 +73,19 @@ def handle_calculate_saju(
             "twelve_wun": get_twelve_wun(p["stem"], p["branch"]),
             "twelve_sin_sal": twelve_sin_sal.get(short, ""),
         }
+    pillars_enriched["hour_pillar"] = pillars_enriched.get("hour_pillar")  # None if unknown
 
     ten_gods_dist = calculate_ten_gods_distribution(saju)
 
-    # 공망(空亡) — 일주(일지) 기준 공망 지지 2개 + 해당 기둥
-    _gm_vacant = GONG_MANG_TABLE.get(saju["day_pillar"]["branch"], [])
+    # 공망(空亡) — 일주(천간+지지) 기준: starting_branch = (branch_idx - stem_idx) % 12
+    _day_s_idx = STEMS_BY_KOREAN[saju["day_pillar"]["stem"]]["index"]
+    _day_b_idx = _BRANCHES_BY_KOREAN[saju["day_pillar"]["branch"]]["index"]
+    _gm_start   = (_day_b_idx - _day_s_idx) % 12
+    _gm_vacant  = [_BRANCHES_ORDER[(_gm_start + 10) % 12], _BRANCHES_ORDER[(_gm_start + 11) % 12]]
     _gm_affected = [
         short
         for short, key in [("year","year_pillar"),("month","month_pillar"),("day","day_pillar"),("hour","hour_pillar")]
-        if saju[key]["branch"] in _gm_vacant
+        if saju.get(key) is not None and saju[key]["branch"] in _gm_vacant
     ]
     gong_mang = {"vacant_branches": _gm_vacant, "affected_pillars": _gm_affected}
 
@@ -92,35 +105,43 @@ def handle_calculate_saju(
     yong_sin = select_yong_sin(saju, strength, ten_gods_dist)
 
     # 7. 현재 대운
-    dae_un_list = calculate_dae_un(saju, count=10)
+    _raw_dae_un = calculate_dae_un(saju, count=12)
+    # 전체 대운에 십성·12운성 추가
+    dae_un_list = [
+        {
+            **d,
+            "stem_ten_god":   calculate_ten_god(day_stem, d["stem"]),
+            "branch_ten_god": get_branch_ten_god(day_stem, d["branch"]),
+            "twelve_wun":     get_twelve_wun(d["stem"], d["branch"]),
+        }
+        for d in _raw_dae_un
+    ]
     birth_year = int(birth_date.split("-")[0])
     current_age = datetime.now().year - birth_year
     current_dae_un = next(
         (d for d in dae_un_list if d["start_age"] <= current_age <= d["end_age"]),
         dae_un_list[-1],
     )
-    current_dae_un = {
-        **current_dae_un,
-        "stem_ten_god": calculate_ten_god(day_stem, current_dae_un["stem"]),
-        "branch_ten_god": get_branch_ten_god(day_stem, current_dae_un["branch"]),
-    }
 
     # 8. 음양 비율
-    all_stems = [saju[k]["stem"] for k in ["year_pillar", "month_pillar", "day_pillar", "hour_pillar"]]
+    _yy_keys = [k for k in ["year_pillar", "month_pillar", "day_pillar", "hour_pillar"]
+                if saju.get(k) is not None]
+    all_stems = [saju[k]["stem"] for k in _yy_keys]
     stem_yy = [STEMS_BY_KOREAN[s]["yin_yang"] for s in all_stems]
-    branch_yy = [saju[k]["yin_yang"] for k in ["year_pillar", "month_pillar", "day_pillar", "hour_pillar"]]
+    branch_yy = [saju[k]["yin_yang"] for k in _yy_keys]
     all_yy = stem_yy + branch_yy
+    _total_chars = len(all_yy)
     yang_count = sum(1 for y in all_yy if y == "양")
-    yin_count = 8 - yang_count
+    yin_count = _total_chars - yang_count
     yin_yang_ratio = {
-        "yang": round(yang_count / 8 * 100, 1),
-        "yin": round(yin_count / 8 * 100, 1),
+        "yang": round(yang_count / _total_chars * 100, 1) if _total_chars else 0.0,
+        "yin": round(yin_count / _total_chars * 100, 1) if _total_chars else 0.0,
     }
 
     # 9. meta
-    hh, mm = map(int, birth_time.split(":"))
+    hh, mm = (12, 0) if birth_time is None else map(int, birth_time.split(":"))
     original_dt = datetime(birth_year, *map(int, birth_date.split("-")[1:]), hh, mm)
-    correction = get_solar_correction_minutes(original_dt)
+    correction = get_solar_correction_for_location(original_dt, birth_longitude, birth_utc_offset)
     applied_dt = original_dt + timedelta(minutes=correction)
     meta = {
         "time_correction_minutes": correction,
@@ -129,13 +150,14 @@ def handle_calculate_saju(
     }
 
     # 빈 필드 제거: null·빈 리스트 키 제외
-    branch_rel = {k: v for k, v in saju["branch_relations"].items() if v}
+    # gong_mang은 top-level에서 별도 관리하므로 branch_relations에서 제외
+    branch_rel = {k: v for k, v in saju["branch_relations"].items() if v and k != "gong_mang"}
 
     # 육합 is_effective: 충·형·파 간섭 검사 (충이 있으면 합 파괴)
     _interference_sets: dict[str, set[str]] = {
-        "chung": {b for pair in saju["branch_relations"].get("chung", []) for b in pair},
+        "chung": {b for item in saju["branch_relations"].get("chung", []) for b in item["pair"]},
         "hyung": {b for name in saju["branch_relations"].get("sam_hyeong", []) for b in _SAM_HYEONG.get(name, [])},
-        "hae":   {b for pair in saju["branch_relations"].get("yuk_hae", []) for b in pair},
+        "hae":   {b for item in saju["branch_relations"].get("yuk_hae", []) for b in item["pair"]},
     }
     if "yuk_hap" in branch_rel:
         def _yuk_hap_entry(h: dict) -> dict:
@@ -157,7 +179,7 @@ def handle_calculate_saju(
         "비겁": ["비견", "겁재"], "식상": ["식신", "상관"],
         "재성": ["편재", "정재"], "관성": ["편관", "정관"], "인성": ["편인", "정인"],
     }
-    _ji_pillar_keys = ["year", "month", "day", "hour"]
+    _ji_pillar_keys = list(saju["ji_jang_gan"].keys())  # hour 없으면 자동 제외
     ten_gods_void_info = []
     for cat, gods in _CATEGORIES.items():
         if all(ten_gods_dist_filtered.get(g, 0) == 0 for g in gods):
@@ -175,6 +197,46 @@ def handle_calculate_saju(
         {k: round(v / _wuxing_total * 100, 1) for k, v in saju["wuxing_count"].items()}
         if _wuxing_total > 0 else saju["wuxing_count"]
     )
+
+    # 8글자 위치별 오행 목록 (궁성 가중치 계산 및 RAG용)
+    _pillar_order = [p for p in ["year", "month", "day", "hour"]
+                     if saju.get(f"{p}_pillar") is not None]
+    _wuxing_chars: list[dict] = []
+    for _p in _pillar_order:
+        _pk = f"{_p}_pillar"
+        _wuxing_chars.append({"pillar": _p, "type": "stem",   "element": saju[_pk]["stem_element"]})
+        _wuxing_chars.append({"pillar": _p, "type": "branch", "element": saju[_pk]["branch_element"]})
+
+    # 합화 적용 오행 목록 (육합·삼합) — 프론트 토글 및 DB 저장용
+    _branch_name = {_p: saju[f"{_p}_pillar"]["branch"] for _p in _pillar_order}
+    _wuxing_chars_hap = [dict(c) for c in _wuxing_chars]
+
+    def _apply_hap(chars: list[dict], br: dict) -> None:
+        """육합·삼합 화화(化化) 적용 — 지지 오행 교체."""
+        for hap in br.get("yuk_hap", []):
+            if not hap.get("is_effective", True):
+                continue
+            for ch in chars:
+                if ch["type"] == "branch" and _branch_name[ch["pillar"]] in hap["pair"]:
+                    ch["element"] = hap["element"]
+        for sam in br.get("sam_hap", []):
+            for ch in chars:
+                if ch["type"] == "branch" and _branch_name[ch["pillar"]] in sam.get("branches", []):
+                    ch["element"] = sam["element"]
+
+    _apply_hap(_wuxing_chars_hap, saju["branch_relations"])
+
+    def _chars_to_pct(chars: list[dict]) -> dict[str, float]:
+        counts: dict[str, float] = {"목": 0, "화": 0, "토": 0, "금": 0, "수": 0}
+        for c in chars:
+            if c["element"] in counts:
+                counts[c["element"]] += 1
+        total = sum(counts.values())
+        if total == 0:
+            return counts
+        return {k: round(v / total * 100, 1) for k, v in counts.items()}
+
+    wuxing_hap_pct = _chars_to_pct(_wuxing_chars_hap)
 
     # 조후(調候) — 월지 기후와 일간의 관계
     _SEASON_MAP: dict[str, tuple] = {
@@ -213,6 +275,12 @@ def handle_calculate_saju(
     # 반복 연산 방지: 결과를 로컬 변수에 캐싱
     _structure_patterns = detect_structure_patterns(ten_gods_dist_filtered, strength["level"], wuxing_pct)
     _dynamics = build_dynamics(saju, branch_rel, wuxing_pct)
+
+    # 천간합·천간충을 branch_relations에 추가 (dynamics에서 추출)
+    if _dynamics.get("stem_hap"):
+        branch_rel["cheon_gan_hap"] = _dynamics["stem_hap"]
+    if _dynamics.get("stem_chung"):
+        branch_rel["cheon_gan_chung"] = _dynamics["stem_chung"]
     _synergy = compute_synergy_tags(_structure_patterns, _dynamics)
 
     # ⑩ 행동 프로파일 — 십성 분포 → 원자적 행동 벡터 합성
@@ -244,7 +312,10 @@ def handle_calculate_saju(
         "day_pillar": pillars_enriched["day_pillar"],
         "hour_pillar": pillars_enriched["hour_pillar"],
         # ④ 오행·음양 분포 (퍼센트, 0 포함 — 결핍 오행도 의미 있음)
-        "wuxing_count": wuxing_pct,
+        "wuxing_count":      wuxing_pct,       # 기본 8글자
+        "wuxing_count_hap":  wuxing_hap_pct,   # 육합·삼합 합화 적용
+        "wuxing_chars":      _wuxing_chars,     # 위치별 오행 [{pillar,type,element}]
+        "wuxing_chars_hap":  _wuxing_chars_hap, # 합화 적용 위치별 오행
         "dominant_elements": saju["dominant_elements"],
         "weak_elements": saju["weak_elements"],
         "yin_yang_ratio": yin_yang_ratio,

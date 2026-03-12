@@ -3,11 +3,14 @@
 from __future__ import annotations
 from fastapi import APIRouter, Query
 from schemas.saju import SajuCalcRequest, SajuCalcResponse
+from schemas.report import SajuReportRequest, SajuReportResponse
 from core.errors import SWAGGER_ERRORS
 from core.exceptions import CalcFailedException, InvalidDateFormatException
 from engine.handlers.calculate_saju import handle_calculate_saju
 from engine.handlers.get_wol_un import handle_get_wol_un
 from engine.handlers.get_il_jin import handle_get_il_jin
+from engine.handlers.get_yeon_un import handle_get_yeon_un
+from llm.pipelines.saju_report import run_saju_report
 
 router = APIRouter(prefix="/api/saju", tags=["사주 계산"])
 
@@ -59,6 +62,8 @@ async def calculate_saju(req: SajuCalcRequest) -> SajuCalcResponse:
             gender=req.gender,
             calendar=req.calendar,
             is_leap_month=req.is_leap_month,
+            birth_longitude=req.birth_longitude,
+            birth_utc_offset=req.birth_utc_offset,
         )
         return result
     except ValueError as e:
@@ -66,6 +71,52 @@ async def calculate_saju(req: SajuCalcRequest) -> SajuCalcResponse:
         if "날짜" in msg or "date" in msg.lower():
             raise InvalidDateFormatException(req.birth_date)
         raise CalcFailedException(msg)
+    except Exception as e:
+        raise CalcFailedException(str(e))
+
+
+@router.post(
+    "/report",
+    response_model=SajuReportResponse,
+    summary="AI 사주 리포트 생성",
+    description="""
+사주팔자 계산 + RAG 지식 검색 + Writer LLM을 한 번에 실행하여
+결론형 헤드라인 탭 리포트를 반환합니다.
+
+**처리 순서**:
+1. 사주팔자 12단계 계산 (Engine)
+2. ChromaDB + 지식 JSON 기반 RAG 컨텍스트 조립 (deterministic)
+3. Writer LLM → 10개 결론형 탭 생성
+
+**고민 입력 시**: 고민 맞춤 탭이 우선 생성됩니다.
+""",
+    responses={**{k: v for k, v in SWAGGER_ERRORS.items() if k in (400, 422, 500)}},
+)
+async def generate_saju_report(req: SajuReportRequest) -> SajuReportResponse:
+    try:
+        saju_dict, writer_output = await run_saju_report(
+            birth_date=req.birth_date,
+            birth_time=req.birth_time,
+            gender=req.gender,
+            calendar=req.calendar,
+            is_leap_month=req.is_leap_month,
+            concern=req.concern,
+            birth_longitude=req.birth_longitude,
+            birth_utc_offset=req.birth_utc_offset,
+        )
+        saju_response = SajuCalcResponse(**saju_dict)
+        return SajuReportResponse(
+            saju=saju_response,
+            tabs=writer_output.tabs,
+            concern=req.concern,
+        )
+    except ValueError as e:
+        msg = str(e)
+        if "날짜" in msg or "date" in msg.lower():
+            raise InvalidDateFormatException(req.birth_date)
+        raise CalcFailedException(msg)
+    except RuntimeError as e:
+        raise CalcFailedException(str(e))
     except Exception as e:
         raise CalcFailedException(str(e))
 
@@ -100,6 +151,25 @@ async def get_il_jin(
 ):
     try:
         return handle_get_il_jin(year=year, month=month)
+    except ValueError as e:
+        raise CalcFailedException(str(e))
+    except Exception as e:
+        raise CalcFailedException(str(e))
+
+
+@router.get(
+    "/yeon-un",
+    summary="연운(세운) 조회",
+    description="특정 구간의 연운 간지 목록을 반환합니다. `day_stem`은 사주 일간 천간입니다.",
+    responses={**{k: v for k, v in SWAGGER_ERRORS.items() if k in (400, 422, 500)}},
+)
+async def get_yeon_un(
+    start_year: int = Query(..., ge=1900, le=2100, description="시작 연도"),
+    count:      int = Query(10,  ge=1,    le=20,   description="반환할 연도 수 (최대 20)"),
+    day_stem:   str = Query(..., description="일간 천간 (갑/을/병/정/무/기/경/신/임/계)"),
+):
+    try:
+        return handle_get_yeon_un(start_year=start_year, count=count, day_stem=day_stem)
     except ValueError as e:
         raise CalcFailedException(str(e))
     except Exception as e:
