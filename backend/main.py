@@ -1,4 +1,4 @@
-"""SajuBon FastAPI 진입점."""
+"""사주구리 FastAPI 진입점."""
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -29,7 +29,7 @@ logger = logging.getLogger("sajubon")
 # ─── FastAPI 앱 ──────────────────────────────────────────────────────────────
 
 app = FastAPI(
-    title="SajuBon API",
+    title="사주구리 API",
     version="0.1.0",
     description="AI 사주 상담 서비스 — 사주팔자 계산·궁합·오늘의 운세·한줄 상담",
     docs_url="/docs",

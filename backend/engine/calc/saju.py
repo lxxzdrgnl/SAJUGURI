@@ -40,6 +40,7 @@ def _pillar(stem_idx: int, branch_idx: int) -> dict:
         "stem_element": stem["element"],
         "branch_element": branch["element"],
         "yin_yang": stem["yin_yang"],
+        "ganji_name": stem["korean"] + branch["korean"],
     }
 
 
@@ -122,7 +123,7 @@ def _count_wuxing(pillars: list[dict]) -> dict[str, int]:
 @functools.lru_cache(maxsize=256)
 def calculate_saju(
     birth_date: str,
-    birth_time: str,
+    birth_time: str | None,
     gender: str,
     calendar: str = "solar",
     is_leap_month: bool = False,
@@ -148,7 +149,7 @@ def calculate_saju(
         solar_date = conv["converted_date"]
 
     y, mo, d = map(int, solar_date.split("-"))
-    hh, mm = map(int, birth_time.split(":"))
+    hh, mm = (12, 0) if birth_time is None else map(int, birth_time.split(":"))
     dt = datetime(y, mo, d, hh, mm, tzinfo=timezone.utc)
 
     # 진태양시 보정 (한국 표준시 역사 기반, 서울 경도 126.97° 기준)
@@ -159,20 +160,21 @@ def calculate_saju(
     year_p = _calc_year_pillar(adjusted)
     month_p = _calc_month_pillar(adjusted, year_p)
     day_p = _calc_day_pillar(adjusted)
-    hour_p = _calc_hour_pillar(adjusted, day_p)
+    hour_p = None if birth_time is None else _calc_hour_pillar(adjusted, day_p)
 
-    pillars = [year_p, month_p, day_p, hour_p]
-    wuxing = _count_wuxing(pillars)
-    avg = 8 / 5
+    known_pillars = [year_p, month_p, day_p] + ([hour_p] if hour_p is not None else [])
+    wuxing = _count_wuxing(known_pillars)
+    n_chars = len(known_pillars) * 2
+    avg = n_chars / 5
     dominant = [e for e, c in wuxing.items() if c > avg * 1.5]
     weak = [e for e, c in wuxing.items() if c == 0 or c < avg * 0.5]
 
-    branches = [p["branch"] for p in pillars]
-    branch_relations = analyze_branch_relations(branches, day_p["branch"])
-
+    _ji_labels = ["year", "month", "day"] + (["hour"] if hour_p is not None else [])
+    branches = [p["branch"] for p in known_pillars]
+    branch_relations = analyze_branch_relations(branches, day_p["branch"], _ji_labels)
     ji_jang_gan = {
         label: get_ji_jang_gan(p["branch"])
-        for label, p in zip(["year", "month", "day", "hour"], pillars)
+        for label, p in zip(_ji_labels, known_pillars)
     }
 
     return {

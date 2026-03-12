@@ -33,10 +33,6 @@ _HWA_GAE_GROUPS: list[tuple[set[str], str]] = [
     ({"신", "자", "진"}, "진"), ({"해", "묘", "미"}, "미"),
 ]
 
-_CHUNG_PAIRS: list[tuple[str, str]] = [
-    ("자", "오"), ("축", "미"), ("인", "신"),
-    ("묘", "유"), ("진", "술"), ("사", "해"),
-]
 
 _GWI_MUN_BRANCHES: set[str] = {"인", "신", "사", "해"}
 
@@ -155,48 +151,55 @@ def _find_group(
 
 SinSalChecker = Callable[[dict, set[str]], dict | None]
 
-def _cheon_eul(saju: dict, bs: set[str]) -> dict | None:
-    stem = saju["day_pillar"]["stem"]
-    matched = [b for b in _CHEON_EUL_TABLE.get(stem, []) if b in bs]
-    if not matched:
-        return None
-    r = dict(SIN_SAL_INFO["천을귀인"])
-    r["reason"] = {"trigger": "day_stem", "day_stem": stem, "matched_branches": matched}
-    r["_location_branches"] = matched
-    return r
+# ── 체커 팩토리 (Factory Pattern) ────────────────────────────────────
 
-def _do_hwa(saju: dict, bs: set[str]) -> dict | None:
-    m = _find_group(bs, _DO_HWA_GROUPS)
-    if m is None:
-        return None
-    group, sal = m
-    group_matched = sorted(group & bs, key=lambda x: _BRANCH_ORDER.index(x))
-    r = dict(SIN_SAL_INFO["도화살"])
-    r["reason"] = {"trigger": "branch_group", "group_branches": group_matched, "도화지": sal}
-    r["_location_branches"] = group_matched + [sal]
-    return r
+def _make_stem_multi(name: str, table: dict[str, list[str]]) -> "SinSalChecker":
+    """일간 → 복수 지지 조회 체커 (천을귀인·태극귀인)."""
+    def checker(saju: dict, bs: set[str]) -> dict | None:
+        stem = saju["day_pillar"]["stem"]
+        matched = [b for b in table.get(stem, []) if b in bs]
+        if not matched:
+            return None
+        r = dict(SIN_SAL_INFO[name])
+        r["reason"] = {"trigger": "day_stem", "day_stem": stem, "matched_branches": matched}
+        r["_location_branches"] = matched
+        return r
+    return checker
 
-def _yeok_ma(saju: dict, bs: set[str]) -> dict | None:
-    m = _find_group(bs, _YEOK_MA_GROUPS)
-    if m is None:
-        return None
-    group, sal = m
-    group_matched = sorted(group & bs, key=lambda x: _BRANCH_ORDER.index(x))
-    r = dict(SIN_SAL_INFO["역마살"])
-    r["reason"] = {"trigger": "branch_group", "group_branches": group_matched, "역마지": sal}
-    r["_location_branches"] = group_matched + [sal]
-    return r
 
-def _hwa_gae(saju: dict, bs: set[str]) -> dict | None:
-    m = _find_group(bs, _HWA_GAE_GROUPS)
-    if m is None:
-        return None
-    group, sal = m
-    group_matched = sorted(group & bs, key=lambda x: _BRANCH_ORDER.index(x))
-    r = dict(SIN_SAL_INFO["화개살"])
-    r["reason"] = {"trigger": "branch_group", "group_branches": group_matched, "화개지": sal}
-    r["_location_branches"] = group_matched + [sal]
-    return r
+def _make_stem_single(name: str, table: dict[str, str]) -> "SinSalChecker":
+    """일간 → 단일 지지 조회 체커 (문곡귀인·관귀학관·홍염살)."""
+    def checker(saju: dict, bs: set[str]) -> dict | None:
+        stem = saju["day_pillar"]["stem"]
+        target = table.get(stem)
+        if not target or target not in bs:
+            return None
+        r = dict(SIN_SAL_INFO[name])
+        r["reason"] = {"trigger": "day_stem", "day_stem": stem, "target_branch": target}
+        r["_location_branches"] = [target]
+        return r
+    return checker
+
+
+def _make_group_branch(name: str, groups: list[tuple[set[str], str]], label_key: str) -> "SinSalChecker":
+    """삼합 그룹 체커 (도화살·역마살·화개살)."""
+    def checker(_saju: dict, bs: set[str]) -> dict | None:
+        m = _find_group(bs, groups)
+        if m is None:
+            return None
+        group, sal = m
+        group_matched = sorted(group & bs, key=lambda x: _BRANCH_ORDER.index(x))
+        r = dict(SIN_SAL_INFO[name])
+        r["reason"] = {"trigger": "branch_group", "group_branches": group_matched, label_key: sal}
+        r["_location_branches"] = group_matched + [sal]
+        return r
+    return checker
+
+
+_cheon_eul = _make_stem_multi("천을귀인", _CHEON_EUL_TABLE)
+_do_hwa    = _make_group_branch("도화살", _DO_HWA_GROUPS, "도화지")
+_yeok_ma   = _make_group_branch("역마살", _YEOK_MA_GROUPS, "역마지")
+_hwa_gae   = _make_group_branch("화개살", _HWA_GAE_GROUPS, "화개지")
 
 def _gong_mang(saju: dict, bs: set[str]) -> dict | None:
     day_branch = saju["day_pillar"]["branch"]
@@ -209,8 +212,13 @@ def _gong_mang(saju: dict, bs: set[str]) -> dict | None:
     r["_location_branches"] = matched
     return r
 
-def _won_jin(saju: dict, bs: set[str]) -> dict | None:
-    for a, b in _CHUNG_PAIRS:
+_WON_JIN_PAIRS: list[tuple[str, str]] = [
+    ("자", "미"), ("축", "오"), ("인", "유"),
+    ("묘", "신"), ("진", "해"), ("사", "술"),
+]
+
+def _won_jin(_saju: dict, bs: set[str]) -> dict | None:
+    for a, b in _WON_JIN_PAIRS:
         if a in bs and b in bs:
             r = dict(SIN_SAL_INFO["원진살"])
             r["reason"] = {"trigger": "branch_pair", "pair": [a, b]}
@@ -218,7 +226,7 @@ def _won_jin(saju: dict, bs: set[str]) -> dict | None:
             return r
     return None
 
-def _gwi_mun(saju: dict, bs: set[str]) -> dict | None:
+def _gwi_mun(_saju: dict, bs: set[str]) -> dict | None:
     found = _GWI_MUN_BRANCHES & bs
     if len(found) < 2:
         return None
@@ -238,7 +246,7 @@ def _yang_in(saju: dict, bs: set[str]) -> dict | None:
     r["_location_branches"] = [yang_in]
     return r
 
-def _baek_ho(saju: dict, bs: set[str]) -> dict | None:
+def _baek_ho(saju: dict, _bs: set[str]) -> dict | None:
     p = saju["day_pillar"]
     if (p["stem"], p["branch"]) not in _BAEK_HO_PAIRS:
         return None
@@ -247,7 +255,7 @@ def _baek_ho(saju: dict, bs: set[str]) -> dict | None:
     r["_location_branches"] = [p["branch"]]
     return r
 
-def _sam_jae(saju: dict, bs: set[str]) -> dict | None:
+def _sam_jae(saju: dict, _bs: set[str]) -> dict | None:
     year_branch = saju["year_pillar"]["branch"]
     current_branch = _BRANCH_ORDER[(datetime.now().year - 4) % 12]
     for group, branches in _SAM_JAE_TABLE:
@@ -264,9 +272,11 @@ def _sam_jae(saju: dict, bs: set[str]) -> dict | None:
     return None
 
 
-def _hyeon_chim(saju: dict, bs: set[str]) -> dict | None:
+def _hyeon_chim(saju: dict, _bs: set[str]) -> dict | None:
     trigger_pillars = []
     for short, key in zip(_PILLAR_ORDER, ["year_pillar", "month_pillar", "day_pillar", "hour_pillar"]):
+        if saju.get(key) is None:
+            continue
         if saju[key]["stem"] in _HYEON_CHIM_STEMS or saju[key]["branch"] in _HYEON_CHIM_BRANCHES:
             trigger_pillars.append(short)
     if not trigger_pillars:
@@ -279,48 +289,10 @@ def _hyeon_chim(saju: dict, bs: set[str]) -> dict | None:
     return r
 
 
-def _tae_geuk(saju: dict, bs: set[str]) -> dict | None:
-    stem = saju["day_pillar"]["stem"]
-    matched = [b for b in _TAE_GEUK_TABLE.get(stem, []) if b in bs]
-    if not matched:
-        return None
-    r = dict(SIN_SAL_INFO["태극귀인"])
-    r["reason"] = {"trigger": "day_stem", "day_stem": stem, "matched_branches": matched}
-    r["_location_branches"] = matched
-    return r
-
-
-def _mun_gok(saju: dict, bs: set[str]) -> dict | None:
-    stem = saju["day_pillar"]["stem"]
-    target = _MUN_GOK_TABLE.get(stem)
-    if not target or target not in bs:
-        return None
-    r = dict(SIN_SAL_INFO["문곡귀인"])
-    r["reason"] = {"trigger": "day_stem", "day_stem": stem, "target_branch": target}
-    r["_location_branches"] = [target]
-    return r
-
-
-def _gwan_gwi(saju: dict, bs: set[str]) -> dict | None:
-    stem = saju["day_pillar"]["stem"]
-    target = _GWAN_GWI_TABLE.get(stem)
-    if not target or target not in bs:
-        return None
-    r = dict(SIN_SAL_INFO["관귀학관"])
-    r["reason"] = {"trigger": "day_stem", "day_stem": stem, "target_branch": target}
-    r["_location_branches"] = [target]
-    return r
-
-
-def _hong_yeom(saju: dict, bs: set[str]) -> dict | None:
-    stem = saju["day_pillar"]["stem"]
-    target = _HONG_YEOM_TABLE.get(stem)
-    if not target or target not in bs:
-        return None
-    r = dict(SIN_SAL_INFO["홍염살"])
-    r["reason"] = {"trigger": "day_stem", "day_stem": stem, "target_branch": target}
-    r["_location_branches"] = [target]
-    return r
+_tae_geuk  = _make_stem_multi("태극귀인", _TAE_GEUK_TABLE)
+_mun_gok   = _make_stem_single("문곡귀인", _MUN_GOK_TABLE)
+_gwan_gwi  = _make_stem_single("관귀학관", _GWAN_GWI_TABLE)
+_hong_yeom = _make_stem_single("홍염살", _HONG_YEOM_TABLE)
 
 
 def _go_sin(saju: dict, bs: set[str]) -> dict | None:
@@ -334,7 +306,7 @@ def _go_sin(saju: dict, bs: set[str]) -> dict | None:
     return r
 
 
-def _wol_deok(saju: dict, bs: set[str]) -> dict | None:
+def _wol_deok(saju: dict, _bs: set[str]) -> dict | None:
     month_branch = saju["month_pillar"]["branch"]
     deok_stem = _WOL_DEOK_TABLE.get(month_branch)
     if not deok_stem or saju["day_pillar"]["stem"] != deok_stem:
@@ -347,7 +319,7 @@ def _wol_deok(saju: dict, bs: set[str]) -> dict | None:
     return r
 
 
-def _hwang_eun(saju: dict, bs: set[str]) -> dict | None:
+def _hwang_eun(saju: dict, _bs: set[str]) -> dict | None:
     day = saju["day_pillar"]
     if (day["stem"], day["branch"]) not in _HWANG_EUN_PILLARS:
         return None
@@ -377,12 +349,15 @@ _PILLAR_ORDER = ["year", "month", "day", "hour"]
 
 def find_sin_sals(saju: dict) -> list[dict]:
     """사주에서 해당하는 신살 목록 반환 [{name, type, desc, location, reason, ...}]."""
-    branch_set = {saju[k]["branch"] for k in
-                  ["year_pillar", "month_pillar", "day_pillar", "hour_pillar"]}
+    _active_keys = [k for k in ["year_pillar", "month_pillar", "day_pillar", "hour_pillar"]
+                    if saju.get(k) is not None]
+    branch_set = {saju[k]["branch"] for k in _active_keys}
 
     # 지지 → 기둥 위치 매핑 (중복 지지 허용)
     branch_to_pillars: dict[str, list[str]] = {}
     for short, key in zip(_PILLAR_ORDER, ["year_pillar", "month_pillar", "day_pillar", "hour_pillar"]):
+        if saju.get(key) is None:
+            continue
         b = saju[key]["branch"]
         branch_to_pillars.setdefault(b, []).append(short)
 
@@ -453,4 +428,5 @@ def find_twelve_sin_sals_per_pillar(saju: dict) -> dict[str, str]:
             _PILLAR_ORDER,
             ["year_pillar", "month_pillar", "day_pillar", "hour_pillar"],
         )
+        if saju.get(key) is not None
     }

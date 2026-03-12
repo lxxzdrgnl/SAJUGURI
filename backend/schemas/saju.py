@@ -14,8 +14,9 @@ class SajuCalcRequest(BaseModel):
         description="생년월일 (YYYY-MM-DD)",
         examples=["1990-03-15"],
     )
-    birth_time: str = Field(
-        description="출생 시각 (HH:MM, 24시 기준). 정확한 시각 모를 경우 '12:00' 사용",
+    birth_time: str | None = Field(
+        default=None,
+        description="출생 시각 (HH:MM, 24시 기준). 시간 모를 경우 null — 시주(時柱) 미산출",
         examples=["14:30"],
     )
     gender: str = Field(
@@ -90,7 +91,7 @@ class MetaInfo(BaseModel):
     )
     gender: str = Field(examples=["male"])
     birth_date: str = Field(examples=["1990-03-15"])
-    birth_time: str = Field(examples=["14:30"])
+    birth_time: str | None = Field(default=None, examples=["14:30"])
     calendar: str = Field(examples=["solar"])
     climate_vibe: ClimateVibe
 
@@ -105,6 +106,7 @@ class PillarInfo(BaseModel):
     stem_element: str = Field(description="천간 오행", examples=["금"])
     branch_element: str = Field(description="지지 오행", examples=["화"])
     yin_yang: str = Field(description="음양 (양/음)", examples=["양"])
+    ganji_name: str = Field(description="간지명 (천간+지지, 예: 경오)", examples=["경오"])
     stem_ten_god: str = Field(description="천간 십성", examples=["상관"])
     branch_ten_god: str = Field(description="지지 대표 십성", examples=["편인"])
     twelve_wun: str = Field(description="12운성", examples=["목욕"])
@@ -204,6 +206,7 @@ class DaeUnEntry(BaseModel):
     branch: str = Field(description="대운 지지", examples=["미"])
     stem_element: str = Field(examples=["수"])
     branch_element: str = Field(examples=["토"])
+    ganji_name: str = Field(description="간지명 (천간+지지, 예: 계미)", examples=["계미"])
     stem_ten_god: str | None = Field(
         default=None,
         description="일간과의 십성 관계 (current_dae_un에만 포함)",
@@ -278,7 +281,7 @@ class SajuCalcResponse(BaseModel):
     year_pillar: PillarInfo = Field(description="연주(年柱) — 조상·청소년기")
     month_pillar: PillarInfo = Field(description="월주(月柱) — 부모·청장년기")
     day_pillar: PillarInfo = Field(description="일주(日柱) — 본인·배우자")
-    hour_pillar: PillarInfo = Field(description="시주(時柱) — 자녀·노년기")
+    hour_pillar: PillarInfo | None = Field(default=None, description="시주(時柱) — 자녀·노년기. 시간 미입력 시 null")
 
     # ④ 오행·음양 분포
     wuxing_count: dict[str, float] = Field(
@@ -440,7 +443,7 @@ class SajuCalcResponse(BaseModel):
                     "stem": "경", "branch": "오",
                     "stem_hanja": "庚", "branch_hanja": "午",
                     "stem_element": "금", "branch_element": "화",
-                    "yin_yang": "양",
+                    "yin_yang": "양", "ganji_name": "경오",
                     "stem_ten_god": "상관",
                     "branch_ten_god": "편인",
                     "twelve_wun": "목욕",
@@ -449,7 +452,7 @@ class SajuCalcResponse(BaseModel):
                     "stem": "갑", "branch": "인",
                     "stem_hanja": "甲", "branch_hanja": "寅",
                     "stem_element": "목", "branch_element": "목",
-                    "yin_yang": "양",
+                    "yin_yang": "양", "ganji_name": "갑인",
                     "stem_ten_god": "편재",
                     "branch_ten_god": "편재",
                     "twelve_wun": "절",
@@ -458,7 +461,7 @@ class SajuCalcResponse(BaseModel):
                     "stem": "신", "branch": "묘",
                     "stem_hanja": "辛", "branch_hanja": "卯",
                     "stem_element": "금", "branch_element": "목",
-                    "yin_yang": "음",
+                    "yin_yang": "음", "ganji_name": "신묘",
                     "stem_ten_god": "비견",
                     "branch_ten_god": "편재",
                     "twelve_wun": "태",
@@ -467,7 +470,7 @@ class SajuCalcResponse(BaseModel):
                     "stem": "병", "branch": "신",
                     "stem_hanja": "丙", "branch_hanja": "申",
                     "stem_element": "화", "branch_element": "금",
-                    "yin_yang": "양",
+                    "yin_yang": "양", "ganji_name": "병신",
                     "stem_ten_god": "편관",
                     "branch_ten_god": "비견",
                     "twelve_wun": "장생",
@@ -509,15 +512,16 @@ class SajuCalcResponse(BaseModel):
                 },
                 "dae_un_start_age": 5,
                 "dae_un_list": [
-                    {"start_age": 5, "end_age": 14, "stem": "을", "branch": "묘", "stem_element": "목", "branch_element": "목"},
-                    {"start_age": 15, "end_age": 24, "stem": "병", "branch": "진", "stem_element": "화", "branch_element": "토"},
-                    {"start_age": 25, "end_age": 34, "stem": "정", "branch": "사", "stem_element": "화", "branch_element": "화"},
-                    {"start_age": 35, "end_age": 44, "stem": "계", "branch": "미", "stem_element": "수", "branch_element": "토"},
+                    {"start_age": 5, "end_age": 14, "stem": "을", "branch": "묘", "stem_element": "목", "branch_element": "목", "ganji_name": "을묘"},
+                    {"start_age": 15, "end_age": 24, "stem": "병", "branch": "진", "stem_element": "화", "branch_element": "토", "ganji_name": "병진"},
+                    {"start_age": 25, "end_age": 34, "stem": "정", "branch": "사", "stem_element": "화", "branch_element": "화", "ganji_name": "정사"},
+                    {"start_age": 35, "end_age": 44, "stem": "계", "branch": "미", "stem_element": "수", "branch_element": "토", "ganji_name": "계미"},
                 ],
                 "current_dae_un": {
                     "start_age": 35, "end_age": 44,
                     "stem": "계", "branch": "미",
                     "stem_element": "수", "branch_element": "토",
+                    "ganji_name": "계미",
                     "stem_ten_god": "편재", "branch_ten_god": "비견",
                 },
                 "dynamics": {

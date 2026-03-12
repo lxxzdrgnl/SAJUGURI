@@ -15,8 +15,8 @@ from engine.data.wuxing import WUXING_GENERATION
 _SUPPORT_GODS: set[str] = {"비견", "겁재", "정인", "편인"}
 
 _LEVEL_8_THRESHOLDS = [
-    (90, "극왕"), (76, "태강"), (63, "신강"), (52, "중화신강"),
-    (42, "중화신약"), (30, "신약"), (18, "태약"),
+    (90, "극왕"), (80, "태강"), (70, "신강"), (60, "중화신강"),
+    (50, "중화신약"), (40, "신약"), (30, "태약"),
 ]
 
 
@@ -84,6 +84,8 @@ def analyze_day_master_strength(saju: dict, ten_gods_dist: dict) -> dict:
         score += 12; factors["bigeop"] = 12;  reasons.append("비겁 적절")
     elif bigeop >= 1:
         score += 5;  factors["bigeop"] = 5;   reasons.append("비겁 소량")
+    elif bigeop >= 0.5:
+        factors["bigeop"] = 0;               reasons.append("비겁 극소 (지지만)")
     else:
         score -= 10; factors["bigeop"] = -10; reasons.append("비겁 없음")
 
@@ -122,11 +124,14 @@ def analyze_day_master_strength(saju: dict, ten_gods_dist: dict) -> dict:
     # ── 득령/득지/득시/득세 ──────────────────────────────────────
     day_stem   = saju["day_pillar"]["stem"]
     day_branch = saju["day_pillar"]["branch"]
-    hour_branch = saju["hour_pillar"]["branch"]
 
     deuk_ryeong = wol_relation == "strong"
-    deuk_ji  = _branch_ten_god_category(day_stem, day_branch)  in _SUPPORT_GODS
-    deuk_si  = _branch_ten_god_category(day_stem, hour_branch) in _SUPPORT_GODS
+    deuk_ji  = _branch_ten_god_category(day_stem, day_branch) in _SUPPORT_GODS
+    if saju.get("hour_pillar") is not None:
+        hour_branch = saju["hour_pillar"]["branch"]
+        deuk_si = _branch_ten_god_category(day_stem, hour_branch) in _SUPPORT_GODS
+    else:
+        deuk_si = False  # 시주 미입력 시 득시 판단 불가
 
     supporting = bigeop + inseong
     opposing   = seolgi

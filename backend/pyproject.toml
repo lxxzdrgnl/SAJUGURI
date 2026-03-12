@@ -1,7 +1,7 @@
 [project]
 name = "saju-backend"
 version = "0.1.0"
-description = "SajuBon FastAPI 백엔드 — AI 사주 상담 서비스"
+description = "사주구리 FastAPI 백엔드 — AI 사주 상담 서비스"
 requires-python = ">=3.10"
 dependencies = [
     "fastapi>=0.111.0",

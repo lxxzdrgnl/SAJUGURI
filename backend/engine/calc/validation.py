@@ -17,7 +17,7 @@ _TIME_RE = re.compile(r"^\d{2}:\d{2}$")
 
 def validate_birth_input(
     birth_date: str,
-    birth_time: str,
+    birth_time: str | None,
     gender: str,
     calendar: str = "solar",
 ) -> None:
@@ -36,12 +36,13 @@ def validate_birth_input(
     except ValueError as e:
         raise ValidationError(f"유효하지 않은 날짜: {birth_date}") from e
 
-    # 시간 형식
-    if not _TIME_RE.match(birth_time):
-        raise ValidationError(f"시간 형식 오류 (HH:MM): {birth_time}")
-    hh, mm = map(int, birth_time.split(":"))
-    if not (0 <= hh <= 23 and 0 <= mm <= 59):
-        raise ValidationError(f"유효하지 않은 시간: {birth_time}")
+    # 시간 형식 (None이면 시주 미산출로 처리 — 스킵)
+    if birth_time is not None:
+        if not _TIME_RE.match(birth_time):
+            raise ValidationError(f"시간 형식 오류 (HH:MM): {birth_time}")
+        hh, mm = map(int, birth_time.split(":"))
+        if not (0 <= hh <= 23 and 0 <= mm <= 59):
+            raise ValidationError(f"유효하지 않은 시간: {birth_time}")
 
     # 성별
     if gender not in ("male", "female"):
