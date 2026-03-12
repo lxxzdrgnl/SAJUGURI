@@ -17,10 +17,13 @@
 ---
 
 ## Production
-Frontend: https://sajuguri.rheon.kr
-Backend API: https://api-sajuguri.rheon.kr
-Swagger UI: https://api-sajuguri.rheon.kr/docs
-Health Check: https://api-sajuguri.rheon.kr/health
+
+- Frontend: https://sajuguri.rheon.kr
+- Backend API: https://api-sajuguri.rheon.kr
+- Swagger UI: https://api-sajuguri.rheon.kr/docs
+- Health Check: https://api-sajuguri.rheon.kr/health
+
+---
 
 ## 사주팔자(四柱八字)란?
 
@@ -161,11 +164,6 @@ docker compose down
 서비스가 모두 올라오면:
 - 프론트엔드: http://localhost:3000
 - 백엔드 API: http://localhost:8000
-
-### 라이브 서비스
-
-- 프론트엔드: https://sajuguri.rheon.kr/
-- 백엔드 API: https://api-sajuguri.rheon.kr/
 
 ### 로컬 개발 환경
 
