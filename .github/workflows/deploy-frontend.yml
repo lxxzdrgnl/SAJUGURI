@@ -27,7 +27,7 @@ jobs:
           ssh -i ~/.ssh/pc_key \
             ${{ secrets.PC_SSH_USER }}@${{ secrets.PC_SSH_HOST }} \
             "cd ~/servers/sajuguri/repo && \
-             git pull && \
+             git fetch origin && git reset --hard origin/main && \
              cd ~/servers && \
              docker compose up -d --build --no-deps sajuguri-frontend && \
              echo '✅ Frontend deployed'"

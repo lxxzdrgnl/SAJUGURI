@@ -8,6 +8,8 @@
 ![Gemini](https://img.shields.io/badge/Gemini-Writer_LLM-4285F4?style=flat-square&logo=google&logoColor=white)
 ![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector_DB-FF6B35?style=flat-square)
 
+🌐 **[sajuguri.rheon.kr](https://sajuguri.rheon.kr/)** · API: [api-sajuguri.rheon.kr](https://api-sajuguri.rheon.kr/)
+
 **AI가 당신의 사주(四柱)와 오늘의 고민을 함께 읽어드립니다.**
 
 > "재물운" (X)
@@ -154,6 +156,11 @@ docker compose down
 서비스가 모두 올라오면:
 - 프론트엔드: http://localhost:3000
 - 백엔드 API: http://localhost:8000
+
+### 라이브 서비스
+
+- 프론트엔드: https://sajuguri.rheon.kr/
+- 백엔드 API: https://api-sajuguri.rheon.kr/
 
 ### 로컬 개발 환경
 
