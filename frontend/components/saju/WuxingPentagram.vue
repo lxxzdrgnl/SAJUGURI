@@ -78,7 +78,7 @@ function pctLabelPos(i: number) {
       </defs>
 
       <!-- 오각형 아웃라인 -->
-      <polygon :points="pentagonPoints" fill="none" stroke="#ddd7d0"
+      <polygon :points="pentagonPoints" fill="none" stroke="var(--border-default)"
         stroke-width="1" stroke-dasharray="4,3" opacity="0.8"/>
 
       <!-- 상극 점선 -->
@@ -92,10 +92,10 @@ function pctLabelPos(i: number) {
         opacity="0.45" fill="none" marker-end="url(#arrow-teal)"/>
 
       <!-- 중앙 일간 -->
-      <circle cx="150" cy="150" r="24" fill="#f7f4f1" stroke="#ddd7d0" stroke-width="1.5"/>
-      <text x="150" y="146" text-anchor="middle" font-size="10" fill="#aaaaaa" font-family="sans-serif">일간</text>
+      <circle cx="150" cy="150" r="24" fill="var(--surface-2)" stroke="var(--border-default)" stroke-width="1.5"/>
+      <text x="150" y="146" text-anchor="middle" font-size="10" fill="var(--text-muted)" style="font-family: var(--font-ganji);">일간</text>
       <text x="150" y="162" text-anchor="middle" font-size="15" font-weight="bold"
-        :fill="ec(dayElement)" font-family="sans-serif">{{ dayElement }}</text>
+        :fill="ec(dayElement)" style="font-family: var(--font-ganji);">{{ dayElement }}</text>
 
       <!-- 꼭짓점 노드 -->
       <g v-for="(el, i) in elements" :key="el" class="element-node">
@@ -110,13 +110,13 @@ function pctLabelPos(i: number) {
         <text
           :x="vertices[i].x" :y="vertices[i].y + 6"
           text-anchor="middle" font-size="16" font-weight="bold"
-          :fill="ec(el)" font-family="sans-serif"
+          :fill="ec(el)" style="font-family: var(--font-ganji);"
         >{{ el }}</text>
         <!-- % 레이블 -->
         <text
           :x="pctLabelPos(i).x" :y="pctLabelPos(i).y"
           text-anchor="middle" font-size="13" font-weight="600"
-          :fill="ec(el)" font-family="sans-serif" opacity="0.9"
+          :fill="ec(el)" style="font-family: var(--font-ganji);" opacity="0.9"
         >{{ data[el] ?? 0 }}%</text>
       </g>
     </svg>

@@ -48,8 +48,8 @@ function judge(el: string) {
 
 <style scoped>
 .balance-wrap {
-  background: #ffffff;
-  border: 1px solid #e8e2db;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -61,23 +61,23 @@ function judge(el: string) {
 .th {
   padding: 8px 12px;
   text-align: left;
-  color: #cccccc;
+  color: var(--text-muted);
   font-weight: 500;
-  background: #faf8f6;
-  border-bottom: 1px solid #f0ece8;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--surface-3);
   letter-spacing: 0.05em;
 }
 .th-num { text-align: center; width: 3.5rem; }
 .td {
   padding: 9px 12px;
-  border-bottom: 1px solid #f5f2ef;
+  border-bottom: 1px solid var(--surface-3);
 }
 .balance-table tr:last-child .td { border-bottom: none; }
 .td-num { text-align: center; }
 .td-bar { min-width: 80px; }
 .bar-bg {
   height: 6px;
-  background: #f0ece8;
+  background: var(--surface-3);
   border-radius: 3px;
   overflow: hidden;
 }

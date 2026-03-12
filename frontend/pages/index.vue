@@ -73,16 +73,16 @@ const currentYear = new Date().getFullYear()
     >
       <div class="inline-block">
         <h1
-          class="font-serif font-bold tracking-wide leading-none"
+          class="font-bold tracking-wide leading-none"
           :class="store.result ? 'text-3xl' : 'text-5xl'"
-          style="transition: font-size 0.4s ease; color: #1a1a1a;"
+          style="transition: font-size 0.4s ease; font-family: var(--font-ganji);"
         >
-          <span style="color: #3a3a3a;">사주</span><span style="color: #a67c52;">본</span>
+          <span style="color: var(--text-primary);">사주</span><span style="color: var(--accent);">구리</span>
         </h1>
         <div
           v-if="!store.result"
           class="mt-1 text-[10px] tracking-[0.35em] uppercase"
-          style="color: #aaaaaa;"
+          style="color: var(--text-muted);"
         >
           四柱八字 · AI 사주 상담
         </div>
@@ -90,7 +90,7 @@ const currentYear = new Date().getFullYear()
       <p
         v-if="!store.result"
         class="mt-4 text-sm"
-        style="color: #888888;"
+        style="color: var(--text-muted);"
       >
         오직 당신을 위한 사주
       </p>
@@ -104,20 +104,20 @@ const currentYear = new Date().getFullYear()
       <ClientOnly>
         <SajuInputForm @submit="onSubmit" />
         <template #fallback>
-          <div class="rounded-2xl px-8 py-8" style="background:#ffffff; border:1px solid #e8e2db; min-height: 420px;" />
+          <div class="rounded-2xl px-8 py-8" style="background:var(--surface-1); border:1px solid var(--border-subtle); min-height: 420px;" />
         </template>
       </ClientOnly>
     </div>
 
     <!-- ── 로딩 ── -->
-    <div v-if="store.loading" class="mt-12 flex flex-col items-center gap-4" style="color: #888888;">
+    <div v-if="store.loading" class="mt-12 flex flex-col items-center gap-4" style="color: var(--text-muted);">
       <div class="relative w-10 h-10">
         <svg class="animate-spin w-10 h-10 absolute inset-0" viewBox="0 0 40 40" fill="none">
-          <circle cx="20" cy="20" r="17" stroke="#e8e2db" stroke-width="3"/>
-          <path d="M20 3a17 17 0 0 1 17 17" stroke="#3a3a3a" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="20" cy="20" r="17" stroke="var(--border-subtle)" stroke-width="3"/>
+          <path d="M20 3a17 17 0 0 1 17 17" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
         </svg>
       </div>
-      <span class="text-sm tracking-wide" style="color: #888888;">사주를 계산하는 중...</span>
+      <span class="text-sm tracking-wide" style="color: var(--text-muted);">사주를 계산하는 중...</span>
     </div>
 
     <!-- ── 에러 ── -->
@@ -137,34 +137,34 @@ const currentYear = new Date().getFullYear()
 
       <!-- 구분선 -->
       <div class="flex items-center gap-4">
-        <div class="h-px flex-1" style="background: linear-gradient(to right, transparent, #ddd7d0, transparent);"></div>
-        <span class="fs-label tracking-[0.3em] uppercase" style="color: #aaaaaa;">분석 결과</span>
-        <div class="h-px flex-1" style="background: linear-gradient(to left, transparent, #ddd7d0, transparent);"></div>
+        <div class="h-px flex-1" style="background: linear-gradient(to right, transparent, var(--border-default), transparent);"></div>
+        <span class="fs-label tracking-[0.3em] uppercase" style="color: var(--text-muted);">분석 결과</span>
+        <div class="h-px flex-1" style="background: linear-gradient(to left, transparent, var(--border-default), transparent);"></div>
       </div>
 
       <!-- 요약 배지 행 -->
       <div class="animate-fade-up flex flex-wrap gap-2">
         <span
           class="px-3 py-1 rounded-full fs-sub font-medium border"
-          style="background: #f0ece8; color: #3a3a3a; border-color: #ddd7d0;"
+          style="background: var(--surface-3); color: var(--text-primary); border-color: var(--border-default);"
         >
           {{ store.result.day_pillar.ganji_name }} 일주
         </span>
         <span
           class="px-3 py-1 rounded-full text-xs font-medium border"
-          style="background: #f0ece8; color: #3a3a3a; border-color: #ddd7d0;"
+          style="background: var(--surface-3); color: var(--text-primary); border-color: var(--border-default);"
         >
           {{ store.result.gyeok_guk.name }}
         </span>
         <span
           class="px-3 py-1 rounded-full text-xs font-medium border"
-          style="background: #f0ece8; color: #3a3a3a; border-color: #ddd7d0;"
+          style="background: var(--surface-3); color: var(--text-primary); border-color: var(--border-default);"
         >
           용신 {{ store.result.yong_sin.primary }} ({{ store.result.yong_sin.yong_sin_label }})
         </span>
         <span
           class="px-3 py-1 rounded-full text-xs font-medium border"
-          style="background: #f0ece8; color: #3a3a3a; border-color: #ddd7d0;"
+          style="background: var(--surface-3); color: var(--text-primary); border-color: var(--border-default);"
         >
           {{ store.result.day_master_strength.level_8 }}
         </span>
@@ -174,10 +174,10 @@ const currentYear = new Date().getFullYear()
           :key="s.name"
           class="px-3 py-1 rounded-full fs-sub border"
           :style="s.type === 'lucky'
-            ? `background: color-mix(in srgb, var(--el-목) 8%, transparent); color: var(--el-목); border-color: color-mix(in srgb, var(--el-목) 25%, transparent);`
+            ? `background: color-mix(in srgb, var(--color-good) 10%, transparent); color: var(--color-good); border-color: color-mix(in srgb, var(--color-good) 25%, transparent);`
             : s.type === 'unlucky' || s.type === 'warning'
-              ? `background: color-mix(in srgb, var(--el-화) 8%, transparent); color: var(--el-화); border-color: color-mix(in srgb, var(--el-화) 25%, transparent);`
-              : 'background: #f0ece8; color: #666666; border-color: #e8e2db;'"
+              ? `background: color-mix(in srgb, var(--color-bad) 8%, transparent); color: var(--color-bad); border-color: color-mix(in srgb, var(--color-bad) 25%, transparent);`
+              : 'background: var(--surface-3); color: var(--text-secondary); border-color: var(--border-subtle);'"
         >
           {{ s.name }}
         </span>
@@ -224,14 +224,14 @@ const currentYear = new Date().getFullYear()
             <span
               class="w-4 h-4 rounded flex items-center justify-center border transition-all shrink-0"
               :style="applyHap
-                ? 'background: #3a3a3a; border-color: #3a3a3a;'
-                : 'background: #ffffff; border-color: #d0cac4;'"
+                ? 'background: var(--accent); border-color: var(--accent);'
+                : 'background: var(--surface-1); border-color: var(--border-default);'"
             >
               <svg v-if="applyHap" class="w-2.5 h-2.5" viewBox="0 0 10 10" fill="none">
                 <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </span>
-            <span class="fs-sub" style="color: #666666;">합에 따른 오행 변화 적용</span>
+            <span class="fs-sub" style="color: var(--text-secondary);">합에 따른 오행 변화 적용</span>
           </label>
 
           <!-- 궁성·조후 토글 -->
@@ -239,19 +239,19 @@ const currentYear = new Date().getFullYear()
             <span
               class="w-4 h-4 rounded flex items-center justify-center border transition-all shrink-0"
               :style="applyJohu
-                ? 'background: #3a3a3a; border-color: #3a3a3a;'
-                : 'background: #ffffff; border-color: #d0cac4;'"
+                ? 'background: var(--accent); border-color: var(--accent);'
+                : 'background: var(--surface-1); border-color: var(--border-default);'"
             >
               <svg v-if="applyJohu" class="w-2.5 h-2.5" viewBox="0 0 10 10" fill="none">
                 <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </span>
-            <span class="fs-sub" style="color: #666666;">조후와 궁성 보정값 적용</span>
+            <span class="fs-sub" style="color: var(--text-secondary);">조후와 궁성 보정값 적용</span>
           </label>
         </div>
 
         <!-- 가중치 안내 (펼침) -->
-        <div v-if="applyJohu" class="flex flex-wrap gap-x-3 gap-y-1 px-1" style="font-size: 11px; color: #aaaaaa;">
+        <div v-if="applyJohu" class="flex flex-wrap gap-x-3 gap-y-1 px-1" style="font-size: 11px; color: var(--text-muted);">
           <span>월지 ×2.0</span>
           <span>일간 ×1.5</span>
           <span>연·월간·일지 ×1.0</span>
@@ -288,14 +288,14 @@ const currentYear = new Date().getFullYear()
               <div class="flex flex-wrap gap-2">
                 <span
                   class="px-4 py-2 rounded-xl font-bold text-base border"
-                  style="background: #f7f4f1; border-color: #ddd7d0; color: #3a3a3a;"
+                  style="background: var(--surface-2); border-color: var(--border-default); color: var(--text-primary);"
                 >
                   {{ store.result.gyeok_guk.name }}
                 </span>
                 <span
                   v-if="store.result.gyeok_guk.basis"
                   class="px-3 py-2 rounded-xl text-sm border"
-                  style="background: #f0ece8; border-color: #e8e2db; color: #888888;"
+                  style="background: var(--surface-3); border-color: var(--border-subtle); color: var(--text-muted);"
                 >
                   {{ store.result.gyeok_guk.basis }}
                 </span>

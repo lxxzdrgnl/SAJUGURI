@@ -56,7 +56,7 @@ const chartData = computed(() => {
       backgroundColor: colors,
       borderColor: '#ffffff',
       borderWidth: 3,
-      hoverBorderColor: '#f7f4f1',
+      hoverBorderColor: '#f4f2ef',
     }],
   }
 })
@@ -69,8 +69,8 @@ const chartOptions = {
     legend: {
       position: 'bottom' as const,
       labels: {
-        color: '#666666',
-        font: { size: 13 },
+        color: '#5a5450',
+        font: { size: 13, family: 'Joseon100Years' },
         padding: 12,
         boxWidth: 12,
         boxHeight: 12,
@@ -95,7 +95,7 @@ const chartOptions = {
         <Doughnut :data="chartData" :options="chartOptions" />
       </div>
       <template #fallback>
-        <div class="h-48 flex items-center justify-center text-sm" style="color: #aaaaaa;">차트 로딩 중...</div>
+        <div class="h-48 flex items-center justify-center text-sm" style="color: var(--text-muted);">차트 로딩 중...</div>
       </template>
     </ClientOnly>
   </div>

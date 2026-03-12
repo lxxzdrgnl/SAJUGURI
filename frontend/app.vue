@@ -1,5 +1,5 @@
 <template>
-  <div style="background: #f4efea; min-height: 100vh; display: flex; flex-direction: column;">
+  <div style="background: var(--bg-base); min-height: 100vh; display: flex; flex-direction: column;">
     <NuxtRouteAnnouncer />
     <main style="flex: 1;">
       <NuxtPage />
@@ -7,7 +7,7 @@
 
     <footer class="app-footer">
       <div class="app-footer-inner">
-        <p>&copy; 2025 SajuNara. All rights reserved.</p>
+        <p>&copy; 2026 SAJUBON. All rights reserved.</p>
         <p class="app-footer-contact">
           <span>Contact:</span>
           <a href="mailto:pung4905@naver.com" class="app-footer-link">pung4905@naver.com</a>
@@ -61,7 +61,7 @@
 }
 
 .app-footer-link {
-  color: var(--text-label);
+  color: var(--text-muted);
   text-decoration: none;
   transition: color 0.2s ease;
 }
@@ -80,6 +80,6 @@
   transition: color 0.2s ease;
 }
 .app-footer-social-link:hover {
-  color: var(--text-label);
+  color: var(--text-muted);
 }
 </style>

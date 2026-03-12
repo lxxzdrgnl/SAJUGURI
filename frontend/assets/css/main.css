@@ -2,19 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Joseon100Years';
+  src: url('https://gcore.jsdelivr.net/gh/projectnoonnu/noonfonts_2206-02@1.0/ChosunCentennial.woff2') format('woff2');
+  font-weight: normal;
+  font-display: swap;
+}
+
 @layer base {
   :root {
-    --bg-base:        #f4efea;
+    --bg-base:        #f7f5f2;
     --surface-1:      #ffffff;
-    --surface-2:      #f7f4f1;
-    --surface-3:      #f0ece8;
-    --border-subtle:  #e8e2db;
-    --border-default: #ddd7d0;
-    --border-hover:   #3a3a3a;
-    --text-primary:   #1a1a1a;
-    --text-secondary: #666666;
-    --text-muted:     #aaaaaa;
-    --text-label:     #888888;
+    --surface-2:      #f4f2ef;
+    --surface-3:      #eeecea;
+    --border-subtle:  #e4e1dd;
+    --border-default: #d8d4cf;
+    --text-primary:   #1a1816;
+    --text-secondary: #5a5450;
+    --text-muted:     #a09c98;
+    --accent:         #c85c14;
+    --accent-hover:   #a84a0e;
+    --color-good:     #2a7a4f;  /* 길신 — 초록 */
+    --color-bad:      #c03030;  /* 실성 — 빨강 */
 
     /* ── 오행 색상 ── 여기만 바꾸면 전체 반영 */
     --el-목: #4a9490;  /* 청록 */
@@ -22,6 +31,10 @@
     --el-토: #8b5e30;  /* 갈색 */
     --el-금: #b89020;  /* 황금색 */
     --el-수: #3858b0;  /* 남색/인디고 */
+
+    /* ── 폰트 ── 여기만 바꾸면 전체 반영 */
+    --font-main:  'Joseon100Years', 'Noto Sans KR', sans-serif;
+    --font-ganji: 'Joseon100Years', 'Noto Serif KR', serif;
 
     /* ── 글씨 크기 ── 여기만 바꾸면 전체 반영 */
     --fs-tiny:        11px;    /* 달력 내부 극소 텍스트 (절기·음력 등) */
@@ -37,7 +50,7 @@
   body {
     background-color: var(--bg-base);
     color: var(--text-primary);
-    font-family: 'Noto Sans KR', sans-serif;
+    font-family: var(--font-main);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -47,7 +60,7 @@
 
   /* ── Buttons ── */
   .btn-primary {
-    background: #3a3a3a;
+    background: var(--accent);
     color: white;
     border-radius: 10px;
     padding: 12px 24px;
@@ -61,23 +74,23 @@
     text-align: center;
   }
   .btn-primary:hover {
-    background: #1a1a1a;
+    background: var(--accent-hover);
   }
   .btn-primary:active {
-    background: #111111;
+    background: color-mix(in srgb, var(--accent-hover) 80%, black);
   }
 
   /* ── Cards ── */
   .card {
-    background: #ffffff;
-    border: 1px solid #e8e2db;
+    background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
     border-radius: 12px;
     padding: 20px;
   }
 
   .card-elevated {
-    background: #f7f4f1;
-    border: 1px solid #e8e2db;
+    background: var(--surface-2);
+    border: 1px solid var(--border-subtle);
     border-radius: 12px;
     padding: 20px;
   }
@@ -85,29 +98,29 @@
   /* ── Section labels ── */
   .label-section {
     font-size: var(--fs-section);
-    color: var(--text-secondary);
+    color: var(--text-primary);
     letter-spacing: 0.05em;
     font-weight: 700;
   }
 
   /* ── 간지 typography ── */
   .ganji {
-    font-family: 'Noto Serif KR', Georgia, serif;
+    font-family: var(--font-ganji);
     letter-spacing: 0.02em;
   }
 
   .ganji-lg {
     font-size: 2.2rem;
-    font-family: 'Noto Serif KR', Georgia, serif;
+    font-family: var(--font-ganji);
     font-weight: 700;
     letter-spacing: 0.02em;
     line-height: 1;
   }
 
   .ganji-dim {
-    font-family: 'Noto Serif KR', Georgia, serif;
+    font-family: var(--font-ganji);
     letter-spacing: 0.02em;
-    color: #aaaaaa;
+    color: var(--text-muted);
   }
 
   /* ── 오행 colors ── --el-* 변수에서 자동 참조 */
@@ -124,15 +137,15 @@
   .element-bg-수 { background-color: color-mix(in srgb, var(--el-수) 8%, transparent); border-color: color-mix(in srgb, var(--el-수) 30%, transparent); }
 
   /* ── 음양 colors ── */
-  .yang { color: #d43f3f; }
-  .yin  { color: #2878c8; }
+  .yang { color: var(--el-화); }
+  .yin  { color: var(--el-수); }
 
   /* ── Input underline style ── */
   .input-underline {
     background: transparent;
     border: none;
-    border-bottom: 1px solid #ddd7d0;
-    color: #1a1a1a;
+    border-bottom: 1px solid var(--border-default);
+    color: var(--text-primary);
     padding: 8px 0;
     width: 100%;
     outline: none;
@@ -140,10 +153,10 @@
     transition: border-bottom-color 0.2s ease;
   }
   .input-underline:focus {
-    border-bottom-color: #3a3a3a;
+    border-bottom-color: var(--text-primary);
   }
   .input-underline::placeholder {
-    color: #aaaaaa;
+    color: var(--text-muted);
   }
 
   /* ── 날짜 분리 입력 세그먼트 ── */
@@ -152,15 +165,20 @@
     border: none;
     outline: none;
     padding: 4px 0;
-    font-size: 22px;
-    color: #1a1a1a;
+    font-size: 18px;
+    color: var(--text-primary);
     text-align: center;
     transition: border-bottom-color 0.2s ease;
     min-width: 0;
   }
   .date-seg:focus { outline: none; }
-  .date-seg::placeholder { color: #cccccc; font-size: 15px; }
-  .date-sep { font-size: 13px; color: #cccccc; padding: 0 2px; }
+  .date-seg::placeholder { color: var(--text-muted); font-size: 15px; }
+  .date-sep { font-size: 13px; color: var(--text-muted); padding: 0 2px; }
+
+  @media (max-width: 400px) {
+    .date-seg { font-size: 18px; }
+    .date-seg::placeholder { font-size: 13px; }
+  }
 
   /* ── 도시 검색 ── */
   .city-input {
@@ -170,15 +188,15 @@
     width: 100%;
     padding: 6px 0;
     font-size: 14px;
-    color: #1a1a1a;
+    color: var(--text-primary);
   }
-  .city-input::placeholder { color: #bbbbbb; }
+  .city-input::placeholder { color: var(--text-muted); }
   .city-dropdown {
     position: absolute;
     top: calc(100% + 4px);
     left: 0; right: 0;
-    background: #ffffff;
-    border: 1px solid #e8e2db;
+    background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
     border-radius: 10px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.08);
     z-index: 50;
@@ -192,30 +210,30 @@
     cursor: pointer;
     transition: background 0.12s;
   }
-  .city-item:hover { background: #f7f4f1; }
-  .city-item-label { font-size: 14px; color: #1a1a1a; }
-  .city-item-sub   { font-size: 12px; color: #aaaaaa; }
+  .city-item:hover { background: var(--surface-2); }
+  .city-item-label { font-size: 14px; color: var(--text-primary); }
+  .city-item-sub   { font-size: 12px; color: var(--text-muted); }
 
   /* ── Select underline style ── */
   .select-underline {
     background: transparent;
     border: none;
-    border-bottom: 1px solid #ddd7d0;
-    color: #1a1a1a;
+    border-bottom: 1px solid var(--border-default);
+    color: var(--text-primary);
     padding: 8px 0;
     width: 100%;
     outline: none;
     font-size: 15px;
     transition: border-bottom-color 0.2s ease;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23857f7a' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 4px center;
     padding-right: 20px;
     cursor: pointer;
   }
   .select-underline:focus {
-    border-bottom-color: #3a3a3a;
+    border-bottom-color: var(--text-primary);
   }
 
   /* ── Pill toggle button ── */
@@ -230,18 +248,18 @@
     cursor: pointer;
   }
   .pill-toggle-active {
-    background: #3a3a3a;
-    color: #ffffff;
-    border-color: #3a3a3a;
+    background: var(--accent);
+    color: var(--surface-1);
+    border-color: var(--accent);
   }
   .pill-toggle-inactive {
-    color: #888888;
+    color: var(--text-muted);
     background: transparent;
-    border-color: #e8e2db;
+    border-color: var(--border-subtle);
   }
   .pill-toggle-inactive:hover {
-    border-color: #aaaaaa;
-    color: #333333;
+    border-color: var(--text-muted);
+    color: var(--text-primary);
   }
 
   /* ── Tab pill ── */
@@ -249,20 +267,20 @@
     padding: 6px 14px;
     border-radius: 9999px;
     font-size: 13px;
-    border: 1px solid #e8e2db;
-    color: #888888;
-    background: white;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    background: var(--surface-1);
     cursor: pointer;
     transition: all 0.15s ease;
   }
   .tab-pill:hover {
-    border-color: #aaaaaa;
-    color: #333333;
+    border-color: var(--text-muted);
+    color: var(--text-primary);
   }
   .tab-pill.active {
-    background: #3a3a3a;
+    background: var(--accent);
     color: white;
-    border-color: #3a3a3a;
+    border-color: var(--accent);
   }
 
   /* ── Ten god badge ── */
@@ -270,9 +288,9 @@
     font-size: 11px;
     padding: 2px 8px;
     border-radius: 4px;
-    background: #f0ece8;
-    color: #666666;
-    border: 1px solid #e8e2db;
+    background: var(--surface-3);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
     display: inline-block;
   }
 
@@ -288,8 +306,8 @@
   /* ── Scrollbar ── */
   .scrollbar-thin::-webkit-scrollbar { height: 4px; width: 4px; }
   .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-  .scrollbar-thin::-webkit-scrollbar-thumb { background: #ddd7d0; border-radius: 2px; }
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #c8c2bb; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 2px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 }
 
 @layer utilities {

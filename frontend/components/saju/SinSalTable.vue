@@ -17,7 +17,7 @@ const neutral = computed(() => props.sinSals.filter(s => s.type === 'neutral'))
         <div class="col-hd lucky-hd">길신 (吉神)</div>
         <div v-if="lucky.length" class="sinsal-list">
           <div v-for="s in lucky" :key="s.name" class="sinsal-row">
-            <span class="dot" style="color: var(--el-목);">●</span>
+            <span class="dot" style="color: var(--color-good);">●</span>
             <span class="sname">{{ s.name }}</span>
             <span v-if="s.priority === 'high'" class="pbadge pbadge-lucky">강</span>
           </div>
@@ -29,7 +29,7 @@ const neutral = computed(() => props.sinSals.filter(s => s.type === 'neutral'))
         <div class="col-hd unlucky-hd">실성 (失星)</div>
         <div v-if="unlucky.length" class="sinsal-list">
           <div v-for="s in unlucky" :key="s.name" class="sinsal-row">
-            <span class="dot" style="color: var(--el-화);">●</span>
+            <span class="dot" style="color: var(--color-bad);">●</span>
             <span class="sname">{{ s.name }}</span>
             <span v-if="s.priority === 'high'" class="pbadge pbadge-unlucky">강</span>
           </div>
@@ -52,8 +52,8 @@ const neutral = computed(() => props.sinSals.filter(s => s.type === 'neutral'))
   gap: 10px;
 }
 .sinsal-col {
-  background: #faf8f6;
-  border: 1px solid #f0ece8;
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -64,14 +64,14 @@ const neutral = computed(() => props.sinSals.filter(s => s.type === 'neutral'))
   letter-spacing: 0.05em;
 }
 .lucky-hd {
-  background: color-mix(in srgb, var(--el-목) 8%, transparent);
-  color: var(--el-목);
-  border-bottom: 1px solid color-mix(in srgb, var(--el-목) 18%, transparent);
+  background: color-mix(in srgb, var(--color-good) 8%, transparent);
+  color: var(--color-good);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-good) 18%, transparent);
 }
 .unlucky-hd {
-  background: color-mix(in srgb, var(--el-화) 8%, transparent);
-  color: var(--el-화);
-  border-bottom: 1px solid color-mix(in srgb, var(--el-화) 18%, transparent);
+  background: color-mix(in srgb, var(--color-bad) 8%, transparent);
+  color: var(--color-bad);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-bad) 18%, transparent);
 }
 .sinsal-list { padding: 4px 0; }
 .sinsal-row {
@@ -91,17 +91,17 @@ const neutral = computed(() => props.sinSals.filter(s => s.type === 'neutral'))
   font-weight: 600;
 }
 .pbadge-lucky {
-  background: color-mix(in srgb, var(--el-목) 12%, transparent);
-  color: var(--el-목);
+  background: color-mix(in srgb, var(--color-good) 12%, transparent);
+  color: var(--color-good);
 }
 .pbadge-unlucky {
-  background: color-mix(in srgb, var(--el-화) 12%, transparent);
-  color: var(--el-화);
+  background: color-mix(in srgb, var(--color-bad) 12%, transparent);
+  color: var(--color-bad);
 }
 .empty {
   padding: 12px;
   font-size: var(--fs-label);
-  color: #cccccc;
+  color: var(--text-muted);
   text-align: center;
 }
 .neutral-row {
@@ -110,13 +110,13 @@ const neutral = computed(() => props.sinSals.filter(s => s.type === 'neutral'))
   gap: 6px;
   align-items: center;
   padding-top: 4px;
-  border-top: 1px solid #f0ece8;
+  border-top: 1px solid var(--border-subtle);
 }
 .neutral-chip {
   font-size: var(--fs-label);
-  color: #888888;
+  color: var(--text-muted);
   padding: 2px 8px;
-  background: #f0ece8;
+  background: var(--surface-3);
   border-radius: 4px;
 }
 </style>

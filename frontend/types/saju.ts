@@ -2,7 +2,7 @@
 export interface SajuCalcRequest {
   name?: string             // 이름 (표시용)
   birth_date: string        // 'YYYY-MM-DD'
-  birth_time: string        // 'HH:MM'
+  birth_time: string | null // 'HH:MM' | null (시간 모름)
   gender: 'male' | 'female'
   calendar?: 'solar' | 'lunar'
   is_leap_month?: boolean
@@ -82,7 +82,7 @@ export interface SajuCalcResponse {
   meta: {
     gender: string
     birth_date: string
-    birth_time: string
+    birth_time: string | null
     calendar: string
     time_correction_minutes: number
     applied_time: string
@@ -101,7 +101,7 @@ export interface SajuCalcResponse {
   year_pillar: Pillar
   month_pillar: Pillar
   day_pillar: Pillar
-  hour_pillar: Pillar
+  hour_pillar: Pillar | null
   wuxing_count:     Record<string, number>
   wuxing_count_hap: Record<string, number>
   wuxing_chars:     { pillar: string; type: string; element: string }[]

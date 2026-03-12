@@ -55,12 +55,12 @@ const yTicks = [0, 10, 20]
       <span v-for="d in deukList" :key="d.key" class="flex items-center gap-1">
         <span class="fs-label" style="color: var(--text-secondary);">{{ d.label }}</span>
         <svg v-if="strength[d.key]" width="18" height="18" viewBox="0 0 18 18">
-          <circle cx="9" cy="9" r="8" fill="#2878c8" fill-opacity="0.12" stroke="#2878c8" stroke-width="1.5"/>
-          <path d="M5.5 9l2.5 2.5 4-4" stroke="#2878c8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <circle cx="9" cy="9" r="8" fill="var(--color-good)" fill-opacity="0.12" stroke="var(--color-good)" stroke-width="1.5"/>
+          <path d="M5.5 9l2.5 2.5 4-4" stroke="var(--color-good)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
         </svg>
         <svg v-else width="18" height="18" viewBox="0 0 18 18">
-          <circle cx="9" cy="9" r="8" fill="#d43f3f" fill-opacity="0.10" stroke="#d43f3f" stroke-width="1.5"/>
-          <path d="M6 6l6 6M12 6l-6 6" stroke="#d43f3f" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="9" cy="9" r="8" fill="var(--color-bad)" fill-opacity="0.10" stroke="var(--color-bad)" stroke-width="1.5"/>
+          <path d="M6 6l6 6M12 6l-6 6" stroke="var(--color-bad)" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
       </span>
     </div>
@@ -78,37 +78,37 @@ const yTicks = [0, 10, 20]
       <rect
         :x="userPt.x - (plotW / 7) / 2" :y="MT"
         :width="plotW / 7" :height="plotH"
-        fill="#f0ece8" opacity="0.9"
+        fill="var(--surface-3)" opacity="0.9"
       />
       <!-- Y grid -->
       <g v-for="tick in yTicks" :key="tick">
         <line
           :x1="ML" :y1="MT + plotH - (tick / MAX_DIST) * plotH"
           :x2="SVG_W - 10" :y2="MT + plotH - (tick / MAX_DIST) * plotH"
-          stroke="#e8e2db" stroke-width="1"
+          stroke="var(--border-subtle)" stroke-width="1"
         />
         <text :x="ML - 4" :y="MT + plotH - (tick / MAX_DIST) * plotH + 4"
-          text-anchor="end" font-size="9" fill="#aaaaaa">{{ tick }}</text>
+          text-anchor="end" font-size="9" fill="var(--text-muted)">{{ tick }}</text>
       </g>
-      <text :x="ML - 4" :y="SVG_H - 2" text-anchor="end" font-size="8" fill="#aaaaaa">(만명)</text>
+      <text :x="ML - 4" :y="SVG_H - 2" text-anchor="end" font-size="8" fill="var(--text-muted)">(만명)</text>
 
       <!-- 면적 -->
-      <polygon :points="areaPolygon" fill="#e0dbd4" opacity="0.5"/>
+      <polygon :points="areaPolygon" fill="var(--accent)" opacity="0.12"/>
       <!-- 라인 -->
-      <polyline :points="polyline" fill="none" stroke="#888888" stroke-width="1.8"
+      <polyline :points="polyline" fill="none" stroke="var(--accent)" stroke-width="1.8"
         stroke-linejoin="round" stroke-linecap="round"/>
       <!-- 일반 점 -->
       <circle v-for="(pt, i) in pts" :key="i"
-        :cx="pt.x" :cy="pt.y" r="3" fill="white" stroke="#bbbbbb" stroke-width="1.2"/>
+        :cx="pt.x" :cy="pt.y" r="3" fill="white" stroke="var(--accent)" stroke-width="1.2" opacity="0.5"/>
       <!-- 유저 점 -->
-      <circle :cx="userPt.x" :cy="userPt.y" r="5" fill="#2a2a2a" stroke="white" stroke-width="1.5"/>
+      <circle :cx="userPt.x" :cy="userPt.y" r="5" fill="var(--accent)" stroke="white" stroke-width="1.5"/>
       <text :x="userPt.x" :y="userPt.y - 9"
-        text-anchor="middle" font-size="11" fill="#2a2a2a" font-weight="700">나</text>
+        text-anchor="middle" font-size="11" fill="var(--accent)" font-weight="700">나</text>
       <!-- X축 -->
       <text v-for="(label, i) in LEVELS" :key="label"
         :x="ML + (plotW / 7) * i" :y="SVG_H - 4"
         text-anchor="middle" font-size="9"
-        :fill="i === levelIdx ? '#2a2a2a' : '#aaaaaa'"
+        :fill="i === levelIdx ? 'var(--accent)' : 'var(--text-muted)'"
         :font-weight="i === levelIdx ? '700' : '400'"
       >{{ label }}</text>
     </svg>

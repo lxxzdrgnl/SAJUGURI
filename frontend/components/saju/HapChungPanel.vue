@@ -37,8 +37,9 @@ const PLABEL: Record<Pkey, string> = { year: '연', month: '월', day: '일', ho
 function pd(p: Pkey) {
   return props.saju[`${p}_pillar`] as any
 }
-function findBranch(b: string): Pkey[] { return PKEYS.filter(p => pd(p).branch === b) }
-function findStem(s: string): Pkey[]   { return PKEYS.filter(p => pd(p).stem   === s) }
+const activePkeys = computed(() => PKEYS.filter(p => pd(p) !== null))
+function findBranch(b: string): Pkey[] { return activePkeys.value.filter(p => pd(p).branch === b) }
+function findStem(s: string): Pkey[]   { return activePkeys.value.filter(p => pd(p).stem   === s) }
 
 // SAM_HYEONG 지지 목록
 const SAM_HYEONG: Record<string, string[]> = {
@@ -51,7 +52,7 @@ const SAM_HYEONG: Record<string, string[]> = {
 // ─── 탭별 데이터 유무 ───────────────────────────────────────────────────────
 function hasData(key: TabKey): boolean {
   if (key === 'gung_seong') return true
-  if (key === 'gong_mang')  return gm.value.vacant_branches.length > 0
+  if (key === 'gong_mang')  return gm.value.affected_pillars.length > 0
   const val = br.value[key]
   if (!val) return false
   if (Array.isArray(val)) return (val as any[]).length > 0
@@ -68,87 +69,86 @@ type Entry = {
   broken?: boolean     // 육합 파괴 여부
 }
 
+// ─── Factory: 공통 빌더 함수 ────────────────────────────────────────────────
+
+/** 지지 쌍 관계 빌더 — pillarDesc 추출 후 textFn에 위임 (충·파·해·원진 공용) */
+function buildPairEntries(val: any[], textFn: (pair: string[], desc: string) => string): Entry[] {
+  return val.map(v => {
+    const pair: string[] = v.pair ?? v
+    const pillars: Pkey[] = (v.pillars as string[] | undefined)?.map(p => p as Pkey)
+      ?? pair.flatMap(b => findBranch(b))
+    const desc = v.pillars ? `(${pillars.map(p => PLABEL[p] + '주').join('-')}) ` : ''
+    return { text: textFn(pair, desc), stems: [], branches: pillars }
+  })
+}
+
+/** 천간 관계 빌더 — pillars를 stems로 매핑 (천간합·천간충 공용) */
+function buildStemEntries(val: any[], textFn: (v: any) => string, extraFn: (v: any) => Partial<Entry> = () => ({})): Entry[] {
+  return val.map(v => ({
+    text: textFn(v),
+    stems: (v.pillars as string[]).map(p => p as Pkey),
+    branches: [],
+    ...extraFn(v),
+  }))
+}
+
+/** 3지지 합 빌더 — branches 전체 하이라이트 (삼합·방합 공용) */
+function buildGroupHapEntries(val: any): Entry[] {
+  return (Array.isArray(val) ? val : [val]).map(item => ({
+    text: `지지에 <b>${item.name ?? item.label ?? ''}</b>이 있어요.`,
+    stems: [],
+    branches: (item.branches ?? []).flatMap((b: string) => findBranch(b)),
+    resultEl: item.element,
+  }))
+}
+
+// ─── Registry (Strategy Pattern): TabKey → Entry 빌더 매핑 ─────────────────
+
+type EntryBuilder = (val: any) => Entry[]
+
+const ENTRY_BUILDERS: Partial<Record<TabKey, EntryBuilder>> = {
+  cheon_gan_hap:   v => buildStemEntries(v, x => `천간에 <b>${x.name ?? x.stems?.join('')}</b>이 있어요.`, x => ({ resultEl: x.result_element })),
+  cheon_gan_chung: v => buildStemEntries(v, x => `천간에 <b>${x.name}</b>이 있어요.`),
+  yuk_hap: val => (val as any[]).map(v => {
+    const pair: string[] = v.pair ?? []
+    const pillars: Pkey[] = (v.pillars as string[] | undefined)?.map(p => p as Pkey) ?? pair.flatMap(b => findBranch(b))
+    const desc = pillars.length ? `(${pillars.map(p => PLABEL[p] + '주').join('-')}) ` : ''
+    return { text: `${desc}지지에 <b>${pair.join('')}육합</b>이 있어요.`, stems: [], branches: pillars, resultEl: v.element, broken: v.is_effective === false }
+  }),
+  sam_hap:    v => buildGroupHapEntries(v),
+  bang_hap:   v => buildGroupHapEntries(v),
+  sam_hyeong: (val: string[]) => val.map(name => ({
+    text: `지지에 <b>${name}</b>이 있어요.`,
+    stems: [],
+    branches: (SAM_HYEONG[name] ?? []).flatMap(b => findBranch(b)),
+  })),
+  chung:   v => buildPairEntries(v, (p, d) => `${d}지지에 <b>${p.join('충')}</b>이 있어요.`),
+  yuk_hae: v => buildPairEntries(v, (p, d) => `${d}지지에 <b>${p.join('·')}해</b>가 있어요.`),
+  pa:      v => buildPairEntries(v, (p, d) => `${d}지지에 <b>${p.join('·')}파</b>가 있어요.`),
+  won_jin: v => buildPairEntries(v, (p, d) => `${d}지지에 <b>${p.join('·')}원진</b>이 있어요.`),
+}
+
+// ─── entries computed ────────────────────────────────────────────────────────
+
 const entries = computed<Entry[]>(() => {
   const key = activeTab.value
-
   if (key === 'gung_seong') return []
 
   if (key === 'gong_mang') {
-    const vacant = gm.value.vacant_branches
-    const highlightBr = vacant.flatMap(b => findBranch(b))
-    return [{
-      text: `공망 지지: <b>${vacant.join(', ')}</b>`,
-      stems: [],
-      branches: highlightBr,
-    }]
+    const vacant = gm.value.vacant_branches as string[]
+    return (gm.value.affected_pillars as string[]).map(p => {
+      const pkey = p as Pkey
+      return {
+        text: `<b>${PLABEL[pkey]}주 지지 ${pd(pkey)?.branch}</b>가 공망이에요. (공망 지지: ${vacant.join(', ')})`,
+        stems: [],
+        branches: [pkey],
+      }
+    })
   }
 
   const val = br.value[key]
   if (!val) return []
-
-  if (key === 'cheon_gan_hap' && Array.isArray(val)) {
-    return (val as any[]).map(v => ({
-      text: `천간에 <b>${v.name ?? v.stems?.join('')}</b>이 있어요.`,
-      stems: (v.pillars as string[]).map(p => p as Pkey),
-      branches: [],
-      resultEl: v.result_element,
-    }))
-  }
-
-  if (key === 'yuk_hap' && Array.isArray(val)) {
-    return (val as any[]).map(v => {
-      const pair: string[] = v.pair ?? []
-      return {
-        text: `지지에 <b>${pair.join('')}육합</b>이 있어요.`,
-        stems: [],
-        branches: pair.flatMap(b => findBranch(b)),
-        resultEl: v.element,
-        broken: v.is_effective === false,
-      }
-    })
-  }
-
-  if (key === 'sam_hap') {
-    const items = Array.isArray(val) ? val : [val]
-    return (items as any[]).map(item => ({
-      text: `지지에 <b>${item.name ?? item.label ?? ''}</b>이 있어요.`,
-      stems: [],
-      branches: (item.branches ?? []).flatMap((b: string) => findBranch(b)),
-      resultEl: item.element,
-    }))
-  }
-
-  if (key === 'chung' && Array.isArray(val)) {
-    return (val as any[]).map(pair => {
-      const branches: string[] = Array.isArray(pair) ? pair : [pair]
-      return {
-        text: `지지에 <b>${branches.join('충')}</b>이 있어요.`,
-        stems: [],
-        branches: branches.flatMap(b => findBranch(b)),
-      }
-    })
-  }
-
-  if (key === 'sam_hyeong' && Array.isArray(val)) {
-    return (val as string[]).map(name => ({
-      text: `지지에 <b>${name}</b>이 있어요.`,
-      stems: [],
-      branches: (SAM_HYEONG[name] ?? []).flatMap(b => findBranch(b)),
-    }))
-  }
-
-  if (key === 'yuk_hae' && Array.isArray(val)) {
-    return (val as any[]).map(pair => {
-      const branches: string[] = Array.isArray(pair) ? pair : [pair]
-      return {
-        text: `지지에 <b>${branches.join('·')}해</b>가 있어요.`,
-        stems: [],
-        branches: branches.flatMap(b => findBranch(b)),
-      }
-    })
-  }
-
-  return []
+  return ENTRY_BUILDERS[key]?.(val) ?? []
 })
 
 // ─── 궁성 가중치 표시 ──────────────────────────────────────────────────────
@@ -187,21 +187,21 @@ const PALACE_INFO = [
       <template v-if="activeTab === 'gung_seong'">
         <p class="gung-desc">
           궁성의 위치에 따라 오행의 비율을 다르게 적용합니다.<br>
-          <span style="color: #aaaaaa;">월지 &gt; 일간 &gt; 시지/연주 &gt; 천간 순서로 작용력이 다릅니다.</span>
+          <span style="color: var(--text-muted);">월지 &gt; 일간 &gt; 시지/연주 &gt; 천간 순서로 작용력이 다릅니다.</span>
         </p>
 
         <!-- 기둥 가중치 그리드 -->
         <div class="pillar-grid">
           <div v-for="info in PALACE_INFO" :key="info.pkey" class="pillar-col">
             <div class="pillar-label-top">{{ PLABEL[info.pkey] }}주</div>
-            <div class="pillar-box pillar-box-stem">
-              <span class="pbox-main">{{ pd(info.pkey).stem }}</span>
-              <span class="pbox-hanja">{{ pd(info.pkey).stem_hanja }}</span>
+            <div class="pillar-box pillar-box-stem" :class="pd(info.pkey) ? '' : 'box-null'">
+              <span class="pbox-main">{{ pd(info.pkey)?.stem ?? '—' }}</span>
+              <span class="pbox-hanja">{{ pd(info.pkey)?.stem_hanja ?? '' }}</span>
               <span class="pbox-weight">{{ info.stemW }}</span>
             </div>
-            <div class="pillar-box pillar-box-branch">
-              <span class="pbox-main">{{ pd(info.pkey).branch }}</span>
-              <span class="pbox-hanja">{{ pd(info.pkey).branch_hanja }}</span>
+            <div class="pillar-box pillar-box-branch" :class="pd(info.pkey) ? '' : 'box-null'">
+              <span class="pbox-main">{{ pd(info.pkey)?.branch ?? '—' }}</span>
+              <span class="pbox-hanja">{{ pd(info.pkey)?.branch_hanja ?? '' }}</span>
               <span class="pbox-weight" :class="info.pkey === 'month' ? 'weight-strong' : ''">{{ info.branchW }}</span>
             </div>
           </div>
@@ -232,23 +232,23 @@ const PALACE_INFO = [
 
             <!-- 미니 기둥 그리드 -->
             <div class="pillar-grid">
-              <div v-for="pkey in (['hour','day','month','year'] as const)" :key="pkey" class="pillar-col">
+              <div v-for="pkey in activePkeys" :key="pkey" class="pillar-col">
                 <div class="pillar-label-top">{{ PLABEL[pkey] }}주</div>
                 <!-- 천간 박스 -->
                 <div
                   class="pillar-box pillar-box-stem"
                   :class="entry.stems.includes(pkey) ? 'box-highlight' : 'box-normal'"
                 >
-                  <span class="pbox-main">{{ pd(pkey).stem }}</span>
-                  <span class="pbox-hanja">{{ pd(pkey).stem_hanja }}</span>
+                  <span class="pbox-main">{{ pd(pkey)?.stem ?? '—' }}</span>
+                  <span class="pbox-hanja">{{ pd(pkey)?.stem_hanja ?? '' }}</span>
                 </div>
                 <!-- 지지 박스 -->
                 <div
                   class="pillar-box pillar-box-branch"
                   :class="entry.branches.includes(pkey) ? 'box-highlight' : 'box-normal'"
                 >
-                  <span class="pbox-main">{{ pd(pkey).branch }}</span>
-                  <span class="pbox-hanja">{{ pd(pkey).branch_hanja }}</span>
+                  <span class="pbox-main">{{ pd(pkey)?.branch ?? '—' }}</span>
+                  <span class="pbox-hanja">{{ pd(pkey)?.branch_hanja ?? '' }}</span>
                 </div>
               </div>
             </div>
@@ -262,8 +262,8 @@ const PALACE_INFO = [
 <style scoped>
 /* ── 패널 래퍼 ── */
 .hap-panel {
-  background: #ffffff;
-  border: 1px solid #e8e2db;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -274,8 +274,8 @@ const PALACE_INFO = [
   flex-wrap: wrap;
   gap: 6px;
   padding: 14px 14px 10px;
-  border-bottom: 1px solid #f0ece8;
-  background: #faf8f6;
+  border-bottom: 1px solid var(--surface-3);
+  background: var(--surface-2);
 }
 
 .tab-btn {
@@ -290,21 +290,31 @@ const PALACE_INFO = [
 }
 
 .tab-active {
-  background: var(--text-primary);
-  color: #ffffff;
-  border-color: var(--text-primary);
+  background: var(--accent);
+  color: var(--surface-1);
+  border-color: var(--accent);
 }
 
 .tab-has-data {
-  background: #ffffff;
-  color: var(--text-primary);
-  border-color: #d0cac4;
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface-1));
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.tab-has-data:hover {
+  background: color-mix(in srgb, var(--accent) 15%, var(--surface-1));
+  border-color: var(--accent);
 }
 
 .tab-no-data {
   background: transparent;
   color: var(--text-muted);
-  border-color: #ece8e4;
+  border-color: var(--border-subtle);
+}
+
+.tab-no-data:hover {
+  color: var(--text-muted);
+  border-color: var(--border-default);
 }
 
 /* ── 본문 ── */
@@ -361,7 +371,7 @@ const PALACE_INFO = [
 /* ── 기둥 그리드 ── */
 .pillar-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(52px, 1fr));
   gap: 6px;
 }
 
@@ -396,21 +406,28 @@ const PALACE_INFO = [
 
 /* 일반 (비하이라이트) */
 .box-normal {
-  background: #ffffff;
-  border-color: #e8e2db;
+  background: var(--surface-1);
+  border-color: var(--border-subtle);
 }
 
-/* 하이라이트 — 토(土) 황금빛 계열 */
+/* 시주 미입력 */
+.box-null {
+  background: var(--surface-2);
+  border-color: var(--border-subtle);
+  opacity: 0.5;
+}
+
+/* 하이라이트 — 브랜드 액센트 */
 .box-highlight {
-  background: color-mix(in srgb, var(--el-금) 85%, white);
-  border-color: var(--el-금);
+  background: color-mix(in srgb, var(--accent) 85%, white);
+  border-color: var(--accent);
 }
 .box-highlight .pbox-main  { color: #ffffff; }
 .box-highlight .pbox-hanja { color: color-mix(in srgb, #ffffff 70%, transparent); }
 
 /* 기둥 박스 내부 텍스트 */
 .pbox-main {
-  font-family: 'Noto Serif KR', Georgia, serif;
+  font-family: var(--font-ganji);
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--text-primary);
@@ -418,7 +435,7 @@ const PALACE_INFO = [
 }
 
 .pbox-hanja {
-  font-family: 'Noto Serif KR', Georgia, serif;
+  font-family: var(--font-ganji);
   font-size: 0.7rem;
   font-weight: 600;
   color: var(--text-muted);

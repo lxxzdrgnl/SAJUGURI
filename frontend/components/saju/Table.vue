@@ -3,16 +3,16 @@ import type { SajuCalcResponse, SinSal } from '~/types/saju'
 
 const props = defineProps<{ data: SajuCalcResponse }>()
 
-// 시주 → 일주 → 월주 → 연주 (좌→우)
+// 시주 → 일주 → 월주 → 연주 (좌→우). 시주 null이면 "—" 표시
 const pillars = [
-  { key: 'hour_pillar'  as const, label: '시주', colLabel: '생시' },
-  { key: 'day_pillar'   as const, label: '일주', colLabel: '생일' },
-  { key: 'month_pillar' as const, label: '월주', colLabel: '생월' },
-  { key: 'year_pillar'  as const, label: '연주', colLabel: '생년' },
+  { key: 'hour_pillar'  as const, label: '시주', colLabel: '생시', loc: 'hour' },
+  { key: 'day_pillar'   as const, label: '일주', colLabel: '생일', loc: 'day'  },
+  { key: 'month_pillar' as const, label: '월주', colLabel: '생월', loc: 'month' },
+  { key: 'year_pillar'  as const, label: '연주', colLabel: '생년', loc: 'year'  },
 ]
 
-const jijangganKeys = ['hour', 'day', 'month', 'year']
-const pillarLocKeys = ['hour', 'day', 'month', 'year']
+const jijangganKeys = pillars.map(p => p.loc)
+const pillarLocKeys = pillars.map(p => p.loc)
 
 function ec(el: string) { return elColor(el) }
 
@@ -34,10 +34,10 @@ function pillarSinSals(pillarIdx: number): SinSal[] {
   )
 }
 
-function sinSalColor(type: string) {
-  if (type === 'lucky')                        return `color: var(--el-목);`
-  if (type === 'unlucky' || type === 'warning') return `color: var(--el-화);`
-  return `color: var(--text-secondary);`
+function sinSalSignColor(type: string) {
+  if (type === 'lucky')                        return `color: var(--color-good);`
+  if (type === 'unlucky' || type === 'warning') return `color: var(--color-bad);`
+  return `color: var(--text-muted);`
 }
 </script>
 
@@ -57,7 +57,7 @@ function sinSalColor(type: string) {
               <th class="cell-label"></th>
               <th v-for="(p, i) in pillars" :key="p.key"
                   class="cell-head" :class="{ 'day-col': isDay(i) }">
-                <span :style="isDay(i) ? `color: ${ec('화')};` : 'color: #bbbbbb;'">
+                <span :style="isDay(i) ? `color: ${ec('화')};` : 'color: var(--text-muted);'">
                   {{ p.colLabel }}
                 </span>
               </th>
@@ -70,19 +70,20 @@ function sinSalColor(type: string) {
               <td class="cell-label row-label">천간</td>
               <td v-for="(p, i) in pillars" :key="p.key + '-stem'"
                   class="cell-data cell-ganji" :class="{ 'day-col': isDay(i) }">
-                <div class="ganji-wrap">
+                <div v-if="data[p.key]" class="ganji-wrap">
                   <div class="ganji-pair">
-                    <span class="ganji-main" :style="`color: ${ec(data[p.key].stem_element)};`">
-                      {{ data[p.key].stem }}
+                    <span class="ganji-main" :style="`color: ${ec(data[p.key]!.stem_element)};`">
+                      {{ data[p.key]!.stem }}
                     </span>
-                    <span class="ganji-hanja" :style="`color: ${ec(data[p.key].stem_element)};`">
-                      {{ data[p.key].stem_hanja }}
+                    <span class="ganji-hanja" :style="`color: ${ec(data[p.key]!.stem_element)};`">
+                      {{ data[p.key]!.stem_hanja }}
                     </span>
                   </div>
-                  <span class="el-sign" :style="`color: ${ec(data[p.key].stem_element)};`">
-                    {{ sign(data[p.key]) }}{{ data[p.key].stem_element }}
+                  <span class="el-sign" :style="`color: ${ec(data[p.key]!.stem_element)};`">
+                    {{ sign(data[p.key]!) }}{{ data[p.key]!.stem_element }}
                   </span>
                 </div>
+                <span v-else class="null-dash">—</span>
               </td>
             </tr>
 
@@ -91,11 +92,11 @@ function sinSalColor(type: string) {
               <td class="cell-label row-label">십성</td>
               <td v-for="(p, i) in pillars" :key="p.key + '-stem-tg'"
                   class="cell-data cell-sm" :class="{ 'day-col': isDay(i) }">
-                <span v-if="data[p.key].stem_ten_god" class="font-medium"
-                      :style="`color: ${tenGodColor(data[p.key].stem_ten_god)};`">
-                  {{ data[p.key].stem_ten_god }}
+                <span v-if="data[p.key]?.stem_ten_god" class="font-medium"
+                      :style="`color: ${tenGodColor(data[p.key]!.stem_ten_god)};`">
+                  {{ data[p.key]!.stem_ten_god }}
                 </span>
-                <span v-else style="color: #e0e0e0;">—</span>
+                <span v-else style="color: var(--border-subtle);">—</span>
               </td>
             </tr>
 
@@ -104,19 +105,20 @@ function sinSalColor(type: string) {
               <td class="cell-label row-label">지지</td>
               <td v-for="(p, i) in pillars" :key="p.key + '-branch'"
                   class="cell-data cell-ganji" :class="{ 'day-col': isDay(i) }">
-                <div class="ganji-wrap">
+                <div v-if="data[p.key]" class="ganji-wrap">
                   <div class="ganji-pair">
-                    <span class="ganji-main" :style="`color: ${ec(data[p.key].branch_element)};`">
-                      {{ data[p.key].branch }}
+                    <span class="ganji-main" :style="`color: ${ec(data[p.key]!.branch_element)};`">
+                      {{ data[p.key]!.branch }}
                     </span>
-                    <span class="ganji-hanja" :style="`color: ${ec(data[p.key].branch_element)};`">
-                      {{ data[p.key].branch_hanja }}
+                    <span class="ganji-hanja" :style="`color: ${ec(data[p.key]!.branch_element)};`">
+                      {{ data[p.key]!.branch_hanja }}
                     </span>
                   </div>
-                  <span class="el-sign" :style="`color: ${ec(data[p.key].branch_element)};`">
-                    {{ sign(data[p.key]) }}{{ data[p.key].branch_element }}
+                  <span class="el-sign" :style="`color: ${ec(data[p.key]!.branch_element)};`">
+                    {{ sign(data[p.key]!) }}{{ data[p.key]!.branch_element }}
                   </span>
                 </div>
+                <span v-else class="null-dash">—</span>
               </td>
             </tr>
 
@@ -125,11 +127,11 @@ function sinSalColor(type: string) {
               <td class="cell-label row-label">십성</td>
               <td v-for="(p, i) in pillars" :key="p.key + '-branch-tg'"
                   class="cell-data cell-sm" :class="{ 'day-col': isDay(i) }">
-                <span v-if="data[p.key].branch_ten_god" class="font-medium"
-                      :style="`color: ${tenGodColor(data[p.key].branch_ten_god)};`">
-                  {{ data[p.key].branch_ten_god }}
+                <span v-if="data[p.key]?.branch_ten_god" class="font-medium"
+                      :style="`color: ${tenGodColor(data[p.key]!.branch_ten_god)};`">
+                  {{ data[p.key]!.branch_ten_god }}
                 </span>
-                <span v-else style="color: #e0e0e0;">—</span>
+                <span v-else style="color: var(--border-subtle);">—</span>
               </td>
             </tr>
 
@@ -138,9 +140,10 @@ function sinSalColor(type: string) {
               <td class="cell-label row-label">지장간</td>
               <td v-for="(p, i) in pillars" :key="p.key + '-jjg'"
                   class="cell-data cell-sm" :class="{ 'day-col': isDay(i) }">
-                <span style="color: #888888; letter-spacing: 0.05em;">
+                <span v-if="data[p.key]" style="color: var(--text-muted); letter-spacing: 0.05em;">
                   {{ (data.ji_jang_gan?.[jijangganKeys[i]] ?? []).join('') }}
                 </span>
+                <span v-else style="color: var(--border-subtle);">—</span>
               </td>
             </tr>
 
@@ -149,9 +152,10 @@ function sinSalColor(type: string) {
               <td class="cell-label row-label">12운성</td>
               <td v-for="(p, i) in pillars" :key="p.key + '-wun'"
                   class="cell-data cell-sm" :class="{ 'day-col': isDay(i) }">
-                <span class="font-medium" style="color: var(--el-목);">
-                  {{ data[p.key].twelve_wun }}
+                <span v-if="data[p.key]" class="font-medium" style="color: var(--el-목);">
+                  {{ data[p.key]!.twelve_wun }}
                 </span>
+                <span v-else style="color: var(--border-subtle);">—</span>
               </td>
             </tr>
 
@@ -160,13 +164,12 @@ function sinSalColor(type: string) {
               <td class="cell-label row-label">신살</td>
               <td v-for="(p, i) in pillars" :key="p.key + '-sal'"
                   class="cell-data cell-sal" :class="{ 'day-col': isDay(i) }">
-                <template v-if="pillarSinSals(i).length">
-                  <div v-for="s in pillarSinSals(i)" :key="s.name"
-                       class="sal-item" :style="sinSalColor(s.type)">
-                    {{ s.name }}
+                <template v-if="data[p.key] && pillarSinSals(i).length">
+                  <div v-for="s in pillarSinSals(i)" :key="s.name" class="sal-item">
+                    <span class="sal-sign" :style="sinSalSignColor(s.type)">{{ s.type === 'lucky' ? '＋' : s.type === 'unlucky' || s.type === 'warning' ? '－' : '･' }}</span><span style="color: var(--text-secondary);">{{ s.name }}</span>
                   </div>
                 </template>
-                <span v-else style="color: #e0e0e0;">—</span>
+                <span v-else style="color: var(--border-subtle);">—</span>
               </td>
             </tr>
           </tbody>
@@ -178,7 +181,7 @@ function sinSalColor(type: string) {
     <div class="pillar-footer">
       <div class="col-label-spacer"></div>
       <div v-for="(p, i) in pillars" :key="p.key + '-footer'" class="pillar-label">
-        <span :style="isDay(i) ? `color: ${ec('화')};` : 'color: #aaaaaa;'">
+        <span :style="isDay(i) ? `color: ${ec('화')};` : 'color: var(--text-muted);'">
           {{ p.label }}
         </span>
       </div>
@@ -198,8 +201,8 @@ function sinSalColor(type: string) {
 
 /* ── 블록 카드 ── */
 .table-block {
-  background: #ffffff;
-  border: 1px solid #e8e2db;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -218,12 +221,12 @@ col.col-label { width: 3.2rem; }
 
 /* ── 셀 공통 ── */
 .cell-label {
-  background: #faf8f6;
-  border-right: 1px solid #f0ece8;
+  background: var(--surface-2);
+  border-right: 1px solid var(--surface-3);
 }
 .row-label {
   font-size: var(--fs-label);
-  color: #cccccc;
+  color: var(--text-muted);
   font-weight: 500;
   letter-spacing: 0.1em;
   padding: 8px 4px;
@@ -237,15 +240,15 @@ col.col-label { width: 3.2rem; }
   padding: 6px 4px;
 }
 .day-col {
-  background: #fff8f8;
+  background: color-mix(in srgb, var(--el-화) 3%, var(--surface-1));
 }
 
 /* ── 헤더 행 ── */
 .header-row {
-  border-bottom: 1px solid #e8e2db;
+  border-bottom: 1px solid var(--border-subtle);
 }
 .header-row .cell-label {
-  border-bottom: 1px solid #e8e2db;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 /* ── 간지 셀 ── */
@@ -266,14 +269,14 @@ col.col-label { width: 3.2rem; }
   gap: 2px;
 }
 .ganji-main {
-  font-family: 'Noto Serif KR', Georgia, serif;
+  font-family: var(--font-ganji);
   font-size: var(--fs-ganji);
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.01em;
 }
 .ganji-hanja {
-  font-family: 'Noto Serif KR', Georgia, serif;
+  font-family: var(--font-ganji);
   font-size: var(--fs-ganji-hanja);
   font-weight: 700;
   line-height: 1;
@@ -287,22 +290,40 @@ col.col-label { width: 3.2rem; }
   margin-top: 2px;
 }
 
+/* ── 시주 미입력 대시 ── */
+.null-dash {
+  font-size: var(--fs-ganji-hanja);
+  color: var(--text-muted);
+  display: block;
+  padding: 14px 0;
+}
+
 /* ── 작은 텍스트 셀 ── */
 .cell-sm {
   font-size: var(--fs-label);
   padding: 8px 4px;
-  border-top: 1px solid #f0ece8;
+  border-top: 1px solid var(--surface-3);
 }
 
 /* ── 신살 셀 ── */
 .cell-sal {
   padding: 10px 4px;
-  border-top: 1px solid #f0ece8;
+  border-top: 1px solid var(--surface-3);
 }
 .sal-item {
   font-size: var(--fs-label);
   font-weight: 500;
   line-height: 1.7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+.sal-sign {
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.85;
+  flex-shrink: 0;
 }
 
 /* ── 푸터 ── */

@@ -13,7 +13,7 @@ export default defineNuxtConfig({
       theme: {
         extend: {
           fontFamily: {
-            serif: ['Noto Serif KR', 'Georgia', 'serif'],
+            serif: ['Joseon100Years', 'Noto Serif KR', 'Georgia', 'serif'],
           },
         },
       },
@@ -22,7 +22,13 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      title: '사주구리',
       link: [
+        {
+          rel: 'icon',
+          type: 'image/svg+xml',
+          href: '/favicon.svg',
+        },
         {
           rel: 'preconnect',
           href: 'https://fonts.googleapis.com',
@@ -34,7 +40,7 @@ export default defineNuxtConfig({
         },
         {
           rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;600&display=swap',
+          href: 'https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&display=swap',
         },
       ],
     },

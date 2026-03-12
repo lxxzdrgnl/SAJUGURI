@@ -102,8 +102,8 @@ function isSaturday(idx: number) {
       <div class="flex items-center gap-3">
         <button
           class="p-1.5 rounded-lg transition-colors"
-          style="color: #888888;"
-          @mouseenter="($event.target as HTMLElement).style.background = '#f0ece8'"
+          style="color: var(--text-muted);"
+          @mouseenter="($event.target as HTMLElement).style.background = 'var(--surface-3)'"
           @mouseleave="($event.target as HTMLElement).style.background = 'transparent'"
           @click="prevMonth"
         >
@@ -111,13 +111,13 @@ function isSaturday(idx: number) {
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
           </svg>
         </button>
-        <span class="fs-body font-medium min-w-[80px] text-center" style="color: #1a1a1a;">
+        <span class="fs-body font-medium min-w-[80px] text-center" style="color: var(--text-primary);">
           {{ year }}년 {{ monthNames[month - 1] }}
         </span>
         <button
           class="p-1.5 rounded-lg transition-colors"
-          style="color: #888888;"
-          @mouseenter="($event.target as HTMLElement).style.background = '#f0ece8'"
+          style="color: var(--text-muted);"
+          @mouseenter="($event.target as HTMLElement).style.background = 'var(--surface-3)'"
           @mouseleave="($event.target as HTMLElement).style.background = 'transparent'"
           @click="nextMonth"
         >
@@ -129,7 +129,7 @@ function isSaturday(idx: number) {
     </div>
 
     <!-- 로딩 -->
-    <div v-if="pending" class="flex items-center justify-center gap-2 text-sm py-8" style="color: #aaaaaa;">
+    <div v-if="pending" class="flex items-center justify-center gap-2 text-sm py-8" style="color: var(--text-muted);">
       <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
@@ -138,7 +138,7 @@ function isSaturday(idx: number) {
     </div>
 
     <!-- 에러 -->
-    <div v-else-if="fetchError" class="text-sm text-center py-4" style="color: #d43f3f;">
+    <div v-else-if="fetchError" class="text-sm text-center py-4" style="color: var(--color-bad);">
       {{ fetchError }}
     </div>
 
@@ -150,7 +150,7 @@ function isSaturday(idx: number) {
           v-for="(wd, i) in weekdays"
           :key="wd"
           class="text-center fs-sub font-medium py-2"
-          :style="i === 0 ? `color: var(--el-화);` : i === 6 ? `color: var(--el-수);` : 'color: #aaaaaa;'"
+          :style="i === 0 ? `color: var(--el-화);` : i === 6 ? `color: var(--el-수);` : 'color: var(--text-muted);'"
         >
           {{ wd }}
         </div>
@@ -164,7 +164,7 @@ function isSaturday(idx: number) {
           class="relative min-h-[80px] rounded-lg p-1.5 transition-all"
           :style="[
             cell.date ? 'cursor: default;' : '',
-            isToday(cell.date) ? 'box-shadow: 0 0 0 2px #3a3a3a; background: #f7f4f1;' : '',
+            isToday(cell.date) ? 'box-shadow: 0 0 0 2px var(--text-primary); background: var(--surface-2);' : '',
             !isToday(cell.date) && cell.entry?.solar_term ? 'background: rgba(166,124,82,0.06);' : '',
             !isToday(cell.date) && cell.date && !cell.entry?.solar_term ? '' : '',
           ].filter(Boolean).join(' ')"
@@ -174,10 +174,10 @@ function isSaturday(idx: number) {
             <div
               class="fs-sub font-medium mb-0.5"
               :style="[
-                isToday(cell.date) ? 'color: #3a3a3a; font-weight: 700;' : '',
-                !isToday(cell.date) && isSunday(idx) ? 'color: #d43f3f;' : '',
-                !isToday(cell.date) && isSaturday(idx) ? 'color: #2878c8;' : '',
-                !isToday(cell.date) && !isSunday(idx) && !isSaturday(idx) ? 'color: #1a1a1a;' : '',
+                isToday(cell.date) ? 'color: var(--text-primary); font-weight: 700;' : '',
+                !isToday(cell.date) && isSunday(idx) ? 'color: var(--el-화);' : '',
+                !isToday(cell.date) && isSaturday(idx) ? 'color: var(--el-수);' : '',
+                !isToday(cell.date) && !isSunday(idx) && !isSaturday(idx) ? 'color: var(--text-primary);' : '',
               ].filter(Boolean).join(' ')"
             >
               {{ cell.day }}
@@ -187,7 +187,7 @@ function isSaturday(idx: number) {
             <div
               v-if="cell.entry?.solar_term"
               class="fs-label font-medium leading-tight mb-0.5"
-              style="color: #a67c52;"
+              style="color: var(--el-토);"
             >
               {{ cell.entry.solar_term }}
             </div>
@@ -196,7 +196,7 @@ function isSaturday(idx: number) {
             <div
               v-if="cell.entry"
               class="fs-label leading-tight font-medium"
-              style="color: #666666;"
+              style="color: var(--text-secondary);"
             >
               {{ cell.entry.ganji_name }}
             </div>
@@ -205,7 +205,7 @@ function isSaturday(idx: number) {
             <div
               v-if="cell.entry"
               class="fs-label leading-tight mt-0.5"
-              :style="cell.entry.is_leap_month ? 'color: #2878c8;' : 'color: #aaaaaa;'"
+              :style="cell.entry.is_leap_month ? 'color: var(--el-수);' : 'color: var(--text-muted);'"
             >
               {{ cell.entry.is_leap_month ? '(윤)' : '' }}{{ cell.entry.lunar_month }}/{{ cell.entry.lunar_day }}
             </div>
@@ -214,11 +214,11 @@ function isSaturday(idx: number) {
       </div>
 
       <!-- 범례 -->
-      <div class="flex flex-wrap gap-4 pt-2 fs-label" style="border-top: 1px solid #f0ece8; color: #aaaaaa;">
+      <div class="flex flex-wrap gap-4 pt-2 fs-label" style="border-top: 1px solid var(--surface-3); color: var(--text-muted);">
         <span class="flex items-center gap-1.5">
           <span
             class="w-3 h-3 rounded inline-block"
-            style="box-shadow: 0 0 0 2px #3a3a3a; background: #f7f4f1;"
+            style="box-shadow: 0 0 0 2px var(--text-primary); background: var(--surface-2);"
           />
           오늘
         </span>
@@ -230,7 +230,7 @@ function isSaturday(idx: number) {
           절기
         </span>
         <span class="flex items-center gap-1.5">
-          <span style="color: #2878c8;">(윤)</span>
+          <span style="color: var(--el-수);">(윤)</span>
           윤달
         </span>
       </div>
