@@ -8,7 +8,6 @@
 ![Gemini](https://img.shields.io/badge/Gemini-Writer_LLM-4285F4?style=flat-square&logo=google&logoColor=white)
 ![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector_DB-FF6B35?style=flat-square)
 
-🌐 **[sajuguri.rheon.kr](https://sajuguri.rheon.kr/)** · API: [api-sajuguri.rheon.kr](https://api-sajuguri.rheon.kr/)
 
 **AI가 당신의 사주(四柱)와 오늘의 고민을 함께 읽어드립니다.**
 
@@ -16,6 +15,12 @@
 > "30대 중반, 바위 틈에서 물이 솟구치듯 재물이 터질 팔자" (O)
 
 ---
+
+## Production
+Frontend: https://sajuguri.rheon.kr
+Backend API: https://api-sajuguri.rheon.kr
+Swagger UI: https://api-sajuguri.rheon.kr/docs
+Health Check: https://api-sajuguri.rheon.kr/health
 
 ## 사주팔자(四柱八字)란?
 
