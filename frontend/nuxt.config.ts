@@ -49,6 +49,8 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   runtimeConfig: {
+    // 서버 사이드 전용 (브라우저에 노출되지 않음)
+    apiBase: process.env.NUXT_PUBLIC_API_BASE ?? 'http://localhost:8000',
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE ?? 'http://localhost:8000',
     },

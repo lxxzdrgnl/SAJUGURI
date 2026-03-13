@@ -229,6 +229,11 @@ const submitAttempted = ref(false)
 const nameError = computed((): string | null =>
   form.name.trim() ? null : '이름을 입력해 주세요.'
 )
+const birthDateError = computed((): string | null => {
+  if (!submitAttempted.value) return dateError.value
+  if (!form.birth_date) return '생년월일을 입력해 주세요.'
+  return dateError.value
+})
 
 function onSubmit() {
   submitAttempted.value = true
@@ -371,8 +376,8 @@ function onSubmit() {
           <span v-if="correctedPreview.sisi" style="color: var(--text-muted);">{{ correctedPreview.sisi.range }}</span>
         </div>
         <!-- 날짜 유효성 에러 -->
-        <p v-if="dateError" class="text-xs font-medium" style="color: var(--color-bad);">
-          {{ dateError }}
+        <p v-if="birthDateError" class="text-xs font-medium" style="color: var(--color-bad);">
+          {{ birthDateError }}
         </p>
         <!-- 시간 모름 안내 -->
         <p v-if="timeUnknown" class="text-xs" style="color: var(--text-muted);">
@@ -396,8 +401,8 @@ function onSubmit() {
       <button
         type="submit"
         class="btn-primary w-full mt-1 text-base"
-        :disabled="submitAttempted && !!(nameError || dateError)"
-        :style="submitAttempted && (nameError || dateError) ? 'opacity: 0.45; cursor: not-allowed;' : ''"
+        :disabled="submitAttempted && !!(nameError || birthDateError)"
+        :style="submitAttempted && (nameError || birthDateError) ? 'opacity: 0.45; cursor: not-allowed;' : ''"
       >
         사주 계산하기
       </button>

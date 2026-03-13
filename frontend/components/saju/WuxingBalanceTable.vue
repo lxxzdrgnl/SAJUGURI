@@ -27,7 +27,7 @@ function judge(el: string) {
       <tbody>
         <tr v-for="el in elements" :key="el">
           <td class="td">
-            <span class="font-bold" :style="`color: ${ec(el)}; font-size: 15px;`">{{ el }}</span>
+            <span class="el-label" :style="`color: ${ec(el)};`">{{ el }}</span>
           </td>
           <td class="td td-num" :style="`color: ${ec(el)}; font-weight: 600;`">
             {{ data[el] ?? 0 }}%
@@ -86,5 +86,10 @@ function judge(el: string) {
   border-radius: 3px;
   opacity: 0.65;
   transition: width 0.4s ease;
+}
+
+.el-label {
+  font-size: 15px;
+  font-weight: 700;
 }
 </style>

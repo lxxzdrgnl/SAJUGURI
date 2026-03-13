@@ -4,16 +4,16 @@ services:
   postgres:
     image: postgres:16-alpine
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     environment:
-      POSTGRES_DB: sajubon
-      POSTGRES_USER: sajubon
+      POSTGRES_DB: sajuguri
+      POSTGRES_USER: rheon
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - /home/rheon/servers/postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sajubon"]
+      test: ["CMD-SHELL", "pg_isready -U rheon -d sajuguri"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -27,7 +27,7 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      - DATABASE_URL=postgresql+asyncpg://sajubon:${POSTGRES_PASSWORD}@postgres:5432/sajubon
+      - DATABASE_URL=postgresql+asyncpg://rheon:${POSTGRES_PASSWORD}@postgres:5432/sajuguri
       - CHROMA_PATH=/app/chroma_db
     volumes:
       - ./backend/chroma_db:/app/chroma_db
@@ -56,5 +56,4 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-volumes:
-  postgres_data:
+volumes: {}

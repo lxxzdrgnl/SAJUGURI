@@ -1,17 +1,39 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 defineProps<{ text: string }>()
 
-const pinned  = ref(false)   // 클릭/터치로 고정
-const hovered = ref(false)   // 호버로 임시 표시
+const pinned  = ref(false)
+const hovered = ref(false)
 const visible = computed(() => pinned.value || hovered.value)
 const wrapRef = ref<HTMLElement | null>(null)
 
-function onMouseEnter() { hovered.value = true }
+const TIP_W = 220
+const pos = ref({ top: 0, left: 0 })
+const tailLeft = ref('50%')
+
+function calcPos() {
+  if (!wrapRef.value) return
+  const rect = wrapRef.value.getBoundingClientRect()
+  const vw   = window.innerWidth
+  const btnCx = rect.left + rect.width / 2
+
+  let left = btnCx - TIP_W / 2
+  // 오른쪽 화면 밖
+  if (left + TIP_W > vw - 8) left = vw - TIP_W - 8
+  // 왼쪽 화면 밖
+  if (left < 8) left = 8
+
+  const tailX = Math.min(Math.max(btnCx - left, 16), TIP_W - 16)
+  tailLeft.value = `${tailX}px`
+  pos.value = { top: rect.top - 8, left }
+}
+
+function onMouseEnter() { calcPos(); hovered.value = true }
 function onMouseLeave() { hovered.value = false }
 function onClick(e: MouseEvent) {
   e.stopPropagation()
+  calcPos()
   pinned.value = !pinned.value
 }
 
@@ -37,11 +59,19 @@ onUnmounted(() => document.removeEventListener('click', onOutside))
       @click="onClick"
     >?</button>
 
-    <Transition name="tt">
-      <span v-if="visible" class="tt-box" role="tooltip" @click.stop>
-        {{ text }}
-      </span>
-    </Transition>
+    <Teleport to="body">
+      <Transition name="tt">
+        <span
+          v-if="visible"
+          class="tt-box"
+          role="tooltip"
+          :style="`top: ${pos.top}px; left: ${pos.left}px; --tail-left: ${tailLeft};`"
+          @click.stop
+        >
+          {{ text }}
+        </span>
+      </Transition>
+    </Teleport>
   </span>
 </template>
 
@@ -53,13 +83,13 @@ onUnmounted(() => document.removeEventListener('click', onOutside))
 }
 
 .tt-btn {
-  width: 16px;
-  height: 16px;
+  width: var(--tt-size);
+  height: var(--tt-size);
   border-radius: 50%;
-  border: 1px solid var(--text-muted);
+  border: 1.5px solid var(--tt-color);
   background: transparent;
-  color: var(--text-muted);
-  font-size: 10px;
+  color: var(--tt-color);
+  font-size: var(--tt-font-size);
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
@@ -70,17 +100,17 @@ onUnmounted(() => document.removeEventListener('click', onOutside))
   flex-shrink: 0;
 }
 .tt-btn:hover {
-  background: var(--text-primary);
-  border-color: var(--text-primary);
+  background: var(--tt-hover-bg);
+  border-color: var(--tt-hover-bg);
   color: #ffffff;
 }
+</style>
 
-/* 툴팁 박스 */
+<style>
+/* Teleport로 body에 렌더링되므로 scoped 불가 */
 .tt-box {
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 8px);
-  transform: translateX(-50%);
+  position: fixed;
+  transform: translateY(-100%);
   width: 220px;
   background: var(--text-primary);
   color: #ffffff;
@@ -89,45 +119,23 @@ onUnmounted(() => document.removeEventListener('click', onOutside))
   padding: 8px 10px;
   border-radius: 8px;
   pointer-events: none;
-  z-index: 100;
+  z-index: 9999;
   white-space: normal;
   word-break: keep-all;
   box-shadow: 0 4px 12px rgba(0,0,0,0.18);
 }
 
-/* 말풍선 꼬리 */
 .tt-box::after {
   content: '';
   position: absolute;
   top: 100%;
-  left: 50%;
+  left: var(--tail-left, 50%);
   transform: translateX(-50%);
   border: 5px solid transparent;
   border-top-color: var(--text-primary);
 }
 
-/* 화면 가장자리 잘림 방지: 오른쪽 정렬 옵션 */
-@media (max-width: 400px) {
-  .tt-box {
-    left: auto;
-    right: 0;
-    transform: none;
-    width: 190px;
-  }
-  .tt-box::after {
-    left: auto;
-    right: 8px;
-    transform: none;
-  }
-}
-
-/* 트랜지션 */
 .tt-enter-active, .tt-leave-active { transition: opacity 0.15s, transform 0.15s; }
-.tt-enter-from, .tt-leave-to       { opacity: 0; transform: translateX(-50%) translateY(4px); }
-.tt-enter-to, .tt-leave-from       { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-@media (max-width: 400px) {
-  .tt-enter-from, .tt-leave-to  { transform: translateY(4px); }
-  .tt-enter-to, .tt-leave-from  { transform: translateY(0); }
-}
+.tt-enter-from, .tt-leave-to  { opacity: 0; transform: translateY(calc(-100% + 4px)); }
+.tt-enter-to,   .tt-leave-from { opacity: 1; transform: translateY(-100%); }
 </style>

@@ -11,7 +11,10 @@ function dotColor(el: string) { return elColor(el) }
 
 <template>
   <div class="card space-y-4">
-    <h3 class="label-section">용신 · 희신 · 기신 (用神)</h3>
+    <div class="flex items-center gap-1.5">
+      <h3 class="label-section">용신 · 희신 · 기신 (用神)</h3>
+      <UiInfoTooltip text="사주의 균형을 맞추는 핵심 오행입니다. 용신은 가장 필요한 기운, 희신은 용신을 돕는 기운, 기신은 균형을 해치는 기운입니다." />
+    </div>
 
     <!-- 용신 (primary) -->
     <div class="flex items-center gap-3">

@@ -68,6 +68,23 @@ class UnauthorizedException(AppException):
         )
 
 
+class TokenExpiredException(AppException):
+    def __init__(self):
+        super().__init__(
+            ErrorCode.TOKEN_EXPIRED,
+            "토큰이 만료되었습니다. 다시 로그인해주세요.",
+        )
+
+
+class OAuthFailedException(AppException):
+    def __init__(self, detail: str = ""):
+        super().__init__(
+            ErrorCode.OAUTH_FAILED,
+            "Google 인증에 실패했습니다.",
+            {"detail": detail} if detail else None,
+        )
+
+
 class ForbiddenException(AppException):
     def __init__(self):
         super().__init__(

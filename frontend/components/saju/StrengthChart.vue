@@ -48,7 +48,10 @@ const yTicks = [0, 10, 20]
 
 <template>
   <div class="card space-y-3">
-    <h3 class="label-section">신강/신약지수</h3>
+    <div class="flex items-center gap-1.5">
+      <h3 class="label-section">신강/신약지수</h3>
+      <UiInfoTooltip text="실제 사주 분포를 기반으로 이 사주가 전체 중 어느 위치에 해당하는지 보여줍니다. 중화에 가까울수록 균형 잡힌 사주입니다." />
+    </div>
 
     <!-- 득령/득지/득시/득세 -->
     <div class="flex flex-wrap gap-4">

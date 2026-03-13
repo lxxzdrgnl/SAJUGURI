@@ -176,37 +176,113 @@ SajuNara/
 - [x] **Pinia store** — saju 계산 결과 상태 관리 (stores/saju.ts)
 - [x] **API 클라이언트** — backend `/api/saju/calc` 호출 래퍼 (composables/useSajuApi.ts)
 
-### Phase 3 — 만세력 리포트 컴포넌트
+### Phase 3 — 만세력 리포트 컴포넌트 ✅
 
-- [ ] **SajuTable** — 4기둥 그리드 (천간·십성·지지·십성·지장간·12운성·12신살, 음양 색상)
-- [ ] **HapChungPanel** — 합충 탭 버튼 (천간합·지지육합·삼합·방합·충·공망·형·파·해·원진) + 해당 기둥 하이라이트
-- [ ] **WuxingPentagram** — 오행 오각형 SVG (상생 파란 화살표·상극 빨간 별, 원 비율 채우기)
-- [ ] **WuxingDonutChart** — 오행 도넛 차트 (Chart.js)
-- [ ] **SipseongDonutChart** — 십성 도넛 차트
-- [ ] **StrengthChart** — 신강/신약 8단계 분포 라인 차트 + 득령/득지/득시/득세 뱃지
-- [ ] **YongSinBadge** — 용신·희신·기신 표시
-- [ ] **DaeUnSlider** — 대운 수평 스크롤 (천간/지지 칩, 십성·12운성 레이블)
-- [ ] **YeonUnSlider** — 연운 수평 스크롤
-- [ ] **WolUnSlider** — 월운 수평 스크롤
-- [ ] **IlJinCalendar** — 일진 달력 (월 네비게이션, 일별 간지·음력 날짜)
+- [x] **SajuTable** — 4기둥 그리드 (천간·십성·지지·십성·지장간·12운성·12신살, 음양 색상)
+- [x] **HapChungPanel** — 합충 탭 버튼 (천간합·지지육합·삼합·방합·충·공망·형·파·해·원진) + 해당 기둥 하이라이트
+- [x] **WuxingPentagram** — 오행 오각형 SVG (상생 파란 화살표·상극 빨간 별, 원 비율 채우기)
+- [x] **WuxingDonutChart** — 오행 도넛 차트 (Chart.js)
+- [x] **SipseongDonutChart** — 십성 도넛 차트
+- [x] **StrengthChart** — 신강/신약 8단계 분포 라인 차트 + 득령/득지/득시/득세 뱃지
+- [x] **YongSinBadge** — 용신·희신·기신 표시
+- [x] **DaeUnSlider** — 대운 수평 스크롤 (천간/지지 칩, 십성·12운성 레이블)
+- [x] **YeonUnSlider** — 연운 수평 스크롤
+- [x] **WolUnSlider** — 월운 수평 스크롤
+- [x] **IlJinCalendar** — 일진 달력 (월 네비게이션, 일별 간지·음력 날짜)
 
-### Phase 4 — AI 탭 리포트 (Headline-Driven Insights)
+### Phase 4 — 인증·프로필·공유 ← **현재 개발 중**
+
+#### DB 테이블 설계
+
+**users** — 계정 및 권한
+| 컬럼 | 타입 | 설명 |
+|---|---|---|
+| id | SERIAL PK | |
+| email | VARCHAR(255) UNIQUE | |
+| hashed_password | VARCHAR(255) NULL | 소셜 로그인 시 NULL |
+| provider | VARCHAR(20) | `local` / `google` / `kakao` |
+| social_id | VARCHAR(255) NULL | 소셜 고유 ID |
+| role | VARCHAR(20) | `admin` / `tester` / `user` |
+| created_at | TIMESTAMP | |
+
+
+**profiles** — 사주 입력 데이터 (재계산용, 결과 캐시 없음)
+| 컬럼 | 타입 | 설명 |
+|---|---|---|
+| id | SERIAL PK | |
+| user_id | INTEGER FK | users.id |
+| name | VARCHAR(50) | 프로필 이름 (나, 엄마 등) |
+| birth_date | DATE | 생년월일 |
+| birth_time | TIME NULL | 생시 (모를 경우 NULL) |
+| calendar | VARCHAR(10) | `solar` / `lunar` |
+| gender | VARCHAR(10) | `male` / `female` |
+| is_leap_month | BOOLEAN | 윤달 여부 |
+| city | VARCHAR(100) NULL | 진태양시 보정용 |
+| longitude | DECIMAL(7,4) NULL | |
+| created_at | TIMESTAMP | |
+
+**shared_results** — 계산 결과 공유 스냅샷
+| 컬럼 | 타입 | 설명 |
+|---|---|---|
+| id | SERIAL PK | |
+| profile_id | INTEGER FK NULL | 로그인 공유 시 연결 |
+| birth_input | JSONB NULL | 비로그인 공유 시 입력값 저장 |
+| share_token | UUID UNIQUE | `/share/{uuid}` 링크용 |
+| calc_snapshot | JSONB | 공유 시점 엔진 결과 전체 |
+| created_at | TIMESTAMP | |
+> CHECK: `profile_id IS NOT NULL OR birth_input IS NOT NULL`
+
+**wallets** — 솜사탕 잔액 캐시 (원장은 candy_transactions)
+| 컬럼 | 타입 | 설명 |
+|---|---|---|
+| id | SERIAL PK | |
+| user_id | INTEGER FK | users.id |
+| candy_count | INTEGER | 현재 보유량 |
+| updated_at | TIMESTAMP | |
+
+**candy_transactions** — 솜사탕 입출 내역
+| 컬럼 | 타입 | 설명 |
+|---|---|---|
+| id | SERIAL PK | |
+| user_id | INTEGER FK | users.id |
+| delta | INTEGER | +지급 / -소모 |
+| reason | VARCHAR(50) | `signup_bonus` / `consultation` / `admin_grant` |
+| ref_id | INTEGER NULL | report_id 등 참조 |
+| created_at | TIMESTAMP | |
+
+**reports** — AI 상담 결과 (Phase 5 연계)
+| 컬럼 | 타입 | 설명 |
+|---|---|---|
+| id | SERIAL PK | |
+| user_id | INTEGER FK | users.id |
+| profile_id | INTEGER FK | profiles.id |
+| concern | TEXT | 고민 입력값 |
+| calc_snapshot | JSONB | 생성 시점 엔진 결과 |
+| tabs | JSONB | AI 생성 탭 배열 |
+| candy_cost | INTEGER | 소모된 솜사탕 |
+| created_at | TIMESTAMP | |
+
+---
+
+#### 구현 태스크
+
+- [ ] **구글 로그인** — OAuth2, `users` 테이블
+- [ ] **프로필 저장** — 결과 페이지 "저장하기" → 로그인 확인 → `profiles` 저장
+  - 비로그인 시: `localStorage`에 `birth_input` 임시 보존 → 로그인 후 자동 저장
+- [ ] **내 프로필 목록** — 저장된 프로필 선택 → 실시간 재계산 → 결과 화면
+- [ ] **결과 공유** — "공유하기" → UUID 링크 → `/share/{uuid}` 비로그인 접근 가능
+- [ ] **솜사탕 지급** — 가입 시 `wallets` 생성 + 기초 지급 (`candy_transactions` 기록)
+
+### Phase 5 — AI 탭 리포트 (Headline-Driven Insights)
 
 - [ ] **Writer LLM 세팅** — llm/providers.py Gemini 연결
 - [ ] **프롬프트 작성** — 사주 calc 결과 + 고민 → 10개 결론형 헤드라인
 - [ ] **PydanticOutputParser** — ReportOutput(tabs: list[TabContent]) 스키마
 - [ ] **사주 분석 파이프라인** — Engine → RAG → Context Filter → Writer
 - [ ] **AI 리포트 탭 UI** — 헤드라인 탭 클릭 → 상세 내용 즉시 전환
-- [ ] **궁합 파이프라인** (Phase 4 후반)
-- [ ] **오늘의 운세 파이프라인** (Phase 4 후반)
-- [ ] **한줄 상담 파이프라인** (Phase 4 후반)
-
-### Phase 5 — DB·공유·인증
-
-- [ ] **PostgreSQL 연결** — SQLAlchemy async 세션
-- [ ] **Report 저장** — 계산 결과 + AI 출력 저장
-- [ ] **공유 링크** — `GET /r/{share_token}`
-- [ ] **JWT 인증** (선택)
+- [ ] **궁합 파이프라인** (Phase 5 후반)
+- [ ] **오늘의 운세 파이프라인** (Phase 5 후반)
+- [ ] **한줄 상담 파이프라인** (Phase 5 후반)
 
 ---
 

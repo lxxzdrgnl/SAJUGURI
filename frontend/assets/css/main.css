@@ -22,6 +22,12 @@
     --text-muted:     #a09c98;
     --accent:         #c85c14;
     --accent-hover:   #a84a0e;
+
+    /* ── 툴팁 ? 버튼 ── */
+    --tt-size:        20px;
+    --tt-color:       var(--accent);
+    --tt-hover-bg:    var(--accent);
+    --tt-font-size:   11px;
     --color-good:     #2a7a4f;  /* 길신 — 초록 */
     --color-bad:      #c03030;  /* 실성 — 빨강 */
 

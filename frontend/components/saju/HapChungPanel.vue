@@ -12,19 +12,19 @@ type TabKey =
   | 'gung_seong' | 'cheon_gan_hap' | 'yuk_hap' | 'sam_hap' | 'bang_hap'
   | 'cheon_gan_chung' | 'chung' | 'gong_mang' | 'sam_hyeong' | 'pa' | 'yuk_hae' | 'won_jin'
 
-const ALL_TABS: { key: TabKey; label: string }[] = [
-  { key: 'gung_seong',      label: '궁성'     },
-  { key: 'cheon_gan_hap',   label: '천간합'   },
-  { key: 'yuk_hap',         label: '지지육합' },
-  { key: 'sam_hap',         label: '지지삼합' },
-  { key: 'bang_hap',        label: '지지방합' },
-  { key: 'cheon_gan_chung', label: '천간충'   },
-  { key: 'chung',           label: '지지충'   },
-  { key: 'gong_mang',       label: '공망'     },
-  { key: 'sam_hyeong',      label: '형'       },
-  { key: 'pa',              label: '파'       },
-  { key: 'yuk_hae',         label: '해'       },
-  { key: 'won_jin',         label: '원진'     },
+const ALL_TABS: { key: TabKey; label: string; tip: string }[] = [
+  { key: 'gung_seong',      label: '궁성',     tip: '기둥별 작용력 가중치입니다. 월지(×2.0)가 가장 강하고, 일간(×1.5), 나머지(×1.0) 순입니다.' },
+  { key: 'cheon_gan_hap',   label: '천간합',   tip: '천간끼리 만나 새로운 오행으로 변화하는 관계입니다. 합화 여부는 주변 환경에 따라 결정됩니다.' },
+  { key: 'yuk_hap',         label: '지지육합', tip: '두 지지가 짝을 이뤄 합화하는 관계입니다. 충이 있으면 합이 파괴될 수 있습니다.' },
+  { key: 'sam_hap',         label: '지지삼합', tip: '세 지지가 모여 강한 오행 기운을 형성합니다. 세 기둥 중 두 개만 있어도 반합이 성립됩니다.' },
+  { key: 'bang_hap',        label: '지지방합', tip: '같은 방위(봄·여름·가을·겨울)의 지지 셋이 모여 오행을 이루는 관계입니다.' },
+  { key: 'cheon_gan_chung', label: '천간충',   tip: '천간끼리 충돌하는 관계입니다. 극(剋) 관계가 대립하여 불안정을 유발합니다.' },
+  { key: 'chung',           label: '지지충',   tip: '정반대 지지끼리 충돌하는 관계입니다. 이동·변화·갈등을 의미하며 무조건 나쁜 것은 아닙니다.' },
+  { key: 'gong_mang',       label: '공망',     tip: '일주 기준으로 작용력이 비어 있는 지지 2개입니다. 해당 기둥의 기운이 약해집니다.' },
+  { key: 'sam_hyeong',      label: '형',       tip: '지지끼리 서로 해치는 관계입니다. 인사신·축술미·자형·오형 네 종류가 있습니다.' },
+  { key: 'pa',              label: '파',       tip: '지지끼리 깨뜨리는 관계입니다. 충보다 약하나 관계·계획을 흔드는 작용을 합니다.' },
+  { key: 'yuk_hae',         label: '해',       tip: '지지끼리 방해·막히는 관계입니다. 육합 성립을 가로막는 역할을 합니다.' },
+  { key: 'won_jin',         label: '원진',     tip: '서로 미워하고 멀어지는 지지 관계입니다. 인연이 맺어져도 결국 등을 돌리게 됩니다.' },
 ]
 
 const activeTab = ref<TabKey>('gung_seong')
@@ -210,9 +210,12 @@ const PALACE_INFO = [
 
       <!-- 일반 탭 -->
       <template v-else>
+        <!-- 탭 설명 -->
+        <p class="tab-desc">{{ ALL_TABS.find(t => t.key === activeTab)?.tip }}</p>
+
         <!-- 데이터 없음 -->
         <div v-if="!hasData(activeTab)" class="empty-msg">
-          해당하는 {{ ALL_TABS.find(t => t.key === activeTab)?.label }}이 없어요.
+          해당하는 {{ ALL_TABS.find(t => t.key === activeTab)?.label }}이 없습니다.
         </div>
 
         <!-- 엔트리 목록 -->
@@ -328,6 +331,16 @@ const PALACE_INFO = [
   color: var(--text-secondary);
   margin-bottom: 14px;
   line-height: 1.7;
+}
+
+/* ── 탭 설명 ── */
+.tab-desc {
+  font-size: var(--fs-label);
+  color: var(--text-muted);
+  line-height: 1.6;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--surface-3);
+  margin-bottom: 4px;
 }
 
 /* ── 빈 메시지 ── */
