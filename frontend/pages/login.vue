@@ -2,15 +2,15 @@
 import { useAuthStore } from '~/stores/auth'
 
 const auth = useAuthStore()
+const config = useRuntimeConfig()
 
 watchEffect(() => {
   if (auth.isLoggedIn) navigateTo('/profile', { replace: true })
 })
 
 function handleGoogleLogin() {
-  // Nuxt 서버 라우트 사용 — routeRules 프록시 우회
-  // 브라우저가 Google OAuth 페이지로 직접 이동해야 계정 선택창이 표시됨
-  window.location.href = '/api/auth/google'
+  // 백엔드로 직접 이동 — Nuxt 프록시 우회, 브라우저가 Google 쿠키 포함해 OAuth 진행
+  window.location.href = `${config.public.apiBase}/api/auth/google`
 }
 </script>
 
