@@ -266,12 +266,11 @@ SajuNara/
 
 #### 구현 태스크
 
-- [ ] **구글 로그인** — OAuth2, `users` 테이블
+- [x] **구글 로그인** — OAuth2, `users` 테이블
 - [ ] **프로필 저장** — 결과 페이지 "저장하기" → 로그인 확인 → `profiles` 저장
   - 비로그인 시: `localStorage`에 `birth_input` 임시 보존 → 로그인 후 자동 저장
 - [ ] **내 프로필 목록** — 저장된 프로필 선택 → 실시간 재계산 → 결과 화면
 - [ ] **결과 공유** — "공유하기" → UUID 링크 → `/share/{uuid}` 비로그인 접근 가능
-- [ ] **솜사탕 지급** — 가입 시 `wallets` 생성 + 기초 지급 (`candy_transactions` 기록)
 
 ### Phase 5 — AI 탭 리포트 (Headline-Driven Insights)
 

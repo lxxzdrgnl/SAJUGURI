@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 import uuid
-from datetime import datetime, timezone
-from sqlalchemy import String, DateTime, Integer, Boolean, Numeric, ForeignKey, Text
+from datetime import date, time, datetime, timezone
+from sqlalchemy import String, DateTime, Date, Time, Integer, Boolean, Numeric, ForeignKey, Text
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -34,8 +34,8 @@ class Profile(Base):
     id:            Mapped[int]         = mapped_column(Integer, primary_key=True)
     user_id:       Mapped[int]         = mapped_column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     name:          Mapped[str]         = mapped_column(String(50))
-    birth_date:    Mapped[str]         = mapped_column(String(10))    # "YYYY-MM-DD"
-    birth_time:    Mapped[str | None]  = mapped_column(String(5), nullable=True)   # "HH:MM"
+    birth_date:    Mapped[date]         = mapped_column(Date)
+    birth_time:    Mapped[time | None] = mapped_column(Time, nullable=True)
     calendar:      Mapped[str]         = mapped_column(String(10), default="solar")
     gender:        Mapped[str]         = mapped_column(String(10))
     is_leap_month: Mapped[bool]        = mapped_column(Boolean, default=False)

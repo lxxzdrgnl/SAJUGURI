@@ -245,6 +245,7 @@ function onSubmit() {
   }
   const req: SajuCalcRequest = { ...form }
   if (selectedCity.value) {
+    req.city = selectedCity.value.label
     req.birth_longitude = selectedCity.value.longitude
     if (!selectedCity.value.isKorea) req.birth_utc_offset = selectedCity.value.utcOffset
   }
@@ -269,7 +270,7 @@ function onSubmit() {
       <!-- 이름 -->
       <div class="space-y-1">
         <label class="text-sm font-semibold tracking-wide" style="color: var(--text-muted);">이름 <span style="color: var(--color-bad);">*</span></label>
-        <input v-model="form.name" type="text" placeholder="홍길동"
+        <input v-model="form.name" type="text" placeholder="홍길동" maxlength="20"
           class="input-underline" style="font-size: 18px;" />
         <p v-if="submitAttempted && nameError" class="text-xs font-medium" style="color: var(--color-bad);">
           {{ nameError }}

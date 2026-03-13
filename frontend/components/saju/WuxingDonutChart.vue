@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, toRaw, markRaw } from 'vue'
 import { Doughnut } from 'vue-chartjs'
 import {
   Chart as ChartJS,
@@ -20,12 +20,13 @@ const elementColors = EL_HEX
 const elementOrder = ['목', '화', '토', '금', '수']
 
 const chartData = computed(() => {
+  const d = toRaw(props.data)
   const labels: string[] = []
   const values: number[] = []
   const colors: string[] = []
 
   for (const el of elementOrder) {
-    const val = props.data[el] ?? 0
+    const val = d[el] ?? 0
     if (val > 0) {
       labels.push(`${el} ${val}%`)
       values.push(val)

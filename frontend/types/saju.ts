@@ -8,6 +8,7 @@ export interface SajuCalcRequest {
   is_leap_month?: boolean
   birth_longitude?: number  // 출생지 경도 (진태양시 보정용)
   birth_utc_offset?: number // UTC 오프셋(분) — 해외 도시 전용, 한국은 생략
+  city?: string             // 출생지 도시명 (표시용)
 }
 
 /** 기둥 하나 */

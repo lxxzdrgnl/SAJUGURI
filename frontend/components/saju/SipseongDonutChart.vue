@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, toRaw } from 'vue'
 import { Doughnut } from 'vue-chartjs'
 import {
   Chart as ChartJS,
@@ -36,12 +36,13 @@ const sipseongColors: Record<string, string> = Object.fromEntries(
 const sipseongOrder = ['비견', '겁재', '식신', '상관', '편재', '정재', '편관', '정관', '편인', '정인']
 
 const chartData = computed(() => {
+  const d = toRaw(props.data)
   const labels: string[] = []
   const values: number[] = []
   const colors: string[] = []
 
   for (const ss of sipseongOrder) {
-    const val = props.data[ss] ?? 0
+    const val = d[ss] ?? 0
     if (val > 0) {
       labels.push(`${ss} ${val}%`)
       values.push(val)
