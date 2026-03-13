@@ -9,7 +9,6 @@ watchEffect(() => {
 })
 
 function handleGoogleLogin() {
-  // 백엔드로 직접 이동 — Nuxt 프록시 우회, 브라우저가 Google 쿠키 포함해 OAuth 진행
   window.location.href = `${config.public.apiBase}/api/auth/google`
 }
 </script>
@@ -17,7 +16,12 @@ function handleGoogleLogin() {
 <template>
   <div class="login-wrap">
     <div class="login-card">
-      <h1 class="login-title ganji">사주구리</h1>
+      <div class="login-illust-box">
+        <img src="/onboarding-illust.png" alt="" class="login-illust-img" />
+      </div>
+      <h1 class="login-title" style="font-family: var(--font-ganji);">
+        <span style="color: var(--text-primary);">사주</span><span style="color: var(--accent);">구리</span>
+      </h1>
       <p class="login-sub">AI 사주 상담 서비스</p>
       <button class="google-btn" @click="handleGoogleLogin">
         <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -34,32 +38,43 @@ function handleGoogleLogin() {
 
 <style scoped>
 .login-wrap {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-base);
+  padding: 24px;
 }
 
 .login-card {
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: 16px;
-  padding: 48px 40px;
   width: 100%;
   max-width: 360px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: 24px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+}
+
+.login-illust-box {
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  background: #f5f3ef;
+}
+.login-illust-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.3);
 }
 
 .login-title {
-  font-size: var(--fs-tile);
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-  letter-spacing: 0.05em;
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  margin: 28px 0 4px;
 }
 
 .login-sub {
@@ -71,24 +86,24 @@ function handleGoogleLogin() {
 .google-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
-  padding: 10px 24px;
+  width: calc(100% - 48px);
+  margin-bottom: 28px;
+  padding: 13px 24px;
   background: var(--surface-2);
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
   color: var(--text-primary);
   font-size: var(--fs-body);
   font-family: inherit;
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
-  width: 100%;
-  justify-content: center;
 }
-
 .google-btn:hover {
   background: var(--surface-hover);
 }
-
 .google-icon {
   width: 20px;
   height: 20px;

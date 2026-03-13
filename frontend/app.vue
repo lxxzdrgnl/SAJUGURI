@@ -3,6 +3,18 @@ import { useAuthStore } from '~/stores/auth'
 
 const auth = useAuthStore()
 const config = useRuntimeConfig()
+
+const menuOpen = ref(false)
+
+function closeMenu() { menuOpen.value = false }
+
+// 외부 클릭 시 닫기
+onMounted(() => {
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement
+    if (!target.closest('.menu-wrap')) closeMenu()
+  })
+})
 </script>
 
 <template>
@@ -12,11 +24,29 @@ const config = useRuntimeConfig()
     <!-- 네브바 -->
     <header class="app-header">
       <div class="app-header-inner">
-        <NuxtLink to="/profile" class="app-logo ganji">사주구리</NuxtLink>
+        <NuxtLink to="/" class="app-logo ganji">
+          <span style="color: var(--text-primary);">사주</span><span style="color: var(--accent);">구리</span>
+        </NuxtLink>
         <div class="app-header-right">
           <template v-if="auth.isLoggedIn">
-            <span class="app-user-email">{{ auth.user?.email }}</span>
-            <button class="app-logout-btn" @click="auth.logout()">로그아웃</button>
+            <div class="menu-wrap">
+              <button class="menu-btn" @click.stop="menuOpen = !menuOpen">
+                <span class="menu-bar" />
+                <span class="menu-bar" />
+                <span class="menu-bar" />
+              </button>
+              <div v-if="menuOpen" class="menu-dropdown">
+                <NuxtLink to="/my-profiles" class="menu-item" @click="closeMenu">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  내 만세력
+                </NuxtLink>
+                <div class="menu-divider" />
+                <button class="menu-item menu-item-danger" @click="auth.logout(); closeMenu()">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  로그아웃
+                </button>
+              </div>
+            </div>
           </template>
           <NuxtLink v-else to="/login" class="app-login-btn">로그인</NuxtLink>
         </div>
@@ -75,7 +105,6 @@ const config = useRuntimeConfig()
 .app-logo {
   font-size: 1.2rem;
   font-weight: 700;
-  color: var(--text-primary);
   text-decoration: none;
   letter-spacing: 0.05em;
 }
@@ -86,9 +115,84 @@ const config = useRuntimeConfig()
   gap: 12px;
 }
 
-.app-user-email {
-  font-size: var(--fs-label);
+/* ── 햄버거 메뉴 ── */
+.menu-wrap {
+  position: relative;
+}
+
+.menu-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  padding: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.menu-btn:hover {
+  background: var(--surface-2);
+}
+.menu-bar {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--text-secondary);
+  border-radius: 2px;
+}
+
+.menu-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 160px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  overflow: hidden;
+  z-index: 200;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  font-size: var(--fs-body);
+  color: var(--text-primary);
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s;
+  text-align: left;
+}
+.menu-item:hover {
+  background: var(--surface-2);
+}
+.menu-item svg {
+  width: 16px;
+  height: 16px;
   color: var(--text-muted);
+  flex-shrink: 0;
+}
+.menu-item-danger {
+  color: #c04838;
+}
+.menu-item-danger svg {
+  color: #c04838;
+}
+.menu-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 0;
 }
 
 .app-login-btn {
@@ -104,21 +208,6 @@ const config = useRuntimeConfig()
 .app-login-btn:hover {
   background: var(--accent);
   color: var(--surface-1);
-}
-
-.app-logout-btn {
-  font-size: var(--fs-label);
-  color: var(--text-muted);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: background 0.15s;
-}
-.app-logout-btn:hover {
-  background: var(--surface-3);
-  color: var(--text-primary);
 }
 
 .app-footer {

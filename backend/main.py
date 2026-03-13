@@ -5,6 +5,7 @@ load_dotenv()
 
 import logging
 import traceback
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
 from fastapi import FastAPI, Request
@@ -16,6 +17,8 @@ from starlette.middleware.sessions import SessionMiddleware
 from core.config import settings
 from core.errors import ErrorCode, ErrorResponse, http_status
 from core.exceptions import AppException
+from db.models import Base
+from db.session import engine
 from middleware.logging import AccessLogMiddleware
 from routers import saju, cities, auth, profiles, share
 
@@ -28,9 +31,21 @@ logging.basicConfig(
 )
 logger = logging.getLogger("sajubon")
 
+# ─── Lifespan ────────────────────────────────────────────────────────────────
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+    except Exception as e:
+        logger.warning("DB 연결 실패 (create_all 건너뜀): %s", e)
+    yield
+
 # ─── FastAPI 앱 ──────────────────────────────────────────────────────────────
 
 app = FastAPI(
+    lifespan=lifespan,
     title="사주구리 API",
     version="0.1.0",
     description="AI 사주 상담 서비스 — 사주팔자 계산·궁합·오늘의 운세·한줄 상담",

@@ -3,7 +3,7 @@
 from datetime import date, time as time_type
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.models import Profile, User
@@ -31,15 +31,20 @@ async def create_profile(
             Profile.birth_time == birth_time,
             Profile.calendar == body.calendar,
             Profile.gender == body.gender,
-        )
+        ).limit(1)
     )
     if dup.scalar_one_or_none():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="이미 저장된 프로필입니다.")
+
+    # 첫 프로필이면 자동으로 대표 설정
+    existing = await db.execute(select(Profile).where(Profile.user_id == user.id).limit(1))
+    is_first = existing.scalar_one_or_none() is None
 
     profile = Profile(
         user_id=user.id,
         birth_date=birth_date,
         birth_time=birth_time,
+        is_representative=is_first,
         **{k: v for k, v in body.model_dump().items() if k not in ("birth_date", "birth_time")},
     )
     db.add(profile)
@@ -56,9 +61,48 @@ async def list_profiles(
     result = await db.execute(
         select(Profile)
         .where(Profile.user_id == user.id)
-        .order_by(Profile.created_at.desc())
+        .order_by(Profile.is_representative.desc(), Profile.created_at.desc())
     )
     return result.scalars().all()
+
+
+@router.get("/representative", response_model=ProfileResponse, summary="대표 프로필 조회")
+async def get_representative_profile(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(Profile).where(Profile.user_id == user.id, Profile.is_representative == True)  # noqa: E712
+    )
+    profile = result.scalar_one_or_none()
+    if not profile:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="대표 프로필이 없습니다.")
+    return profile
+
+
+@router.patch("/{profile_id}/representative", response_model=ProfileResponse, summary="대표 프로필 설정")
+async def set_representative(
+    profile_id: int,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    # 기존 대표 해제
+    await db.execute(
+        update(Profile)
+        .where(Profile.user_id == user.id, Profile.is_representative == True)  # noqa: E712
+        .values(is_representative=False)
+    )
+    # 새 대표 설정
+    result = await db.execute(
+        select(Profile).where(Profile.id == profile_id, Profile.user_id == user.id)
+    )
+    profile = result.scalar_one_or_none()
+    if not profile:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="프로필을 찾을 수 없습니다.")
+    profile.is_representative = True
+    await db.commit()
+    await db.refresh(profile)
+    return profile
 
 
 @router.get("/{profile_id}", response_model=ProfileResponse, summary="프로필 단건 조회")
