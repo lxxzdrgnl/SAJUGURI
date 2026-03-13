@@ -17,7 +17,7 @@ from core.config import settings
 from core.errors import ErrorCode, ErrorResponse, http_status
 from core.exceptions import AppException
 from middleware.logging import AccessLogMiddleware
-from routers import saju, cities, auth
+from routers import saju, cities, auth, profiles, share
 
 # ─── 로깅 설정 ───────────────────────────────────────────────────────────────
 
@@ -53,7 +53,12 @@ app.add_middleware(SessionMiddleware, secret_key=settings.jwt_secret)
 
 def _error_json(req: Request, code: ErrorCode, message: str, details: dict | None = None) -> JSONResponse:
     body = ErrorResponse.make(code=code, message=message, path=req.url.path, details=details)
-    return JSONResponse(status_code=http_status(code), content=body.model_dump())
+    origin = req.headers.get("origin", "*")
+    return JSONResponse(
+        status_code=http_status(code),
+        content=body.model_dump(),
+        headers={"Access-Control-Allow-Origin": origin},
+    )
 
 
 @app.exception_handler(AppException)
@@ -95,6 +100,8 @@ async def unhandled_exception_handler(req: Request, exc: Exception) -> JSONRespo
 app.include_router(auth.router)
 app.include_router(saju.router)
 app.include_router(cities.router)
+app.include_router(profiles.router)
+app.include_router(share.router)
 # app.include_router(compatibility.router)   # 구현 예정
 # app.include_router(daily.router)           # 구현 예정
 # app.include_router(question.router)        # 구현 예정
