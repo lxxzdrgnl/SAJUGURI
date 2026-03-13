@@ -14,6 +14,9 @@ class ProfileCreate(BaseModel):
     is_leap_month: bool = Field(default=False)
     city: str | None = Field(default=None, max_length=100)
     longitude: float | None = Field(default=None)
+    day_stem: str | None = Field(default=None, max_length=5)
+    day_branch: str | None = Field(default=None, max_length=5)
+    day_stem_element: str | None = Field(default=None, max_length=5)
 
 
 class ProfileResponse(BaseModel):
@@ -26,6 +29,10 @@ class ProfileResponse(BaseModel):
     is_leap_month: bool
     city: str | None
     longitude: float | None
+    is_representative: bool
+    day_stem: str | None
+    day_branch: str | None
+    day_stem_element: str | None
     created_at: datetime
 
     model_config = {"from_attributes": True}

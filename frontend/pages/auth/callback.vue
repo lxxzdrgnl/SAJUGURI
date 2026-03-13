@@ -3,6 +3,7 @@ import { useAuthStore } from '~/stores/auth'
 
 const route = useRoute()
 const auth = useAuthStore()
+const config = useRuntimeConfig()
 
 onMounted(async () => {
   const accessToken = route.query.access_token as string | undefined
@@ -16,16 +17,16 @@ onMounted(async () => {
   auth.setTokens(accessToken, refreshToken)
   await auth.fetchMe()
 
-  // 로그인 전에 저장하려던 프로필이 있으면 자동 저장
+  // 로그인 전 저장 시도했던 만세력 자동 저장
   const pending = localStorage.getItem('saju_pending_save')
   if (pending) {
     try {
-      await $fetch('/api/profiles', {
+      await $fetch(`${config.public.apiBase}/api/profiles`, {
         method: 'POST',
         body: JSON.parse(pending),
         headers: { Authorization: `Bearer ${accessToken}` },
       })
-    } catch { /* 저장 실패해도 홈으로 이동 */ }
+    } catch { /* 저장 실패해도 계속 진행 */ }
     localStorage.removeItem('saju_pending_save')
   }
 

@@ -29,5 +29,10 @@ export const useSajuStore = defineStore('saju', () => {
     lastRequest.value = null
   }
 
-  return { result, loading, error, lastRequest, calculate, reset }
+  function restore(req: SajuCalcRequest, res: SajuCalcResponse) {
+    lastRequest.value = req
+    result.value = res
+  }
+
+  return { result, loading, error, lastRequest, calculate, reset, restore }
 })
