@@ -16,10 +16,24 @@ class Settings(BaseSettings):
     chroma_path: str = "./chroma_db"
 
     # DB (PostgreSQL)
-    database_url: str = "postgresql+asyncpg://user:password@localhost:5432/sajubon"
+    database_url: str = "postgresql+asyncpg://user:password@localhost:5432/sajuguri"
 
     # Server
     port: int = 8000
+
+    # Google OAuth (Authorization Code Flow)
+    google_client_id: str = ""
+    google_client_secret: str = ""
+    google_redirect_uri: str = "http://localhost:8000/api/auth/google/callback"
+
+    # Frontend URL (OAuth 완료 후 리다이렉트)
+    frontend_url: str = "http://localhost:3000"
+
+    # JWT
+    jwt_secret: str = "change-me-in-production"
+    jwt_algorithm: str = "HS256"
+    jwt_expire_minutes: int = 15  # 15분 (short-lived)
+    refresh_token_expire_days: int = 30  # 30일
 
     class Config:
         env_file = ".env"
