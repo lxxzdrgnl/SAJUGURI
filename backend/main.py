@@ -11,11 +11,13 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.middleware.sessions import SessionMiddleware
 
+from core.config import settings
 from core.errors import ErrorCode, ErrorResponse, http_status
 from core.exceptions import AppException
 from middleware.logging import AccessLogMiddleware
-from routers import saju, cities
+from routers import saju, cities, auth
 
 # ─── 로깅 설정 ───────────────────────────────────────────────────────────────
 
@@ -45,7 +47,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+app.add_middleware(SessionMiddleware, secret_key=settings.jwt_secret)
 
 # ─── 예외 핸들러 ─────────────────────────────────────────────────────────────
 
@@ -90,6 +92,7 @@ async def unhandled_exception_handler(req: Request, exc: Exception) -> JSONRespo
 
 # ─── 라우터 ──────────────────────────────────────────────────────────────────
 
+app.include_router(auth.router)
 app.include_router(saju.router)
 app.include_router(cities.router)
 # app.include_router(compatibility.router)   # 구현 예정

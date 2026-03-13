@@ -16,6 +16,7 @@ class ErrorCode(str, Enum):
     # 401 Unauthorized
     UNAUTHORIZED          = "UNAUTHORIZED"
     TOKEN_EXPIRED         = "TOKEN_EXPIRED"
+    OAUTH_FAILED          = "OAUTH_FAILED"
     # 403 Forbidden
     FORBIDDEN             = "FORBIDDEN"
     # 404 Not Found
@@ -45,6 +46,7 @@ _STATUS_MAP: dict[ErrorCode, int] = {
     ErrorCode.INVALID_QUERY_PARAM:   400,
     ErrorCode.UNAUTHORIZED:          401,
     ErrorCode.TOKEN_EXPIRED:         401,
+    ErrorCode.OAUTH_FAILED:          401,
     ErrorCode.FORBIDDEN:             403,
     ErrorCode.RESOURCE_NOT_FOUND:    404,
     ErrorCode.REPORT_NOT_FOUND:      404,
