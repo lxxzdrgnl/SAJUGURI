@@ -1,0 +1,353 @@
+<script setup lang="ts">
+import { useAuthStore } from '~/stores/auth'
+import { useSajuStore } from '~/stores/saju'
+import type { SajuCalcRequest } from '~/types/saju'
+
+interface Profile {
+  id: number
+  name: string
+  birth_date: string
+  birth_time: string | null
+  calendar: string
+  gender: string
+  is_leap_month: boolean
+  city: string | null
+  longitude: number | null
+  is_representative: boolean
+  day_stem: string | null
+  day_branch: string | null
+  day_stem_element: string | null
+}
+
+const auth = useAuthStore()
+const store = useSajuStore()
+const config = useRuntimeConfig()
+const base = config.public.apiBase
+
+const profiles = ref<Profile[]>([])
+const pending = ref(true)
+const openingId = ref<number | null>(null)
+
+async function fetchProfiles() {
+  try {
+    profiles.value = await $fetch<Profile[]>(`${base}/api/profiles`, {
+      headers: { Authorization: `Bearer ${auth.token}` },
+    })
+  } finally {
+    pending.value = false
+  }
+}
+
+onMounted(fetchProfiles)
+
+const STEM_HANJA: Record<string, string> = {
+  '갑': '甲', '을': '乙', '병': '丙', '정': '丁', '무': '戊',
+  '기': '己', '경': '庚', '신': '辛', '임': '壬', '계': '癸',
+}
+const BRANCH_HANJA: Record<string, string> = {
+  '자': '子', '축': '丑', '인': '寅', '묘': '卯', '진': '辰', '사': '巳',
+  '오': '午', '미': '未', '신': '申', '유': '酉', '술': '戌', '해': '亥',
+}
+const STEM_COLOR: Record<string, string> = {
+  '갑': '청', '을': '청', '병': '붉은', '정': '붉은',
+  '무': '황', '기': '황', '경': '흰', '신': '흰',
+  '임': '검은', '계': '검은',
+}
+const BRANCH_ANIMAL: Record<string, string> = {
+  '자': '쥐', '축': '소', '인': '호랑이', '묘': '토끼',
+  '진': '용', '사': '뱀', '오': '말', '미': '양',
+  '신': '원숭이', '유': '닭', '술': '개', '해': '돼지',
+}
+
+function iljuHanja(p: Profile) {
+  if (!p.day_stem || !p.day_branch) return ''
+  return `${STEM_HANJA[p.day_stem] ?? p.day_stem}${BRANCH_HANJA[p.day_branch] ?? p.day_branch}`
+}
+
+function iljuLabel(p: Profile) {
+  if (!p.day_stem || !p.day_branch) return ''
+  return `${STEM_COLOR[p.day_stem] ?? p.day_stem} ${BRANCH_ANIMAL[p.day_branch] ?? p.day_branch}`
+}
+
+function iljuColor(element: string | null): string {
+  if (!element) return 'var(--text-secondary)'
+  if (element === '수') return '#888'
+  return `var(--el-${element})`
+}
+
+function birthLabel(p: Profile) {
+  const [y, m, d] = p.birth_date.split('-')
+  const cal = p.calendar === 'lunar' ? '음력' : '양력'
+  return `${y}년 ${m}월 ${d}일 (${cal})`
+}
+
+const deletingId = ref<number | null>(null)
+const repSettingId = ref<number | null>(null)
+
+async function openProfile(p: Profile) {
+  openingId.value = p.id
+  const req: SajuCalcRequest = {
+    name: p.name,
+    birth_date: p.birth_date,
+    birth_time: p.birth_time,
+    gender: p.gender as 'male' | 'female',
+    calendar: p.calendar as 'solar' | 'lunar',
+    is_leap_month: p.is_leap_month,
+    city: p.city ?? undefined,
+    birth_longitude: p.longitude ?? undefined,
+  }
+  try {
+    await store.calculate(req)
+    await navigateTo('/profile?saved=1')
+  } finally {
+    openingId.value = null
+  }
+}
+
+async function deleteProfile(id: number) {
+  if (!confirm('이 프로필을 삭제할까요?')) return
+  deletingId.value = id
+  try {
+    await $fetch(`${base}/api/profiles/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${auth.token}` },
+    })
+    profiles.value = profiles.value.filter(p => p.id !== id)
+  } finally {
+    deletingId.value = null
+  }
+}
+
+async function setRepresentative(id: number) {
+  repSettingId.value = id
+  try {
+    await $fetch(`${base}/api/profiles/${id}/representative`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${auth.token}` },
+    })
+    profiles.value = profiles.value.map(p => ({ ...p, is_representative: p.id === id }))
+  } finally {
+    repSettingId.value = null
+  }
+}
+</script>
+
+<template>
+  <div class="page-wrap">
+    <h2 class="page-title">내 만세력</h2>
+
+    <!-- 로딩 -->
+    <div v-if="pending" class="loading">
+      <svg class="animate-spin w-8 h-8" viewBox="0 0 40 40" fill="none">
+        <circle cx="20" cy="20" r="17" stroke="var(--border-subtle)" stroke-width="3"/>
+        <path d="M20 3a17 17 0 0 1 17 17" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <!-- 비어있음 -->
+    <div v-else-if="!profiles.length" class="empty">
+      <p>저장된 프로필이 없습니다.</p>
+      <NuxtLink to="/profile" class="btn-primary" style="margin-top: 12px; display: inline-flex; gap: 6px; padding: 12px 24px;">
+        만세력 보러가기
+      </NuxtLink>
+    </div>
+
+    <!-- 목록 -->
+    <div v-else class="profile-list">
+      <div
+        v-for="p in profiles"
+        :key="p.id"
+        class="profile-item"
+        :class="{ 'is-rep': p.is_representative, 'is-opening': openingId === p.id }"
+        @click="openProfile(p)"
+      >
+        <div class="profile-item-info">
+          <div class="profile-item-top">
+            <span class="profile-item-name">{{ p.name }}</span>
+            <span v-if="p.is_representative" class="rep-badge">대표</span>
+          </div>
+          <span class="profile-item-birth">{{ birthLabel(p) }}</span>
+          <span v-if="p.day_stem" class="profile-item-ilju">
+            <span
+              class="ilju-chars"
+              :style="`color: ${iljuColor(p.day_stem_element)}`"
+            >{{ iljuHanja(p) }}</span>
+            <span
+              class="ilju-animal-text"
+              :style="`color: ${iljuColor(p.day_stem_element)}`"
+            >{{ iljuLabel(p) }}</span>
+          </span>
+        </div>
+
+        <div class="profile-item-actions" @click.stop>
+          <button
+            v-if="!p.is_representative"
+            class="action-btn rep-btn"
+            :disabled="repSettingId === p.id"
+            @click="setRepresentative(p.id)"
+          >
+            {{ repSettingId === p.id ? '설정 중...' : '대표 설정' }}
+          </button>
+          <button
+            class="action-btn del-btn"
+            :disabled="deletingId === p.id"
+            @click="deleteProfile(p.id)"
+          >
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.page-wrap {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+}
+
+.page-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 20px;
+}
+
+.loading, .empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  color: var(--text-muted);
+  font-size: var(--fs-sub);
+}
+
+.profile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profile-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  border: 1px solid var(--border-default);
+  background: var(--surface-1);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.profile-item:hover {
+  background: var(--surface-2);
+}
+.profile-item.is-rep {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 5%, var(--surface-1));
+}
+.profile-item.is-rep:hover {
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface-1));
+}
+.profile-item.is-opening {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.profile-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.profile-item-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.profile-item-name {
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.rep-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+}
+.profile-item-birth {
+  font-size: var(--fs-sub);
+  color: var(--text-muted);
+}
+.profile-item-ilju {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+.ilju-chars {
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--font-ganji);
+}
+.ilju-animal-text {
+  font-size: var(--fs-sub);
+  color: var(--text-secondary);
+}
+
+.profile-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.rep-btn {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 12px;
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.rep-btn:hover:not(:disabled) {
+  background: var(--surface-3);
+  color: var(--text-primary);
+}
+.del-btn {
+  width: 34px;
+  height: 34px;
+  background: color-mix(in srgb, #c04838 8%, transparent);
+  color: #c04838;
+}
+.del-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, #c04838 15%, transparent);
+}
+.del-btn svg {
+  width: 16px;
+  height: 16px;
+}
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+</style>
