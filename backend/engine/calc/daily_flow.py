@@ -10,7 +10,7 @@ calc_saju + 오늘 날짜 → daily_tags (오늘의 운세 RAG 쿼리 seed)
 """
 
 from __future__ import annotations
-from datetime import datetime, timezone, date as _date
+from datetime import datetime, timezone, timedelta, date as _date
 from engine.calc.ten_gods import calculate_ten_god
 from engine.calc.se_un import calc_year_ganji, calc_month_ganji, get_element_interaction
 
@@ -22,7 +22,7 @@ _BASE_DATE = _date(1900, 1, 1)   # 갑술일: stemIdx=0, branchIdx=10
 
 
 def _today_day_ganji(target: _date | None = None) -> dict:
-    today = target or datetime.now(timezone.utc).date()
+    today = target or datetime.now(timezone.utc).astimezone(timezone(timedelta(hours=9))).date()
     delta = (today - _BASE_DATE).days
     stem   = _STEMS[delta % 10]
     branch = _BRANCHES[(delta + 10) % 12]
@@ -46,7 +46,7 @@ def compute_daily_flow(calc: dict, target_date: _date | None = None) -> dict:
           "interactions":  [{type, label, ten_god, element_relation}, ...],
         }
     """
-    today = target_date or datetime.now(timezone.utc).date()
+    today = target_date or datetime.now(timezone.utc).astimezone(timezone(timedelta(hours=9))).date()
     year  = today.year
     month = today.month
 

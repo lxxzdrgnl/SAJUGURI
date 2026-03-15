@@ -40,6 +40,7 @@ function scoreColor(score: number) {
 </script>
 
 <template>
+  <div class="daily-result-inner">
   <!-- 요약 카드 -->
   <div class="card summary-card">
     <div class="summary-top">
@@ -106,9 +107,12 @@ function scoreColor(score: number) {
 
   <!-- 하단 액션 (슬롯) -->
   <slot name="actions" />
+  </div>
 </template>
 
 <style scoped>
+.daily-result-inner { display: flex; flex-direction: column; gap: 12px; }
+
 .summary-card { display: flex; flex-direction: column; gap: 12px; }
 .summary-top { display: flex; align-items: center; gap: 16px; }
 .summary-ganji { display: flex; gap: 0; flex-shrink: 0; line-height: 1; }

@@ -160,6 +160,7 @@ onMounted(() => {
     try {
       const b = JSON.parse(pending)
       fromDirectInput.value = true
+      step.value = 'input'  // 로딩 오버레이 표시용
       calcFortune({
         birth_date:      b.birth_date,
         birth_time:      b.birth_time ?? null,

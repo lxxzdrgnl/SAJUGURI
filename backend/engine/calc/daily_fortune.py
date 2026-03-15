@@ -10,7 +10,7 @@ scoring flow:
 """
 
 from __future__ import annotations
-from datetime import date as _date, datetime, timezone
+from datetime import date as _date, datetime, timezone, timedelta
 
 from engine.calc.ten_gods import calculate_ten_god
 from engine.calc.daily_flow import _today_day_ganji
@@ -379,7 +379,7 @@ def _make_basis(
 # ── 메인 함수 ─────────────────────────────────────────────────────────────────
 
 def compute_daily_fortune(calc: dict, target_date: _date | None = None) -> dict:
-    today = target_date or datetime.now(timezone.utc).date()
+    today = target_date or datetime.now(timezone.utc).astimezone(timezone(timedelta(hours=9))).date()
     day_ganji = _today_day_ganji(today)
 
     day_master   = calc["day_pillar"]["stem"]
