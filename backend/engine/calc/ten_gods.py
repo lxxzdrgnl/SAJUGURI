@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 from engine.data.heavenly_stems import STEMS_BY_KOREAN
+from engine.data.earthly_branches import BRANCHES_BY_KOREAN as _BRANCHES_BY_KOREAN
 from engine.data.wuxing import WUXING_GENERATION, WUXING_DESTRUCTION
 
 # 지지 대표 천간 (정기 기준)
@@ -56,10 +57,28 @@ def generate_ten_gods_list(saju: dict) -> list[str]:
     return result
 
 
-def calculate_ten_gods_distribution(saju: dict) -> dict[str, float]:
+# 합화 오행 + 음양 → 대표 천간 (합화 후 십성 계산용)
+_ELEMENT_YY_TO_STEM: dict[tuple, str] = {
+    ("목", "양"): "갑", ("목", "음"): "을",
+    ("화", "양"): "병", ("화", "음"): "정",
+    ("토", "양"): "무", ("토", "음"): "기",
+    ("금", "양"): "경", ("금", "음"): "신",
+    ("수", "양"): "임", ("수", "음"): "계",
+}
+
+
+def calculate_ten_gods_distribution(
+    saju: dict,
+    branch_hap: "dict[str, tuple[str, float]] | None" = None,
+    stem_hap: "dict[str, tuple[str, float]] | None" = None,
+) -> dict[str, float]:
     """
     십성 분포 계산.
     가중치: 천간 1.0 / 일반 지지 0.5 / 월지 1.5 (명리학적 月令 우위 반영)
+
+    branch_hap: {pillar_key: (합화_오행, 반영비율)} — 지지합화 시 전달
+                ratio=0.7 → 합화 오행 70% + 원래 오행 30%
+    stem_hap:   {pillar_key: (합화_오행, 반영비율)} — 천간합화 시 전달
     """
     dist: dict[str, float] = {
         g: 0.0 for g in [
@@ -73,8 +92,17 @@ def calculate_ten_gods_distribution(saju: dict) -> dict[str, float]:
     for key in ["year_pillar", "month_pillar", "hour_pillar"]:
         if saju.get(key) is None:
             continue
-        stem = saju[key]["stem"]
-        dist[calculate_ten_god(day_stem, stem)] += 1.0
+        orig_stem = saju[key]["stem"]
+        if stem_hap and key in stem_hap:
+            new_el, ratio = stem_hap[key]
+            orig_yy = STEMS_BY_KOREAN[orig_stem]["yin_yang"]
+            new_rep = _ELEMENT_YY_TO_STEM.get((new_el, orig_yy))
+            # 합화 오행 (ratio%) + 원래 오행 (1-ratio%)
+            if new_rep:
+                dist[calculate_ten_god(day_stem, new_rep)] += 1.0 * ratio
+            dist[calculate_ten_god(day_stem, orig_stem)] += 1.0 * (1.0 - ratio)
+        else:
+            dist[calculate_ten_god(day_stem, orig_stem)] += 1.0
 
     # 지지 대표 천간 — 월지 1.5, 나머지 0.5
     branch_weights = {
@@ -87,9 +115,20 @@ def calculate_ten_gods_distribution(saju: dict) -> dict[str, float]:
         if saju.get(key) is None:
             continue
         branch = saju[key]["branch"]
-        rep = _BRANCH_TO_STEM.get(branch)
-        if rep:
-            dist[calculate_ten_god(day_stem, rep)] += weight
+        if branch_hap and key in branch_hap:
+            new_el, ratio = branch_hap[key]
+            branch_yy = _BRANCHES_BY_KOREAN[branch]["yin_yang"]
+            new_rep = _ELEMENT_YY_TO_STEM.get((new_el, branch_yy))
+            orig_rep = _BRANCH_TO_STEM.get(branch)
+            # 합화 오행 (ratio%) + 원래 오행 (1-ratio%)
+            if new_rep:
+                dist[calculate_ten_god(day_stem, new_rep)] += weight * ratio
+            if orig_rep:
+                dist[calculate_ten_god(day_stem, orig_rep)] += weight * (1.0 - ratio)
+        else:
+            rep = _BRANCH_TO_STEM.get(branch)
+            if rep:
+                dist[calculate_ten_god(day_stem, rep)] += weight
 
     return dist
 

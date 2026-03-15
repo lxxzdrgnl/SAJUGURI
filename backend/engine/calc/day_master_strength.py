@@ -11,11 +11,12 @@
 from __future__ import annotations
 from engine.data.earthly_branches import BRANCHES_BY_KOREAN
 from engine.data.wuxing import WUXING_GENERATION
+from engine.calc.ten_gods import calculate_ten_gods_distribution
 
 _SUPPORT_GODS: set[str] = {"비견", "겁재", "정인", "편인"}
 
 _LEVEL_8_THRESHOLDS = [
-    (90, "극왕"), (80, "태강"), (70, "신강"), (60, "중화신강"),
+    (93, "극왕"), (87, "태강"), (80, "신강"), (60, "중화신강"),
     (50, "중화신약"), (40, "신약"), (30, "태약"),
 ]
 
@@ -48,7 +49,7 @@ def _branch_ten_god_category(day_stem: str, branch: str) -> str:
     return get_branch_ten_god(day_stem, branch)
 
 
-def analyze_day_master_strength(saju: dict, ten_gods_dist: dict) -> dict:
+def analyze_day_master_strength(saju: dict, ten_gods_dist: dict, branch_relations: dict | None = None) -> dict:
     """
     일간 강약 종합 분석.
 
@@ -133,9 +134,55 @@ def analyze_day_master_strength(saju: dict, ten_gods_dist: dict) -> dict:
     else:
         deuk_si = False  # 시주 미입력 시 득시 판단 불가
 
-    supporting = bigeop + inseong
-    opposing   = seolgi
-    deuk_se    = supporting > opposing
+    # ── 득세: 삼합/방합/반합만 반영, 육합·천간합 제외, 월지 기여분 제외 ──
+    # branch_relations 없으면 원국 ten_gods_dist 사용
+    if branch_relations:
+        # 기둥 순서 + branch→pillar 매핑
+        _pillar_order = [p for p in ["year", "month", "day", "hour"] if saju.get(f"{p}_pillar") is not None]
+        _branch_to_pillars: dict[str, list[str]] = {}
+        for _p in _pillar_order:
+            _branch_to_pillars.setdefault(saju[f"{_p}_pillar"]["branch"], []).append(f"{_p}_pillar")
+
+        # 합화 결과 오행의 천간 존재 여부
+        _HAP_EL_STEMS: dict[str, set] = {
+            "목": {"갑", "을"}, "화": {"병", "정"},
+            "토": {"무", "기"}, "금": {"경", "신"}, "수": {"임", "계"},
+        }
+        _all_stems = {saju[_k]["stem"] for _k in ["year_pillar", "month_pillar", "day_pillar", "hour_pillar"] if saju.get(_k)}
+
+        # 삼합(삼합/방합/반합)만 override 구성 — 육합/천간합 제외
+        _sam_hap_overrides: dict[str, tuple[str, float]] = {}
+        for _sam in branch_relations.get("sam_hap", []):
+            _result_el = _sam.get("element", "")
+            _hap_subtype = _sam.get("type", "삼합")
+            _base = 0.30 if _hap_subtype == "반합" else (0.45 if _hap_subtype == "방합" else 0.50)
+            _has_stem = bool(_HAP_EL_STEMS.get(_result_el, set()) & _all_stems)
+            if _has_stem:
+                _base += 0.30
+            for _br in _sam.get("branches", []):
+                for _pk in _branch_to_pillars.get(_br, []):
+                    if _result_el == saju[_pk]["branch_element"]:
+                        continue
+                    _ratio = _base
+                    if _pk == "month_pillar":
+                        _full_combo = _hap_subtype in ("삼합", "방합")
+                        _ratio = min(_ratio, 0.80 if (_full_combo and _has_stem) else 0.50)
+                    _ratio = min(_ratio, 1.0)
+                    if _ratio > _sam_hap_overrides.get(_pk, ("", 0.0))[1]:
+                        _sam_hap_overrides[_pk] = (_result_el, _ratio)
+
+        _deuk_se_dist = calculate_ten_gods_distribution(saju, _sam_hap_overrides, {})
+    else:
+        _deuk_se_dist = ten_gods_dist
+
+    _bigeop_d  = _deuk_se_dist.get("비견", 0) + _deuk_se_dist.get("겁재", 0)
+    _inseong_d = _deuk_se_dist.get("정인", 0) + _deuk_se_dist.get("편인", 0)
+    _seolgi_d  = sum(_deuk_se_dist.get(g, 0) for g in ["정재", "편재", "정관", "편관", "식신", "상관"])
+
+    # 월지 기여분 제외 (得令에서 이미 반영)
+    _month_br_tg = _branch_ten_god_category(day_stem, month_branch)
+    _month_br_weight = 1.5 if _month_br_tg in _SUPPORT_GODS else 0.0
+    deuk_se = (_bigeop_d + _inseong_d - _month_br_weight) >= _seolgi_d
 
     return {
         "level": level,
