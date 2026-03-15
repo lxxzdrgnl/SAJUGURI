@@ -1,9 +1,60 @@
 <script setup lang="ts">
 import type { SajuCalcRequest } from '~/types/saju'
 import { useSajuStore } from '~/stores/saju'
+import { useAuthStore } from '~/stores/auth'
 
-const store = useSajuStore()
-const route = useRoute()
+const store  = useSajuStore()
+const auth   = useAuthStore()
+const route  = useRoute()
+const config = useRuntimeConfig()
+
+// ── 저장 모달 (프로필 0개 첫 계산 후) ────────────────────────────────────────
+const showFirstSaveModal = ref(false)
+const firstSaveState = ref<'idle' | 'loading' | 'done' | 'error'>('idle')
+
+async function checkAndPromptSave() {
+  if (!auth.isLoggedIn) return
+  try {
+    const profiles = await $fetch<unknown[]>(`${config.public.apiBase}/api/profiles`, {
+      headers: { Authorization: `Bearer ${auth.token}` },
+    })
+    if (profiles.length === 0) showFirstSaveModal.value = true
+  } catch { /* 무시 */ }
+}
+
+async function doFirstSave() {
+  const b = store.lastRequest as Record<string, unknown>
+  const dp = store.result?.day_pillar
+  if (!b) return
+  firstSaveState.value = 'loading'
+  try {
+    await $fetch(`${config.public.apiBase}/api/profiles`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${auth.token}` },
+      body: {
+        name: (b.name as string)?.trim() || '내 사주',
+        birth_date: b.birth_date,
+        birth_time: b.birth_time ?? null,
+        calendar: b.calendar ?? 'solar',
+        gender: b.gender,
+        is_leap_month: b.is_leap_month ?? false,
+        city: b.city ?? null,
+        longitude: (b.birth_longitude ?? b.longitude) ?? null,
+        day_stem: dp?.stem ?? null,
+        day_branch: dp?.branch ?? null,
+        day_stem_element: dp?.stem_element ?? null,
+      },
+    })
+    firstSaveState.value = 'done'
+    setTimeout(() => { showFirstSaveModal.value = false; firstSaveState.value = 'idle' }, 1200)
+  } catch {
+    firstSaveState.value = 'error'
+    setTimeout(() => { firstSaveState.value = 'idle' }, 2000)
+  }
+}
+
+// 페이지 떠날 때 스토어 초기화 (홈에서 프리로드한 결과가 남지 않도록)
+onBeforeRouteLeave(() => { store.reset() })
 
 // 로그인 후 복귀 시 이전 계산 결과 복원 / 내 만세력 진입 시 저장 상태 표시
 onMounted(() => {
@@ -19,6 +70,7 @@ onMounted(() => {
 
 async function onSubmit(req: SajuCalcRequest) {
   await store.calculate(req)
+  if (store.result) checkAndPromptSave()
 }
 
 // ── 입력 요약 ──────────────────────────────────────────────────────────────────
@@ -44,24 +96,42 @@ const inputSummary = computed(() => {
 
     <!-- 헤더 -->
     <header
-      class="text-center transition-all duration-500"
-      :class="store.result ? 'mb-4' : 'mb-6'"
+      class="transition-all duration-500"
+      :class="store.result ? 'mb-4 text-center' : 'mb-6'"
     >
-      <div class="inline-block">
+      <!-- 입력 화면: 뒤로가기(좌상단) + 타이틀 중앙 -->
+      <div v-if="!store.result" class="relative mb-1">
+        <button
+          class="absolute left-0 top-1 flex items-center justify-center sm:hidden"
+          style="width:32px;height:32px;border-radius:8px;border:1px solid var(--border-subtle);background:var(--surface-1);color:var(--text-secondary);cursor:pointer;"
+          @click="navigateTo('/')"
+        >
+          <svg viewBox="0 0 24 24" fill="none" style="width:20px;height:20px;">
+            <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <h1 class="font-bold tracking-wide leading-none text-5xl text-center" style="font-family: var(--font-ganji);">
+          <span style="color: var(--text-primary);">사주</span><span style="color: var(--accent);">구리</span>
+        </h1>
+      </div>
+
+      <!-- 결과 화면: 뒤로가기 + 타이틀 -->
+      <div v-else class="relative w-full">
+        <button
+          class="absolute left-0 top-1/2 flex items-center justify-center sm:hidden"
+          style="width:32px;height:32px;border-radius:8px;border:1px solid var(--border-subtle);background:var(--surface-1);color:var(--text-secondary);cursor:pointer;transform:translateY(-50%);"
+          @click="store.reset()"
+        >
+          <svg viewBox="0 0 24 24" fill="none" style="width:20px;height:20px;">
+            <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
         <h1
-          class="font-bold tracking-wide leading-none"
-          :class="store.result ? 'text-3xl' : 'text-5xl'"
-          style="transition: font-size 0.4s ease; font-family: var(--font-ganji);"
+          class="font-bold tracking-wide leading-none text-3xl"
+          style="font-family: var(--font-ganji);"
         >
           <span style="color: var(--text-primary);">사주</span><span style="color: var(--accent);">구리</span>
         </h1>
-        <div
-          v-if="!store.result"
-          class="mt-1 text-[10px] tracking-[0.35em] uppercase"
-          style="color: var(--text-muted);"
-        >
-          四柱八字 · AI 사주 상담
-        </div>
       </div>
       <p v-if="!store.result" class="mt-4 text-sm" style="color: var(--text-muted);">
         오직 당신을 위한 사주
@@ -128,6 +198,26 @@ const inputSummary = computed(() => {
     </Transition>
 
   </div>
+
+  <!-- 첫 계산 후 저장 유도 모달 -->
+  <AppDialog
+    v-model:show="showFirstSaveModal"
+    title="프로필을 저장할까요?"
+    desc="저장하면 다음에 다시 입력 없이 바로 만세력을 볼 수 있어요."
+    cancel-text="다음에"
+  >
+    <button
+      class="btn-primary"
+      style="width:100%"
+      :disabled="firstSaveState === 'loading' || firstSaveState === 'done'"
+      @click="doFirstSave"
+    >
+      <template v-if="firstSaveState === 'loading'">저장 중…</template>
+      <template v-else-if="firstSaveState === 'done'">저장 완료!</template>
+      <template v-else-if="firstSaveState === 'error'">저장 실패 — 다시 시도</template>
+      <template v-else>저장하기</template>
+    </button>
+  </AppDialog>
 </template>
 
 <style scoped>

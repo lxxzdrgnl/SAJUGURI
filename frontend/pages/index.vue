@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import { useSajuStore } from '~/stores/saju'
+import type { SajuCalcRequest } from '~/types/saju'
 
 interface ProfileItem {
   id: number
@@ -126,6 +128,25 @@ const birthLabel = computed(() => {
 })
 
 const hasProfile = computed(() => !!repProfile.value)
+
+const store = useSajuStore()
+
+function goToMyProfile() {
+  const p = repProfile.value
+  if (!p) return
+  const req: SajuCalcRequest = {
+    name:           p.name,
+    birth_date:     p.birth_date,
+    birth_time:     p.birth_time,
+    gender:         p.gender as 'male' | 'female',
+    calendar:       p.calendar as 'solar' | 'lunar',
+    is_leap_month:  p.is_leap_month,
+    city:           p.city ?? undefined,
+    birth_longitude: p.longitude ?? undefined,
+  }
+  store.calculate(req)   // await 없이 — profile 페이지가 loading 스피너 처리
+  navigateTo('/profile')
+}
 </script>
 
 <template>
@@ -145,7 +166,7 @@ const hasProfile = computed(() => !!repProfile.value)
       <!-- 왼쪽: 일진 + 프로필 or 온보딩 -->
       <div class="dashboard-left">
         <!-- 프로필 카드 (있을 때만) -->
-        <div v-if="hasProfile" class="profile-card">
+        <button v-if="hasProfile" class="profile-card" @click="goToMyProfile">
           <div class="profile-card-inner">
             <div class="profile-info">
               <p class="profile-name">
@@ -170,7 +191,7 @@ const hasProfile = computed(() => !!repProfile.value)
               <img src="/profile-illust.jpg" alt="" />
             </div>
           </div>
-        </div>
+        </button>
 
         <!-- 프로필 없을 때 온보딩 -->
         <div v-else class="onboarding-inline">
@@ -226,6 +247,21 @@ const hasProfile = computed(() => !!repProfile.value)
               <div>
                 <p class="service-name">만세력</p>
                 <p class="service-desc">4기둥·오행·대운 정밀 분석</p>
+              </div>
+              <svg class="service-arrow" viewBox="0 0 24 24" fill="none">
+                <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </NuxtLink>
+
+          <NuxtLink to="/daily" class="service-card service-card-daily">
+            <div class="service-card-img-wrap">
+              <img src="/daily-illust.png" alt="오늘의 운세" class="service-card-img" />
+            </div>
+            <div class="service-card-footer">
+              <div>
+                <p class="service-name">오늘의 운세</p>
+                <p class="service-desc">시험·재물·연애·건강 6가지 분석</p>
               </div>
               <svg class="service-arrow" viewBox="0 0 24 24" fill="none">
                 <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -355,7 +391,12 @@ const hasProfile = computed(() => !!repProfile.value)
   border: 1px solid var(--border-default);
   background: var(--surface-1);
   overflow: hidden;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
 }
+.profile-card:hover { background: var(--surface-2); }
 .profile-card-inner {
   display: flex;
   align-items: center;

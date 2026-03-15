@@ -153,6 +153,43 @@ export interface YeonUnEntry {
   twelve_wun: string
 }
 
+/** 오늘의 운세 요청 */
+export interface DailyFortuneRequest {
+  birth_date: string
+  birth_time: string | null
+  gender: 'male' | 'female'
+  calendar?: 'solar' | 'lunar'
+  is_leap_month?: boolean
+  birth_longitude?: number
+  target_date?: string
+}
+
+/** 카테고리 운세 항목 */
+export interface FortuneItem {
+  score: number
+  level: string
+  text: string
+  label: string
+}
+
+/** 옷 색깔 추천 */
+export interface ClothingColor {
+  color:   string
+  element: string
+  reason:  string
+}
+
+/** 오늘의 운세 응답 */
+export interface DailyFortuneResponse {
+  target_date:    string
+  day_ganji:      { stem: string; branch: string }
+  overall:        string
+  caution:        string
+  basis:          string
+  clothing_color: ClothingColor
+  fortunes:       Record<string, FortuneItem>
+}
+
 /** 일진 항목 */
 export interface IlJinEntry {
   date: string

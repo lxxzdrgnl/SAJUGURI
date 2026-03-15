@@ -4,6 +4,9 @@ import {
   searchCities, calcSolarCorrection, formatCorrection, SEOUL_CORRECTION, type CityOption,
 } from '~/utils/citySearch'
 
+const props = withDefaults(defineProps<{ submitLabel?: string }>(), {
+  submitLabel: '사주 계산하기',
+})
 const emit = defineEmits<{ submit: [req: SajuCalcRequest] }>()
 
 const form = reactive<{
@@ -405,7 +408,7 @@ function onSubmit() {
         :disabled="submitAttempted && !!(nameError || birthDateError)"
         :style="submitAttempted && (nameError || birthDateError) ? 'opacity: 0.45; cursor: not-allowed;' : ''"
       >
-        사주 계산하기
+        {{ props.submitLabel }}
       </button>
     </div>
   </form>
