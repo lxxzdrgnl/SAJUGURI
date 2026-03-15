@@ -40,7 +40,10 @@ jobs:
              git fetch origin && git reset --hard origin/main && \
              cd ~/servers && \
              docker compose up -d --build --no-deps sajuguri-backend && \
-             echo '✅ Backend deployed'"
+             echo '⏳ Waiting for migration...' && \
+             sleep 5 && \
+             docker compose logs --tail=30 sajuguri-backend && \
+             docker compose ps sajuguri-backend | grep -q 'Up' && echo '✅ Backend deployed' || (echo '❌ Backend failed to start' && exit 1)"
 
       - name: Cleanup SSH Key
         if: always()

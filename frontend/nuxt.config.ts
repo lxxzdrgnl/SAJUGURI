@@ -23,6 +23,16 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: '사주구리',
+      titleTemplate: '%s | 사주구리',
+      meta: [
+        { name: 'description', content: 'AI가 분석한 나만의 사주 — 오늘의 운세부터 사주 상담까지' },
+        { property: 'og:site_name', content: '사주구리' },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:title', content: '사주구리 — AI 사주 상담' },
+        { property: 'og:description', content: 'AI가 분석한 나만의 사주 — 오늘의 운세부터 사주 상담까지' },
+        { property: 'og:image', content: `${process.env.NUXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/onboarding-illust.png` },
+        { name: 'twitter:card', content: 'summary_large_image' },
+      ],
       link: [
         {
           rel: 'icon',
@@ -52,6 +62,7 @@ export default defineNuxtConfig({
     apiBase: process.env.NUXT_PUBLIC_API_BASE ?? 'http://localhost:8000',
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE ?? 'http://localhost:8000',
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL ?? 'http://localhost:3000',
     },
   },
 

@@ -13,4 +13,10 @@ COPY . .
 EXPOSE 8000
 
 # 컨테이너 시작 시 DB 마이그레이션 후 서버 실행
-CMD ["sh", "-c", "uv run alembic upgrade head && uv run uvicorn main:app --host 0.0.0.0 --port 8000"]
+CMD ["sh", "-c", "\
+  for i in $(seq 1 10); do \
+    uv run alembic upgrade head && break; \
+    echo \"[retry $i/10] DB not ready, waiting 3s...\"; \
+    sleep 3; \
+  done && \
+  uv run uvicorn main:app --host 0.0.0.0 --port 8000"]

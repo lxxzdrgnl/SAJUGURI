@@ -11,6 +11,17 @@ const result = ref<SajuCalcResponse | null>(null)
 const birthInput = ref<Record<string, unknown> | null>(null)
 const currentUrl = ref('')
 
+const personName = computed(() => (birthInput.value?.name as string) || '사주구리')
+
+useSeoMeta({
+  title:          () => `${personName.value}님의 사주 만세력 보러가기`,
+  ogTitle:        () => `${personName.value}님의 사주 만세력 보러가기`,
+  description:    () => `${personName.value}님의 사주 분석 결과를 확인해보세요.`,
+  ogDescription:  () => `${personName.value}님의 사주 분석 결과를 확인해보세요.`,
+  ogImage:        `${config.public.siteUrl}/onboarding-illust.png`,
+  ogUrl:          () => `${config.public.siteUrl}/share/${token}`,
+})
+
 onMounted(async () => {
   currentUrl.value = window.location.href
   try {

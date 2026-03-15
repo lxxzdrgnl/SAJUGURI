@@ -24,6 +24,7 @@ const props = withDefaults(defineProps<{
 
 const auth = useAuthStore()
 const config = useRuntimeConfig()
+const goToLogin = useGoToLogin()
 
 // 깊은 복사로 Proxy 완전 해제 (Chart.js hasOwnProperty 오류 방지)
 const raw = computed(() => JSON.parse(JSON.stringify(props.result)) as SajuCalcResponse)
@@ -217,7 +218,14 @@ async function copyShareUrl() {
 }
 
 function confirmLogin() {
-  navigateTo('/login')
+  // 로그인 후 결과 복원을 위해 현재 상태 저장
+  if (import.meta.client && props.birthInput && props.result) {
+    localStorage.setItem('saju_pending_state', JSON.stringify({
+      req: props.birthInput,
+      res: props.result,
+    }))
+  }
+  goToLogin()
 }
 </script>
 
@@ -515,8 +523,8 @@ function confirmLogin() {
     <!-- 저장 / 공유 CTA 카드 -->
     <div v-if="birthInput" class="action-card">
       <div class="action-card-text">
-        <p class="action-card-title">분석 결과 보관하기</p>
-        <p class="action-card-desc">저장하면 언제든 다시 확인할 수 있고, 링크로 가족·친구와 공유할 수 있어요.</p>
+        <p class="action-card-title">만세력 저장하기</p>
+        <p class="action-card-desc">만세력을 저장하면 오늘의 운세·사주 상담에 바로 활용할 수 있어요.</p>
       </div>
       <div class="action-card-btns">
         <button class="action-btn action-btn-save" :disabled="saveState === 'loading'" @click="saveProfile">
@@ -543,7 +551,7 @@ function confirmLogin() {
             <circle cx="18" cy="19" r="3" stroke="currentColor" stroke-width="1.5"/>
             <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
-          <span>{{ shareState === 'error' ? '공유 오류' : '공유하기' }}</span>
+          <span>{{ shareState === 'error' ? '오류 발생' : '만세력 결과 공유하기' }}</span>
         </button>
       </div>
     </div>
@@ -659,24 +667,14 @@ function confirmLogin() {
 /* ── 저장/공유 CTA 카드 ── */
 .action-card {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 24px 28px;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px 24px;
   border-radius: 16px;
   border: 1px solid var(--border-subtle);
   background: var(--surface-1);
 }
-@media (max-width: 600px) {
-  .action-card {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 20px;
-    gap: 16px;
-  }
-}
 .action-card-text {
-  flex: 1;
   min-width: 0;
 }
 .action-card-title {
@@ -692,25 +690,23 @@ function confirmLogin() {
 }
 .action-card-btns {
   display: flex;
-  gap: 10px;
-  flex-shrink: 0;
-}
-@media (max-width: 600px) {
-  .action-card-btns { width: 100%; }
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
 }
 .action-btn {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 11px 22px;
+  width: 100%;
+  padding: 12px 20px;
   border-radius: 10px;
-  font-size: var(--fs-label);
+  font-size: var(--fs-body);
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
-  white-space: nowrap;
   border: 1px solid;
 }
 .action-btn:disabled { opacity: 0.55; cursor: default; }
@@ -726,9 +722,6 @@ function confirmLogin() {
   border-color: var(--border-default);
 }
 .action-btn-share:hover:not(:disabled) { background: var(--surface-2); }
-@media (max-width: 600px) {
-  .action-btn { flex: 1; }
-}
 
 /* ── 모달 공통 ── */
 .modal-backdrop {

@@ -3,6 +3,7 @@ import { useAuthStore } from '~/stores/auth'
 
 const auth = useAuthStore()
 const config = useRuntimeConfig()
+const goToLogin = useGoToLogin()
 
 const menuOpen = ref(false)
 
@@ -48,7 +49,7 @@ onMounted(() => {
               </div>
             </div>
           </template>
-          <NuxtLink v-else to="/login" class="app-login-btn">로그인</NuxtLink>
+          <button v-else class="app-login-btn" @click="goToLogin()">로그인</button>
         </div>
       </div>
     </header>
@@ -59,7 +60,7 @@ onMounted(() => {
 
     <footer class="app-footer">
       <div class="app-footer-inner">
-        <p>&copy; 2026 SAJUBON. All rights reserved.</p>
+        <p>&copy; 2026 SAJUGURI. All rights reserved.</p>
         <p class="app-footer-contact">
           <span>Contact:</span>
           <a href="mailto:pung4905@naver.com" class="app-footer-link">pung4905@naver.com</a>

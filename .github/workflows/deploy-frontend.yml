@@ -31,7 +31,10 @@ jobs:
              echo 'NUXT_PUBLIC_API_BASE=${{ secrets.NUXT_PUBLIC_API_BASE }}' > ~/servers/sajuguri/repo/frontend/.env && \
              cd ~/servers && \
              docker compose up -d --build --no-deps sajuguri-frontend && \
-             echo '✅ Frontend deployed'"
+             echo '⏳ Waiting for frontend...' && \
+             sleep 5 && \
+             docker compose logs --tail=20 sajuguri-frontend && \
+             docker compose ps sajuguri-frontend | grep -q 'Up' && echo '✅ Frontend deployed' || (echo '❌ Frontend failed to start' && exit 1)"
 
       - name: Cleanup SSH Key
         if: always()
