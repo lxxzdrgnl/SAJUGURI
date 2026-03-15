@@ -176,9 +176,8 @@ async function saveProfile() {
   }
   saveState.value = 'loading'
   try {
-    await $fetch(`${config.public.apiBase}/api/profiles`, {
+    await auth.authFetch(`${config.public.apiBase}/api/profiles`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${auth.token}` },
       body: buildProfileBody(),
     })
     saveState.value = 'done'
@@ -197,9 +196,8 @@ async function createShare() {
   }
   shareState.value = 'loading'
   try {
-    const data = await $fetch<{ share_token: string; share_url: string }>(`${config.public.apiBase}/api/share`, {
+    const data = await auth.authFetch<{ share_token: string; share_url: string }>(`${config.public.apiBase}/api/share`, {
       method: 'POST',
-      headers: auth.token ? { Authorization: `Bearer ${auth.token}` } : {},
       body: { calc_snapshot: props.result, birth_input: props.birthInput },
     })
     shareUrl.value = data.share_url

@@ -71,9 +71,7 @@ onMounted(async () => {
     return
   }
   try {
-    repProfile.value = await $fetch<ProfileItem>(`${base}/api/profiles/representative`, {
-      headers: { Authorization: `Bearer ${auth.token}` },
-    })
+    repProfile.value = await auth.authFetch<ProfileItem>(`${base}/api/profiles/representative`)
   } catch {
     // 404 or error — 온보딩 화면 표시
   } finally {

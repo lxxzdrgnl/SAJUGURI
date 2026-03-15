@@ -93,5 +93,20 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  return { token, refreshToken, user, isLoggedIn, setTokens, setToken, logout, fetchMe, init }
+  /** 인증이 필요한 fetch — 401 시 자동 refresh 후 1회 재시도 */
+  async function authFetch<T>(url: string, opts: Parameters<typeof $fetch>[1] = {}): Promise<T> {
+    const makeHeaders = () => ({ ...(opts.headers ?? {}), Authorization: `Bearer ${token.value}` })
+    try {
+      return await $fetch<T>(url, { ...opts, headers: makeHeaders() })
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status
+      if (status === 401) {
+        const ok = await _refresh()
+        if (ok) return await $fetch<T>(url, { ...opts, headers: makeHeaders() })
+      }
+      throw err
+    }
+  }
+
+  return { token, refreshToken, user, isLoggedIn, setTokens, setToken, logout, fetchMe, init, authFetch }
 })
