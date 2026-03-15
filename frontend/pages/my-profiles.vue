@@ -30,9 +30,7 @@ const openingId = ref<number | null>(null)
 
 async function fetchProfiles() {
   try {
-    profiles.value = await $fetch<Profile[]>(`${base}/api/profiles`, {
-      headers: { Authorization: `Bearer ${auth.token}` },
-    })
+    profiles.value = await auth.authFetch<Profile[]>(`${base}/api/profiles`)
   } finally {
     pending.value = false
   }
@@ -108,10 +106,7 @@ async function deleteProfile(id: number) {
   if (!confirm('이 프로필을 삭제할까요?')) return
   deletingId.value = id
   try {
-    await $fetch(`${base}/api/profiles/${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${auth.token}` },
-    })
+    await auth.authFetch(`${base}/api/profiles/${id}`, { method: 'DELETE' })
     profiles.value = profiles.value.filter(p => p.id !== id)
   } finally {
     deletingId.value = null
@@ -121,10 +116,7 @@ async function deleteProfile(id: number) {
 async function setRepresentative(id: number) {
   repSettingId.value = id
   try {
-    await $fetch(`${base}/api/profiles/${id}/representative`, {
-      method: 'PATCH',
-      headers: { Authorization: `Bearer ${auth.token}` },
-    })
+    await auth.authFetch(`${base}/api/profiles/${id}/representative`, { method: 'PATCH' })
     profiles.value = profiles.value.map(p => ({ ...p, is_representative: p.id === id }))
   } finally {
     repSettingId.value = null
@@ -146,8 +138,12 @@ async function setRepresentative(id: number) {
 
     <!-- 비어있음 -->
     <div v-else-if="!profiles.length" class="empty">
-      <p>저장된 프로필이 없습니다.</p>
-      <NuxtLink to="/profile" class="btn-primary" style="margin-top: 12px; display: inline-flex; gap: 6px; padding: 12px 24px;">
+      <div class="empty-illust-box">
+        <img src="/onboarding-illust.png" alt="" class="empty-illust" />
+      </div>
+      <p class="empty-title">저장된 만세력이 없으시네요</p>
+      <p class="empty-desc">생년월일시만 알면 내 사주 만세력을 바로 만들 수 있어요.</p>
+      <NuxtLink to="/profile" class="btn-primary" style="margin-top: 8px; display: inline-flex; padding: 14px 28px;">
         만세력 보러가기
       </NuxtLink>
     </div>
@@ -225,6 +221,37 @@ async function setRepresentative(id: number) {
   padding: 60px 0;
   color: var(--text-muted);
   font-size: var(--fs-sub);
+}
+
+.empty-illust-box {
+  width: 200px;
+  height: 200px;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid var(--border-default);
+  background: var(--surface-1);
+  margin-bottom: 16px;
+}
+
+.empty-illust {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.3);
+}
+
+.empty-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.empty-desc {
+  font-size: var(--fs-sub);
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.6;
 }
 
 .profile-list {

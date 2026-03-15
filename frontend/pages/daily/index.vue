@@ -63,9 +63,8 @@ async function saveProfile() {
   const b = lastBirthInput.value
   saveProfileState.value = 'loading'
   try {
-    await $fetch(`${base}/api/profiles`, {
+    await auth.authFetch(`${base}/api/profiles`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${auth.token}` },
       body: {
         name:          (b.name as string)?.trim() || '내 사주',
         birth_date:    b.birth_date,
@@ -135,8 +134,7 @@ async function loadProfiles() {
   if (!auth.isLoggedIn) return
   profLoad.value = true
   try {
-    profiles.value = await $fetch<ProfileItem[]>(`${base}/api/profiles`, {
-      headers: { Authorization: `Bearer ${auth.token}` },
+    profiles.value = await auth.authFetch<ProfileItem[]>(`${base}/api/profiles`, {
     })
   } catch { profiles.value = [] }
   finally { profLoad.value = false }
@@ -216,6 +214,7 @@ function reset() {
 // ── 색상 유틸 ────────────────────────────────────────────────────────────────
 function elColor(el: string): string {
   if (!el) return 'var(--text-secondary)'
+  if (el === '수') return '#888'
   return `var(--el-${el})`
 }
 
@@ -369,108 +368,36 @@ const branchEl = computed(() => result.value ? BRANCH_EL[result.value.day_ganji.
 
     <!-- ── Step 3: 결과 ───────────────────────────────────────────────────── -->
     <div v-else-if="step === 'result' && result" class="result-wrap animate-fade-up">
-
-      <!-- 요약 카드 -->
-      <div class="card summary-card">
-        <div class="summary-top">
-          <div class="summary-ganji">
-            <span class="ganji ganji-char" :style="`color: ${elColor(stemEl)}`">
-              {{ STEM_HANJA[result.day_ganji.stem] }}
-            </span>
-            <span class="ganji ganji-char" :style="`color: ${elColor(branchEl)}`">
-              {{ BRANCH_HANJA[result.day_ganji.branch] }}
-            </span>
-          </div>
-          <p class="overall-text fs-body">{{ result.overall }}</p>
+    <SajuDailyResultPanel :result="result">
+      <template #actions>
+        <div class="result-actions">
+          <button class="btn-share" :disabled="shareState === 'loading'" @click="doShare">
+            <svg viewBox="0 0 24 24" fill="none" class="share-icon">
+              <circle cx="18" cy="5" r="3" stroke="currentColor" stroke-width="1.8"/>
+              <circle cx="6" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
+              <circle cx="18" cy="19" r="3" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <template v-if="shareState === 'loading'">링크 생성 중…</template>
+            <template v-else-if="shareState === 'error'">오류 발생</template>
+            <template v-else>공유하기</template>
+          </button>
+          <button
+            v-if="fromDirectInput"
+            class="btn-save-profile"
+            :class="{ 'is-done': saveProfileState === 'done' }"
+            :disabled="saveProfileState === 'loading' || saveProfileState === 'done'"
+            @click="saveProfile"
+          >
+            <template v-if="saveProfileState === 'loading'">저장 중…</template>
+            <template v-else-if="saveProfileState === 'done'">저장 완료 ✓</template>
+            <template v-else-if="saveProfileState === 'error'">저장 실패 — 다시 시도</template>
+            <template v-else>프로필 저장하기</template>
+          </button>
+          <button class="btn-secondary" @click="reset">다른 사람 운세 보기</button>
         </div>
-
-        <!-- 명리 근거 -->
-        <div class="basis-row">
-          <span class="basis-label fs-tiny">📌 오늘의 근거</span>
-          <span class="basis-text fs-tiny">{{ result.basis }}</span>
-        </div>
-      </div>
-
-      <!-- 옷 색깔 + 조심 -->
-      <div class="info-row">
-        <!-- 옷 색깔 -->
-        <div class="card info-card">
-          <div class="info-icon-row">
-            <div
-              v-if="result.clothing_color.element"
-              class="el-swatch"
-              :style="`background: ${EL_SWATCH[result.clothing_color.element] ?? 'var(--surface-3)'}`"
-            />
-            <span class="fs-label" style="font-weight:700;color:var(--text-primary);">오늘의 옷 색깔</span>
-          </div>
-          <p class="info-value fs-body">{{ result.clothing_color.color }}</p>
-          <p class="info-reason fs-tiny">{{ result.clothing_color.reason }}</p>
-        </div>
-
-        <!-- 조심 -->
-        <div class="card info-card caution-card">
-          <div class="info-icon-row">
-            <span class="caution-icon">⚠️</span>
-            <span class="fs-label" style="font-weight:700;color:var(--color-bad);">오늘 조심</span>
-          </div>
-          <p class="info-value fs-sub caution-text">{{ result.caution }}</p>
-        </div>
-      </div>
-
-      <!-- 카테고리별 운세 (1열) -->
-      <div class="fortunes-list">
-        <div v-for="item in orderedFortunes" :key="item.key" class="card fortune-card">
-          <div class="fortune-top">
-            <div class="fortune-header">
-              <span class="fortune-icon">{{ CAT_ICON[item.key] }}</span>
-              <span class="fortune-label fs-body">{{ item.label }}</span>
-            </div>
-            <div class="fortune-score-col">
-              <span class="score-num" :style="`color: ${scoreColor(item.score)}`">{{ item.score }}</span>
-              <span class="fs-tiny" style="color:var(--text-muted);">/100</span>
-            </div>
-          </div>
-
-          <!-- 점수 바 + 레벨 -->
-          <div class="score-bar-row">
-            <div class="score-bar-track">
-              <div
-                class="score-bar-fill"
-                :style="`width:${item.score}%; background:${scoreColor(item.score)}`"
-              />
-            </div>
-            <span class="level-badge fs-tiny" :style="`color:${scoreColor(item.score)}`">{{ item.level }}</span>
-          </div>
-
-          <p class="fortune-text fs-sub">{{ item.text }}</p>
-        </div>
-      </div>
-
-      <!-- 공유 + 저장 + 다시 계산 -->
-      <div class="result-actions">
-        <button class="btn-share" :disabled="shareState === 'loading'" @click="doShare">
-          <svg viewBox="0 0 24 24" fill="none" class="share-icon">
-            <circle cx="18" cy="5" r="3" stroke="currentColor" stroke-width="1.8"/>
-            <circle cx="6" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
-            <circle cx="18" cy="19" r="3" stroke="currentColor" stroke-width="1.8"/>
-            <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-          </svg>
-          <template v-if="shareState === 'loading'">링크 생성 중…</template>
-          <template v-else-if="shareState === 'error'">오류 발생</template>
-          <template v-else>공유하기</template>
-        </button>
-        <button
-          v-if="fromDirectInput && saveProfileState !== 'done'"
-          class="btn-save-profile"
-          :disabled="saveProfileState === 'loading'"
-          @click="saveProfile"
-        >
-          <template v-if="saveProfileState === 'loading'">저장 중…</template>
-          <template v-else-if="saveProfileState === 'error'">저장 실패 — 다시 시도</template>
-          <template v-else>프로필 저장하기</template>
-        </button>
-        <button class="btn-secondary" @click="reset">다른 사람 운세 보기</button>
-      </div>
+      </template>
+    </SajuDailyResultPanel>
     </div>
 
   </div>
@@ -717,128 +644,6 @@ const branchEl = computed(() => result.value ? BRANCH_EL[result.value.day_ganji.
 /* ── Step3: 결과 ── */
 .result-wrap { display: flex; flex-direction: column; gap: 12px; }
 
-.summary-card { display: flex; flex-direction: column; gap: 12px; }
-.summary-top {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-.summary-ganji { display: flex; gap: 0; flex-shrink: 0; line-height: 1; }
-.overall-text {
-  flex: 1;
-  min-width: 0;
-  color: var(--text-primary);
-  font-weight: 500;
-  line-height: 1.65;
-}
-.basis-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: var(--surface-2);
-  border: 1px solid var(--border-subtle);
-  flex-wrap: wrap;
-}
-.basis-label {
-  font-weight: 700;
-  color: var(--text-muted);
-  white-space: nowrap;
-}
-.basis-text { color: var(--text-secondary); line-height: 1.5; }
-
-/* 옷 색깔 + 조심 나란히 */
-.info-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-.info-card {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 14px 16px;
-}
-.info-icon-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.el-swatch {
-  width: 14px;
-  height: 14px;
-  border-radius: 3px;
-  flex-shrink: 0;
-}
-.caution-icon { font-size: 14px; }
-.info-value {
-  font-weight: 600;
-  color: var(--text-primary);
-  line-height: 1.4;
-}
-.info-reason { color: var(--text-muted); line-height: 1.5; }
-.caution-card .caution-text {
-  color: var(--text-secondary);
-  font-weight: 400;
-  font-size: var(--fs-tiny);
-  line-height: 1.55;
-}
-
-/* 카테고리 — 1열 */
-.fortunes-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.fortune-card { display: flex; flex-direction: column; gap: 8px; }
-.fortune-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.fortune-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.fortune-icon  { font-size: var(--fs-body); line-height: 1; }
-.fortune-label { font-weight: 700; color: var(--text-primary); }
-.fortune-score-col {
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
-  flex-shrink: 0;
-}
-.score-num {
-  font-size: 26px;
-  font-weight: 800;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-.score-bar-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.score-bar-track {
-  flex: 1;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--border-subtle);
-  overflow: hidden;
-}
-.score-bar-fill {
-  height: 100%;
-  border-radius: 2px;
-  transition: width 0.5s ease;
-}
-.level-badge { font-weight: 600; white-space: nowrap; }
-.fortune-text {
-  color: var(--text-secondary);
-  line-height: 1.7;
-}
-
 /* 결과 하단 액션 */
 .result-actions {
   display: flex;
@@ -913,6 +718,7 @@ const branchEl = computed(() => result.value ? BRANCH_EL[result.value.day_ganji.
 }
 .btn-save-profile:hover:not(:disabled) { background: var(--surface-2); }
 .btn-save-profile:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-save-profile.is-done { border-color: var(--color-good); color: var(--color-good); }
 
 /* 다시 계산 버튼 */
 .btn-secondary {
