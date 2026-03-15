@@ -69,7 +69,7 @@ export interface SinSal {
   type: 'lucky' | 'neutral' | 'unlucky' | 'warning'
   priority: 'high' | 'medium' | 'low'
   location: string[]
-  description?: string
+  desc?: string
 }
 
 /** 공망 */
@@ -106,7 +106,7 @@ export interface SajuCalcResponse {
   wuxing_count:     Record<string, number>
   wuxing_count_hap: Record<string, number>
   wuxing_chars:     { pillar: string; type: string; element: string }[]
-  wuxing_chars_hap: { pillar: string; type: string; element: string }[]
+  wuxing_hap_contributions: { pillar: string; type: string; hap_type: string | null; base_element: string; hap_element: string | null; hap_ratio: number }[]
   dominant_elements: string[]
   weak_elements: string[]
   yin_yang_ratio: { yang: number; yin: number }

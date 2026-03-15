@@ -24,7 +24,7 @@ function isCurrent(entry: DaeUnEntry) {
 
     <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
       <div
-        v-for="entry in daeUnList"
+        v-for="entry in daeUnList.slice(0, 10)"
         :key="entry.start_age"
         class="flex-shrink-0 flex flex-col items-center gap-1"
       >

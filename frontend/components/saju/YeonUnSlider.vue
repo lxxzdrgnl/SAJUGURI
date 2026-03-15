@@ -8,11 +8,11 @@ const props = defineProps<{
 const { getYeonUn } = useSajuApi()
 
 const currentYear = new Date().getFullYear()
-const startYear = currentYear - 4
+const startYear = currentYear - 2
 
 const { data: yeonUnList, pending, error } = await useAsyncData(
   `yeon-un-${startYear}-${props.dayStem}`,
-  () => getYeonUn(startYear, 12, props.dayStem),
+  () => getYeonUn(startYear, 10, props.dayStem),
   { default: () => [] as YeonUnEntry[] }
 )
 

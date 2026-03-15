@@ -69,7 +69,10 @@ function pctLabelPos(i: number) {
 
 <template>
   <div class="card flex flex-col items-center">
-    <h3 class="label-section mb-4 self-start">오행 오각형</h3>
+    <div class="flex items-center gap-1.5 mb-4 self-start">
+      <h3 class="label-section">오행 오각형</h3>
+      <UiInfoTooltip text="목·화·토·금·수 다섯 기운을 오각형으로 나타냅니다. 파란 화살표는 상생(서로 돕는 관계), 빨간 선은 상극(서로 제어하는 관계)입니다. 원이 클수록 해당 오행이 강합니다." />
+    </div>
     <svg viewBox="0 0 300 300" class="w-full max-w-[300px]" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <marker id="arrow-teal" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
