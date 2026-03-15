@@ -31,9 +31,11 @@ export function useSajuApi() {
   }
 
   async function getDailyFortune(req: DailyFortuneRequest): Promise<DailyFortuneResponse> {
+    const d = new Date()
+    const localDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
     return $fetch<DailyFortuneResponse>(`${base}/api/saju/daily`, {
       method: 'POST',
-      body: req,
+      body: { ...req, target_date: req.target_date ?? localDate },
     })
   }
 

@@ -19,7 +19,7 @@ const form = reactive<{
 }>({
   name: '',
   birth_date: '',
-  birth_time: '12:00',
+  birth_time: '',
   gender: 'male',
   calendar: 'solar',
   is_leap_month: false,
@@ -114,8 +114,8 @@ const onDayKeydown   = makeBackspace(dayVal,   monthRef, monthVal)
 // ── 시각 분리 입력 ──────────────────────────────────────────────────
 const hourRef     = ref<HTMLInputElement | null>(null)
 const minuteRef   = ref<HTMLInputElement | null>(null)
-const hourVal     = ref('12')
-const minuteVal   = ref('00')
+const hourVal     = ref('')
+const minuteVal   = ref('')
 const timeUnknown = ref(false)
 
 watch([hourVal, minuteVal], () => {
