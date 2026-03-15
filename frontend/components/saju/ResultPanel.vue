@@ -135,7 +135,7 @@ const hapBasis = computed((): HapGroup[] => {
 })
 
 // ── 저장 상태 ─────────────────────────────────────────────────────────────────
-const saveState = ref<'idle' | 'loading' | 'done' | 'exists' | 'error'>('idle')
+const { saveState, saveProfile: _saveProfile, saveLabel, saveDisabled } = useProfileSave()
 const showLoginModal = ref(false)
 
 // ── 공유 상태 ─────────────────────────────────────────────────────────────────
@@ -154,13 +154,13 @@ function buildProfileBody() {
   const dp = props.result.day_pillar
   return {
     name: (b.name as string)?.trim() || '내 사주',
-    birth_date: b.birth_date,
-    birth_time: b.birth_time ?? null,
-    calendar: b.calendar ?? 'solar',
-    gender: b.gender,
-    is_leap_month: b.is_leap_month ?? false,
-    city: b.city ?? null,
-    longitude: (b.birth_longitude ?? b.longitude) ?? null,
+    birth_date: b.birth_date as string,
+    birth_time: (b.birth_time as string | null) ?? null,
+    calendar: (b.calendar as string) ?? 'solar',
+    gender: b.gender as string,
+    is_leap_month: (b.is_leap_month as boolean) ?? false,
+    city: (b.city as string | null) ?? null,
+    longitude: ((b.birth_longitude ?? b.longitude) as number | null) ?? null,
     day_stem: dp?.stem ?? null,
     day_branch: dp?.branch ?? null,
     day_stem_element: dp?.stem_element ?? null,
@@ -174,19 +174,7 @@ async function saveProfile() {
     showLoginModal.value = true
     return
   }
-  saveState.value = 'loading'
-  try {
-    await auth.authFetch(`${config.public.apiBase}/api/profiles`, {
-      method: 'POST',
-      body: buildProfileBody(),
-    })
-    saveState.value = 'done'
-    setTimeout(() => { saveState.value = 'idle' }, 2500)
-  } catch (e: unknown) {
-    const status = (e as { response?: { status?: number } })?.response?.status
-    saveState.value = status === 409 ? 'exists' : 'error'
-    setTimeout(() => { saveState.value = 'idle' }, 2500)
-  }
+  await _saveProfile(buildProfileBody())
 }
 
 async function createShare() {
@@ -525,7 +513,7 @@ function confirmLogin() {
         <p class="action-card-desc">만세력을 저장하면 오늘의 운세·사주 상담에 바로 활용할 수 있어요.</p>
       </div>
       <div class="action-card-btns">
-        <button class="action-btn action-btn-save" :disabled="saveState === 'loading'" @click="saveProfile">
+        <button class="action-btn action-btn-save" :disabled="saveDisabled" @click="saveProfile">
           <svg v-if="saveState === 'loading'" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
             <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" stroke-dasharray="32" stroke-dashoffset="12"/>
           </svg>
@@ -536,7 +524,7 @@ function confirmLogin() {
             <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M17 21v-8H7v8M7 3v5h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          <span>{{ saveState === 'done' ? '저장됨' : saveState === 'exists' ? '이미 저장됨' : saveState === 'error' ? '저장 오류' : '저장하기' }}</span>
+          <span>{{ saveLabel }}</span>
         </button>
 
         <button class="action-btn action-btn-share" :disabled="shareState === 'loading'" @click="createShare">

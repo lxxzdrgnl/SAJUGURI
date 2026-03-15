@@ -37,15 +37,22 @@ class ClothingColor(BaseModel):
     reason:  str = Field(description="한 줄 이유")
 
 
+class BirthDayPillar(BaseModel):
+    stem:         str = Field(description="일주 천간", examples=["임"])
+    branch:       str = Field(description="일주 지지", examples=["자"])
+    stem_element: str = Field(description="일주 천간 오행", examples=["수"])
+
+
 class DailyFortuneResponse(BaseModel):
     """오늘의 운세 응답."""
 
-    target_date:    str          = Field(description="운세 날짜", examples=["2026-03-15"])
-    day_ganji:      DailyGanji   = Field(description="오늘 일진 간지")
-    overall:        str          = Field(description="전체 요약 한 문장")
-    caution:        str          = Field(description="오늘 조심해야 할 것")
-    basis:          str          = Field(description="오늘 운세의 명리 근거 요약")
-    clothing_color: ClothingColor = Field(description="추천 옷 색깔")
-    fortunes: dict[str, FortuneItem] = Field(
+    target_date:      str            = Field(description="운세 날짜", examples=["2026-03-15"])
+    day_ganji:        DailyGanji     = Field(description="오늘 일진 간지")
+    overall:          str            = Field(description="전체 요약 한 문장")
+    caution:          str            = Field(description="오늘 조심해야 할 것")
+    basis:            str            = Field(description="오늘 운세의 명리 근거 요약")
+    clothing_color:   ClothingColor  = Field(description="추천 옷 색깔")
+    fortunes:         dict[str, FortuneItem] = Field(
         description="카테고리별 운세 (exam/money/love/career/health/social)"
     )
+    birth_day_pillar: BirthDayPillar = Field(description="생일 기준 일주 (프로필 저장용)")

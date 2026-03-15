@@ -431,4 +431,9 @@ def compute_daily_fortune(calc: dict, target_date: _date | None = None) -> dict:
         "basis":          basis,
         "clothing_color": clothing,
         "fortunes":       fortunes,
+        "birth_day_pillar": {
+            "stem":         calc["day_pillar"]["stem"],
+            "branch":       calc["day_pillar"]["branch"],
+            "stem_element": calc["day_pillar"]["stem_element"],
+        },
     }

@@ -3,7 +3,7 @@
 from datetime import date, time as time_type
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select, update
+from sqlalchemy import select, update, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.models import Profile, User
@@ -24,13 +24,16 @@ async def create_profile(
     birth_time = time_type.fromisoformat(body.birth_time) if body.birth_time else None
 
     # 동일 생년월일+생시+음양력+성별 중복 체크
+    time_cond = Profile.birth_time.is_(None) if birth_time is None else Profile.birth_time == birth_time
     dup = await db.execute(
         select(Profile).where(
-            Profile.user_id == user.id,
-            Profile.birth_date == birth_date,
-            Profile.birth_time == birth_time,
-            Profile.calendar == body.calendar,
-            Profile.gender == body.gender,
+            and_(
+                Profile.user_id == user.id,
+                Profile.birth_date == birth_date,
+                time_cond,
+                Profile.calendar == body.calendar,
+                Profile.gender == body.gender,
+            )
         ).limit(1)
     )
     if dup.scalar_one_or_none():
