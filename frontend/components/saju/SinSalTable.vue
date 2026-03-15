@@ -18,7 +18,10 @@ const neutral = computed(() => props.sinSals.filter(s => s.type === 'neutral'))
         <div v-if="lucky.length" class="sinsal-list">
           <div v-for="s in lucky" :key="s.name" class="sinsal-row">
             <span class="dot" style="color: var(--color-good);">●</span>
-            <span class="sname">{{ s.name }}</span>
+            <div class="sname-col">
+              <span class="sname">{{ s.name }}</span>
+              <span v-if="s.desc" class="sdesc">{{ s.desc }}</span>
+            </div>
             <span v-if="s.priority === 'high'" class="pbadge pbadge-lucky">강</span>
           </div>
         </div>
@@ -30,7 +33,10 @@ const neutral = computed(() => props.sinSals.filter(s => s.type === 'neutral'))
         <div v-if="unlucky.length" class="sinsal-list">
           <div v-for="s in unlucky" :key="s.name" class="sinsal-row">
             <span class="dot" style="color: var(--color-bad);">●</span>
-            <span class="sname">{{ s.name }}</span>
+            <div class="sname-col">
+              <span class="sname">{{ s.name }}</span>
+              <span v-if="s.desc" class="sdesc">{{ s.desc }}</span>
+            </div>
             <span v-if="s.priority === 'high'" class="pbadge pbadge-unlucky">강</span>
           </div>
         </div>
@@ -38,9 +44,11 @@ const neutral = computed(() => props.sinSals.filter(s => s.type === 'neutral'))
       </div>
     </div>
 
-    <div v-if="neutral.length" class="neutral-row">
-      <span style="font-size: var(--fs-label); color: #aaaaaa;">중립:</span>
-      <span v-for="s in neutral" :key="s.name" class="neutral-chip">{{ s.name }}</span>
+    <div v-if="neutral.length" class="neutral-wrap">
+      <div v-for="s in neutral" :key="s.name" class="neutral-item">
+        <span class="neutral-name">{{ s.name }}</span>
+        <span v-if="s.desc" class="sdesc">{{ s.desc }}</span>
+      </div>
     </div>
   </div>
 </template>
@@ -50,6 +58,9 @@ const neutral = computed(() => props.sinSals.filter(s => s.type === 'neutral'))
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+}
+@media (max-width: 400px) {
+  .sinsal-grid { grid-template-columns: 1fr; }
 }
 .sinsal-col {
   background: var(--surface-2);
@@ -73,17 +84,21 @@ const neutral = computed(() => props.sinSals.filter(s => s.type === 'neutral'))
   color: var(--color-bad);
   border-bottom: 1px solid color-mix(in srgb, var(--color-bad) 18%, transparent);
 }
-.sinsal-list { padding: 4px 0; }
+.sinsal-list { padding: 0; }
 .sinsal-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
-  padding: 5px 12px;
+  padding: 7px 12px;
   font-size: var(--fs-label);
   color: var(--text-primary);
+  border-bottom: 1px solid var(--surface-3);
 }
-.dot { font-size: 7px; flex-shrink: 0; }
-.sname { flex: 1; }
+.sinsal-list .sinsal-row:last-child { border-bottom: none; }
+.dot { font-size: 7px; flex-shrink: 0; margin-top: 3px; }
+.sname-col { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.sname { font-size: var(--fs-label); color: var(--text-primary); }
+.sdesc { font-size: 10px; color: var(--text-muted); line-height: 1.4; }
 .pbadge {
   font-size: 10px;
   padding: 1px 5px;
@@ -104,19 +119,26 @@ const neutral = computed(() => props.sinSals.filter(s => s.type === 'neutral'))
   color: var(--text-muted);
   text-align: center;
 }
-.neutral-row {
+.neutral-wrap {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  align-items: center;
-  padding-top: 4px;
+  gap: 8px;
+  padding-top: 6px;
   border-top: 1px solid var(--border-subtle);
 }
-.neutral-chip {
+.neutral-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 5px 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  min-width: 80px;
+}
+.neutral-name {
   font-size: var(--fs-label);
-  color: var(--text-muted);
-  padding: 2px 8px;
-  background: var(--surface-3);
-  border-radius: 4px;
+  color: var(--text-secondary);
+  font-weight: 600;
 }
 </style>

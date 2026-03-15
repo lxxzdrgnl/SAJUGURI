@@ -5,6 +5,17 @@ const props = defineProps<{
   strength: DayMasterStrength
 }>()
 
+const LEVEL_DESC: Record<string, string> = {
+  '극약':   '일간의 힘이 극도로 약합니다. 인성·비겁이 절실하며 설기·극제하는 기운은 크게 해롭습니다.',
+  '태약':   '일간이 매우 약합니다. 인성·비겁으로 강하게 부조해야 균형을 이룹니다.',
+  '신약':   '일간이 약한 편입니다. 인성이나 비겁이 용신 후보로 활용됩니다.',
+  '중화신약': '거의 균형에 가깝지만 약간 부족합니다. 소폭의 부조가 도움이 됩니다.',
+  '중화신강': '가장 이상적인 균형에 가깝습니다. 크게 치우침 없이 두루 좋은 사주입니다.',
+  '신강':   '일간이 강한 편입니다. 식상·재성·관성으로 기운을 소모·설기해야 합니다.',
+  '태강':   '일간이 매우 강합니다. 설기·극제하는 오행이 용신으로 필요합니다.',
+  '극왕':   '일간이 극도로 강합니다. 종강격 가능성이 있으며 거스르는 기운은 크게 흉합니다.',
+}
+
 const segments = [
   { key: '극약',    label: '극약' },
   { key: '태약',    label: '태약' },
@@ -32,9 +43,14 @@ const deukItems = [
     </div>
 
     <!-- 현재 레벨 강조 표시 -->
-    <div class="text-center py-2">
-      <span class="text-lg font-bold" style="color: var(--text-primary);">{{ strength.level_8 }}</span>
-      <span class="ml-2 text-sm" style="color: var(--text-muted);">({{ strength.score }}점)</span>
+    <div class="py-1">
+      <div class="flex items-baseline gap-2">
+        <span class="text-lg font-bold" style="color: var(--text-primary);">{{ strength.level_8 }}</span>
+        <span class="text-sm" style="color: var(--text-muted);">({{ strength.score }}점)</span>
+      </div>
+      <p v-if="LEVEL_DESC[strength.level_8]" class="mt-1 fs-label leading-relaxed" style="color: var(--text-secondary);">
+        {{ LEVEL_DESC[strength.level_8] }}
+      </p>
     </div>
 
     <!-- 8단계 바 -->

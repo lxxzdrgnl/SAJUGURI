@@ -53,6 +53,7 @@ const chartOptions = {
   plugins: {
     legend: {
       position: 'bottom' as const,
+      onClick: () => {},
       labels: {
         color: '#5a5450',
         font: { size: 14, family: 'Joseon100Years' },
@@ -73,14 +74,13 @@ const chartOptions = {
 </script>
 
 <template>
-  <div class="card flex flex-col items-center">
-    <h3 class="label-section mb-4 self-start">오행 분포</h3>
+  <div class="flex flex-col items-center">
     <ClientOnly>
-      <div class="w-full max-w-[240px]">
+      <div class="w-full max-w-[200px]">
         <Doughnut :data="chartData" :options="chartOptions" />
       </div>
       <template #fallback>
-        <div class="h-48 flex items-center justify-center text-sm" style="color: var(--text-muted);">차트 로딩 중...</div>
+        <div class="h-48 flex items-center justify-center fs-label" style="color: var(--text-muted);">차트 로딩 중...</div>
       </template>
     </ClientOnly>
   </div>
