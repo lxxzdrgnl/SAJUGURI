@@ -5,7 +5,13 @@ const auth = useAuthStore()
 const config = useRuntimeConfig()
 
 watchEffect(() => {
-  if (auth.isLoggedIn) navigateTo('/profile', { replace: true })
+  if (auth.isLoggedIn) {
+    const redirect = import.meta.client
+      ? (localStorage.getItem('saju_login_redirect') || '/')
+      : '/'
+    if (import.meta.client) localStorage.removeItem('saju_login_redirect')
+    navigateTo(redirect, { replace: true })
+  }
 })
 
 function handleGoogleLogin() {
