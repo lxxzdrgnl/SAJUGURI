@@ -30,7 +30,9 @@ onMounted(async () => {
     localStorage.removeItem('saju_pending_save')
   }
 
-  navigateTo('/profile', { replace: true })
+  const redirect = localStorage.getItem('saju_login_redirect') || '/profile'
+  localStorage.removeItem('saju_login_redirect')
+  navigateTo(redirect, { replace: true })
 })
 </script>
 
