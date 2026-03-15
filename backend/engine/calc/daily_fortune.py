@@ -206,10 +206,10 @@ _TEN_GOD_LABEL: dict[str, str] = {
 }
 
 _WUXING_RELATION_LABEL: dict[int, str] = {
-    15: "용신 오행",
-    10: "희신 오행",
-    0:  "중립 오행",
-    -10:"기신 오행",
+    15: "나에게 힘이 되는 기운",
+    10: "나에게 좋은 기운",
+    0:  "무난한 기운",
+    -10:"조심이 필요한 기운",
 }
 
 
@@ -291,6 +291,21 @@ def _clothing_color(yong_sin: dict) -> dict:
     return {"color": data["color"], "element": el, "reason": data["reason"]}
 
 
+_TEN_GOD_DESC: dict[str, str] = {
+    "비견": "독립·경쟁의 기운",  "겁재": "기회·경쟁의 기운",
+    "식신": "여유·표현의 기운",  "상관": "창의·발산의 기운",
+    "편재": "변동·재물의 기운",  "정재": "안정·재물의 기운",
+    "편관": "도전·긴장의 기운",  "정관": "규율·책임의 기운",
+    "편인": "직관·탐구의 기운",  "정인": "학습·보호의 기운",
+}
+
+_WUXING_EL_MEANING: dict[str, str] = {
+    "목": "성장·추진",  "화": "열정·활동",
+    "토": "안정·중재",  "금": "결단·집중",
+    "수": "지혜·유연",
+}
+
+
 def _make_basis(
     ten_god: str,
     today_branch_el: str,
@@ -299,34 +314,66 @@ def _make_basis(
     day_branch: str,
     month_branch: str,
     today_branch: str,
+    day_master: str,
+    year_branch: str,
 ) -> str:
-    """오늘 운세의 명리 근거 한 줄 요약."""
+    """오늘 운세의 명리 근거 요약."""
     parts: list[str] = []
 
-    parts.append(f"오늘 천간의 십성: {ten_god}")
+    tg_desc = _TEN_GOD_DESC.get(ten_god, "")
+    parts.append(f"오늘 천간은 일간({day_master}) 기준 {ten_god}({tg_desc})")
 
-    wx_label = _WUXING_RELATION_LABEL.get(wx_bonus, "기신 오행" if wx_bonus < 0 else "중립 오행")
-    josa = "는" if today_branch_el in ("수","오") else "은"
-    parts.append(f"지지 오행 {today_branch_el}{josa} {wx_label}")
+    el_meaning = _WUXING_EL_MEANING.get(today_branch_el, "")
+    wx_label = _WUXING_RELATION_LABEL.get(wx_bonus, "조심이 필요한 기운" if wx_bonus < 0 else "무난한 기운")
+    parts.append(f"오늘 지지의 {today_branch_el}({el_meaning}) 기운은 {wx_label}")
 
+    # 충 체크
+    branch_relation = None
     for a, b in CHUNG_PAIRS:
-        if (a, b) == (today_branch, day_branch) or (b, a) == (today_branch, day_branch):
-            parts.append(f"일지({day_branch})와 충(沖) 관계")
+        if (a, b) in [(today_branch, day_branch), (b, a)]:
+            branch_relation = f"내 일지({day_branch})와 충돌 → 변화·불안정 주의"
             break
-        if (a, b) == (today_branch, month_branch) or (b, a) == (today_branch, month_branch):
-            parts.append(f"월지({month_branch})와 충(沖) 관계")
+        if (a, b) in [(today_branch, month_branch), (b, a)]:
+            branch_relation = f"내 월지({month_branch})와 충돌 → 감정 기복 주의"
             break
-    else:
+
+    # 합 체크 (충 없을 때만)
+    if branch_relation is None:
         for h in YUK_HAP:
-            hp = tuple(sorted(h["pair"]))
-            if hp == tuple(sorted([today_branch, day_branch])):
-                parts.append(f"일지({day_branch})와 합(合) 관계")
+            hp = set(h["pair"])
+            if hp == {today_branch, day_branch}:
+                branch_relation = f"내 일지({day_branch})와 합 → 흐름이 잘 맞는 날"
                 break
-            if hp == tuple(sorted([today_branch, month_branch])):
-                parts.append(f"월지({month_branch})와 합(合) 관계")
+            if hp == {today_branch, month_branch}:
+                branch_relation = f"내 월지({month_branch})와 합 → 안정적인 기운"
                 break
 
-    return " · ".join(parts)
+    # 형 체크
+    if branch_relation is None:
+        for members in SAM_HYEONG.values():
+            if today_branch in members and (day_branch in members or month_branch in members):
+                branch_relation = "형(刑) 관계 → 긴장·마찰 가능성"
+                break
+
+    # 해 체크
+    if branch_relation is None:
+        for a, b in YUK_HAE:
+            if {a, b} in [{today_branch, day_branch}, {today_branch, month_branch}]:
+                branch_relation = "해(害) 관계 → 작은 방해 주의"
+                break
+
+    if branch_relation:
+        parts.append(branch_relation)
+
+    # 연지 포함 삼합 체크
+    all_branches = {day_branch, month_branch, year_branch, today_branch}
+    SAM_HAP = [{"자","진","신"}, {"묘","미","해"}, {"오","술","인"}, {"유","축","사"}]
+    for group in SAM_HAP:
+        if len(group & all_branches) >= 3:
+            parts.append("삼합 기운 형성 → 강한 에너지의 날")
+            break
+
+    return "\n".join(parts)
 
 
 # ── 메인 함수 ─────────────────────────────────────────────────────────────────
@@ -338,6 +385,7 @@ def compute_daily_fortune(calc: dict, target_date: _date | None = None) -> dict:
     day_master   = calc["day_pillar"]["stem"]
     day_branch   = calc["day_pillar"]["branch"]
     month_branch = calc["month_pillar"]["branch"]
+    year_branch  = calc["year_pillar"]["branch"]
     yong_sin     = calc.get("yong_sin", {})
 
     ten_god            = calculate_ten_god(day_master, day_ganji["stem"])
@@ -371,7 +419,8 @@ def compute_daily_fortune(calc: dict, target_date: _date | None = None) -> dict:
     )
     caution  = _CAUTION_CHUNG if has_chung else _CAUTION_BY_CATEGORY[worst_cat]
     basis    = _make_basis(ten_god, today_branch_el, wx_bonus, branch_bonus,
-                           day_branch, month_branch, day_ganji["branch"])
+                           day_branch, month_branch, day_ganji["branch"],
+                           day_master, year_branch)
     clothing = _clothing_color(yong_sin)
 
     return {

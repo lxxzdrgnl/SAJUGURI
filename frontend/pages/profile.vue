@@ -15,9 +15,7 @@ const firstSaveState = ref<'idle' | 'loading' | 'done' | 'error'>('idle')
 async function checkAndPromptSave() {
   if (!auth.isLoggedIn) return
   try {
-    const profiles = await $fetch<unknown[]>(`${config.public.apiBase}/api/profiles`, {
-      headers: { Authorization: `Bearer ${auth.token}` },
-    })
+    const profiles = await auth.authFetch<unknown[]>(`${config.public.apiBase}/api/profiles`)
     if (profiles.length === 0) showFirstSaveModal.value = true
   } catch { /* 무시 */ }
 }
@@ -28,9 +26,8 @@ async function doFirstSave() {
   if (!b) return
   firstSaveState.value = 'loading'
   try {
-    await $fetch(`${config.public.apiBase}/api/profiles`, {
+    await auth.authFetch(`${config.public.apiBase}/api/profiles`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${auth.token}` },
       body: {
         name: (b.name as string)?.trim() || '내 사주',
         birth_date: b.birth_date,
@@ -133,7 +130,7 @@ const inputSummary = computed(() => {
           <span style="color: var(--text-primary);">사주</span><span style="color: var(--accent);">구리</span>
         </h1>
       </div>
-      <p v-if="!store.result" class="mt-4 text-sm" style="color: var(--text-muted);">
+      <p v-if="!store.result" class="mt-4 text-sm text-center" style="color: var(--text-muted);">
         오직 당신을 위한 사주
       </p>
     </header>

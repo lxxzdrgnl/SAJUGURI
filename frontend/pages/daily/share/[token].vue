@@ -11,17 +11,6 @@ const error    = ref('')
 const result   = ref<DailyFortuneResponse | null>(null)
 const userName = ref('')
 
-// ── 상수 ──────────────────────────────────────────────────────────────────────
-const STEMS    = ['갑','을','병','정','무','기','경','신','임','계']
-const BRANCHES = ['자','축','인','묘','진','사','오','미','신','유','술','해']
-const STEM_HANJA: Record<string,string>   = { '갑':'甲','을':'乙','병':'丙','정':'丁','무':'戊','기':'己','경':'庚','신':'辛','임':'壬','계':'癸' }
-const BRANCH_HANJA: Record<string,string> = { '자':'子','축':'丑','인':'寅','묘':'卯','진':'辰','사':'巳','오':'午','미':'未','신':'申','유':'酉','술':'戌','해':'亥' }
-const STEM_EL: Record<string,string>   = { '갑':'목','을':'목','병':'화','정':'화','무':'토','기':'토','경':'금','신':'금','임':'수','계':'수' }
-const BRANCH_EL: Record<string,string> = { '자':'수','축':'토','인':'목','묘':'목','진':'토','사':'화','오':'화','미':'토','신':'금','유':'금','술':'토','해':'수' }
-const CAT_ICON: Record<string,string>  = { exam:'📚', money:'💰', love:'💕', career:'💼', health:'🌿', social:'🤝' }
-const CAT_ORDER = ['exam','money','love','career','health','social']
-const EL_SWATCH: Record<string,string> = { '목':'var(--el-목)','화':'var(--el-화)','토':'var(--el-토)','금':'var(--el-금)','수':'var(--el-수)' }
-
 // ── 날짜 ──────────────────────────────────────────────────────────────────────
 const todayLabel = computed(() => {
   const d = new Date()
@@ -48,22 +37,6 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
-})
-
-// ── 유틸 ──────────────────────────────────────────────────────────────────────
-function elColor(el: string) { return el ? `var(--el-${el})` : 'var(--text-secondary)' }
-function scoreColor(score: number) {
-  if (score >= 80) return 'var(--color-good)'
-  if (score >= 60) return 'var(--accent)'
-  if (score >= 45) return '#c07818'
-  return 'var(--color-bad)'
-}
-
-const stemEl   = computed(() => result.value ? STEM_EL[result.value.day_ganji.stem]    ?? '' : '')
-const branchEl = computed(() => result.value ? BRANCH_EL[result.value.day_ganji.branch] ?? '' : '')
-const orderedFortunes = computed(() => {
-  if (!result.value) return []
-  return CAT_ORDER.map(k => ({ key: k, ...result.value!.fortunes[k] }))
 })
 
 // ── SEO ───────────────────────────────────────────────────────────────────────
@@ -114,72 +87,21 @@ useSeoMeta({
     </div>
 
     <!-- 결과 -->
-    <template v-else-if="result">
-
-      <!-- 요약 카드 -->
-      <div class="card summary-card">
-        <div class="summary-top">
-          <div class="summary-ganji">
-            <span class="ganji ganji-char" :style="`color:${elColor(stemEl)}`">{{ STEM_HANJA[result.day_ganji.stem] }}</span>
-            <span class="ganji ganji-char" :style="`color:${elColor(branchEl)}`">{{ BRANCH_HANJA[result.day_ganji.branch] }}</span>
-          </div>
-          <p class="overall-text fs-body">{{ result.overall }}</p>
-        </div>
-        <div class="basis-row">
-          <span class="basis-label fs-tiny">📌 오늘의 근거</span>
-          <span class="basis-text fs-tiny">{{ result.basis }}</span>
-        </div>
-      </div>
-
-      <!-- 옷 색깔 + 조심 -->
-      <div class="info-row">
-        <div class="card info-card">
-          <div class="info-icon-row">
-            <div v-if="result.clothing_color.element" class="el-swatch"
-              :style="`background:${EL_SWATCH[result.clothing_color.element] ?? 'var(--surface-3)'}`" />
-            <span class="fs-label" style="font-weight:700;color:var(--text-primary);">오늘의 옷 색깔</span>
-          </div>
-          <p class="info-value fs-body">{{ result.clothing_color.color }}</p>
-          <p class="info-reason fs-tiny">{{ result.clothing_color.reason }}</p>
-        </div>
-        <div class="card info-card caution-card">
-          <div class="info-icon-row">
-            <span class="caution-icon">⚠️</span>
-            <span class="fs-label" style="font-weight:700;color:var(--color-bad);">오늘 조심</span>
-          </div>
-          <p class="info-value fs-sub caution-text">{{ result.caution }}</p>
-        </div>
-      </div>
-
-      <!-- 카테고리 운세 -->
-      <div class="fortunes-list">
-        <div v-for="item in orderedFortunes" :key="item.key" class="card fortune-card">
-          <div class="fortune-top">
-            <div class="fortune-header">
-              <span class="fortune-icon">{{ CAT_ICON[item.key] }}</span>
-              <span class="fortune-label fs-body">{{ item.label }}</span>
+    <div v-else-if="result" class="animate-fade-up">
+      <SajuDailyResultPanel :result="result">
+        <template #actions>
+          <div class="cta-card">
+            <div class="cta-text">
+              <p class="cta-title">내 운세도 궁금하다면?</p>
+              <p class="cta-desc">생년월일시만 입력하면 오늘의 운세를 바로 확인할 수 있어요.</p>
             </div>
-            <div class="fortune-score-col">
-              <span class="score-num" :style="`color:${scoreColor(item.score)}`">{{ item.score }}</span>
-              <span class="fs-tiny" style="color:var(--text-muted);">/100</span>
-            </div>
+            <NuxtLink to="/daily" class="btn-primary cta-btn">
+              내 운세 보기
+            </NuxtLink>
           </div>
-          <div class="score-bar-row">
-            <div class="score-bar-track">
-              <div class="score-bar-fill" :style="`width:${item.score}%;background:${scoreColor(item.score)}`" />
-            </div>
-            <span class="level-badge fs-tiny" :style="`color:${scoreColor(item.score)}`">{{ item.level }}</span>
-          </div>
-          <p class="fortune-text fs-sub">{{ item.text }}</p>
-        </div>
-      </div>
-
-      <!-- 내 운세 보기 CTA -->
-      <NuxtLink to="/daily" class="btn-primary" style="text-align:center;margin-top:4px;">
-        내 운세 보기
-      </NuxtLink>
-
-    </template>
+        </template>
+      </SajuDailyResultPanel>
+    </div>
   </div>
 </template>
 
@@ -218,43 +140,26 @@ useSeoMeta({
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
 }
-.summary-card { display: flex; flex-direction: column; gap: 12px; }
-.summary-top { display: flex; align-items: center; gap: 16px; }
-.summary-ganji { display: flex; gap: 0; flex-shrink: 0; line-height: 1; }
-.ganji-char { font-size: 52px; font-weight: 700; font-family: var(--font-ganji); letter-spacing: -0.02em; }
-.overall-text { flex: 1; min-width: 0; color: var(--text-primary); font-weight: 500; line-height: 1.65; }
-.basis-row {
-  display: flex; align-items: flex-start; gap: 8px;
-  padding: 10px 12px; border-radius: 10px;
-  background: var(--surface-2); border: 1px solid var(--border-subtle); flex-wrap: wrap;
+.cta-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 28px;
+  border-radius: 16px;
+  border: 1px solid var(--border-default);
+  background: var(--surface-1);
 }
-.basis-label { font-weight: 700; color: var(--text-muted); white-space: nowrap; }
-.basis-text { color: var(--text-secondary); line-height: 1.5; }
-.info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.info-card { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; }
-.info-icon-row { display: flex; align-items: center; gap: 6px; }
-.el-swatch { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
-.caution-icon { font-size: 14px; }
-.info-value { font-weight: 600; color: var(--text-primary); line-height: 1.4; }
-.info-reason { color: var(--text-muted); line-height: 1.5; }
-.caution-card .caution-text { color: var(--text-secondary); font-weight: 400; font-size: var(--fs-tiny); line-height: 1.55; }
-.fortunes-list { display: flex; flex-direction: column; gap: 10px; }
-.fortune-card { display: flex; flex-direction: column; gap: 8px; }
-.fortune-top { display: flex; align-items: center; justify-content: space-between; }
-.fortune-header { display: flex; align-items: center; gap: 8px; }
-.fortune-icon { font-size: var(--fs-body); line-height: 1; }
-.fortune-label { font-weight: 700; color: var(--text-primary); }
-.fortune-score-col { display: flex; align-items: baseline; gap: 2px; flex-shrink: 0; }
-.score-num { font-size: 26px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
-.score-bar-row { display: flex; align-items: center; gap: 8px; }
-.score-bar-track { flex: 1; height: 4px; border-radius: 2px; background: var(--border-subtle); overflow: hidden; }
-.score-bar-fill { height: 100%; border-radius: 2px; }
-.level-badge { font-weight: 600; white-space: nowrap; }
-.fortune-text { color: var(--text-secondary); line-height: 1.7; }
+.cta-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.cta-title { font-size: var(--fs-body); font-weight: 700; color: var(--text-primary); }
+.cta-desc { font-size: var(--fs-sub); color: var(--text-muted); }
+.cta-btn { display: inline-flex; align-items: center; white-space: nowrap; padding: 12px 20px; width: auto; flex-shrink: 0; }
 
 @media (min-width: 768px) {
   .share-wrap { max-width: 960px; padding: 32px 40px 60px; gap: 20px; }
-  .ganji-char { font-size: 64px; }
-  .fortunes-list { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+}
+@media (max-width: 640px) {
+  .cta-card { flex-direction: column; align-items: flex-start; }
+  .cta-btn { width: 100%; justify-content: center; }
 }
 </style>
