@@ -181,13 +181,14 @@ export interface ClothingColor {
 
 /** 오늘의 운세 응답 */
 export interface DailyFortuneResponse {
-  target_date:    string
-  day_ganji:      { stem: string; branch: string }
-  overall:        string
-  caution:        string
-  basis:          string
-  clothing_color: ClothingColor
-  fortunes:       Record<string, FortuneItem>
+  target_date:      string
+  day_ganji:        { stem: string; branch: string }
+  overall:          string
+  caution:          string
+  basis:            string
+  clothing_color:   ClothingColor
+  fortunes:         Record<string, FortuneItem>
+  birth_day_pillar: { stem: string; branch: string; stem_element: string }
 }
 
 /** 일진 항목 */

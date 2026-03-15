@@ -55,32 +55,26 @@ const showLoginDialog = ref(false)
 const fromDirectInput = ref(false)
 
 // ── 프로필 저장 ──────────────────────────────────────────────────────────────
-const saveProfileState = ref<'idle' | 'loading' | 'done' | 'error'>('idle')
+const { saveState: saveProfileState, saveProfile: _saveProfile, saveLabel: saveProfileLabel, saveDisabled: saveProfileDisabled } = useProfileSave()
 
 async function saveProfile() {
   if (!auth.isLoggedIn) { showLoginDialog.value = true; return }
   if (!lastBirthInput.value) return
   const b = lastBirthInput.value
-  saveProfileState.value = 'loading'
-  try {
-    await auth.authFetch(`${base}/api/profiles`, {
-      method: 'POST',
-      body: {
-        name:          (b.name as string)?.trim() || '내 사주',
-        birth_date:    b.birth_date,
-        birth_time:    b.birth_time ?? null,
-        calendar:      b.calendar ?? 'solar',
-        gender:        b.gender,
-        is_leap_month: b.is_leap_month ?? false,
-        city:          b.city ?? null,
-        longitude:     b.birth_longitude ?? null,
-      },
-    })
-    saveProfileState.value = 'done'
-  } catch {
-    saveProfileState.value = 'error'
-    setTimeout(() => { saveProfileState.value = 'idle' }, 2500)
-  }
+  const dp = result.value?.birth_day_pillar
+  await _saveProfile({
+    name:             (b.name as string)?.trim() || '내 사주',
+    birth_date:       b.birth_date as string,
+    birth_time:       (b.birth_time as string | null) ?? null,
+    calendar:         (b.calendar as string) ?? 'solar',
+    gender:           b.gender as string,
+    is_leap_month:    (b.is_leap_month as boolean) ?? false,
+    city:             (b.city as string | null) ?? null,
+    longitude:        (b.birth_longitude as number | null) ?? null,
+    day_stem:         dp?.stem ?? null,
+    day_branch:       dp?.branch ?? null,
+    day_stem_element: dp?.stem_element ?? null,
+  })
 }
 
 // ── 공유 상태 ────────────────────────────────────────────────────────────────
@@ -152,8 +146,31 @@ function goProfile() {
 const goToLogin = useGoToLogin()
 
 function goLogin() {
+  if (lastBirthInput.value) {
+    localStorage.setItem('daily_pending_input', JSON.stringify(lastBirthInput.value))
+  }
   goToLogin()
 }
+
+// ── 로그인 후 복원 ────────────────────────────────────────────────────────────
+onMounted(() => {
+  const pending = localStorage.getItem('daily_pending_input')
+  if (pending) {
+    localStorage.removeItem('daily_pending_input')
+    try {
+      const b = JSON.parse(pending)
+      fromDirectInput.value = true
+      calcFortune({
+        birth_date:      b.birth_date,
+        birth_time:      b.birth_time ?? null,
+        gender:          b.gender,
+        calendar:        b.calendar ?? 'solar',
+        is_leap_month:   b.is_leap_month ?? false,
+        birth_longitude: b.birth_longitude ?? undefined,
+      }, b.name || '')
+    } catch { /* ignore */ }
+  }
+})
 
 // ── 계산 ────────────────────────────────────────────────────────────────────
 async function calcFortune(req: SajuCalcRequest, name: string) {
@@ -386,14 +403,9 @@ const branchEl = computed(() => result.value ? BRANCH_EL[result.value.day_ganji.
             v-if="fromDirectInput"
             class="btn-save-profile"
             :class="{ 'is-done': saveProfileState === 'done' }"
-            :disabled="saveProfileState === 'loading' || saveProfileState === 'done'"
+            :disabled="saveProfileDisabled"
             @click="saveProfile"
-          >
-            <template v-if="saveProfileState === 'loading'">저장 중…</template>
-            <template v-else-if="saveProfileState === 'done'">저장 완료 ✓</template>
-            <template v-else-if="saveProfileState === 'error'">저장 실패 — 다시 시도</template>
-            <template v-else>프로필 저장하기</template>
-          </button>
+          >{{ saveProfileLabel }}</button>
           <button class="btn-secondary" @click="reset">다른 사람 운세 보기</button>
         </div>
       </template>

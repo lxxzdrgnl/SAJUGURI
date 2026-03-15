@@ -6,24 +6,30 @@ const config = useRuntimeConfig()
 const token  = route.params.token as string
 const { getDailyShareInput, getDailyFortune } = useSajuApi()
 
-const loading  = ref(true)
-const error    = ref('')
-const result   = ref<DailyFortuneResponse | null>(null)
-const userName = ref('')
+const loading = ref(false)
+const error   = ref('')
+const result  = ref<DailyFortuneResponse | null>(null)
 
-// ── 날짜 ──────────────────────────────────────────────────────────────────────
-const todayLabel = computed(() => {
-  const d = new Date()
-  const days = ['일','월','화','수','목','금','토']
-  return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`
+// ── 공유 입력값 (SSR — 카카오 크롤러용 메타태그) ─────────────────────────────
+const { data: shareData, error: shareError } = await useAsyncData(
+  `daily-share-${token}`,
+  () => getDailyShareInput(token),
+)
+
+const userName = computed(() => {
+  const name = shareData.value?.birth_input?.name as string | undefined
+  return name || '공유된 사람'
 })
 
-// ── 계산 ──────────────────────────────────────────────────────────────────────
+// ── 운세 계산 (클라이언트) ────────────────────────────────────────────────────
 onMounted(async () => {
+  if (shareError.value || !shareData.value) {
+    error.value = '공유 링크를 불러오지 못했습니다.'
+    return
+  }
+  loading.value = true
   try {
-    const share = await getDailyShareInput(token)
-    const b = share.birth_input
-    userName.value = (b.name as string) || '공유된 사람'
+    const b = shareData.value.birth_input
     result.value = await getDailyFortune({
       birth_date:      b.birth_date as string,
       birth_time:      (b.birth_time as string | null) ?? null,
@@ -33,18 +39,25 @@ onMounted(async () => {
       birth_longitude: (b.birth_longitude as number | null) ?? undefined,
     })
   } catch {
-    error.value = '공유 링크를 불러오지 못했습니다.'
+    error.value = '운세를 불러오지 못했습니다.'
   } finally {
     loading.value = false
   }
 })
 
+// ── 날짜 ──────────────────────────────────────────────────────────────────────
+const todayLabel = computed(() => {
+  const d = new Date()
+  const days = ['일','월','화','수','목','금','토']
+  return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`
+})
+
 // ── SEO ───────────────────────────────────────────────────────────────────────
 useSeoMeta({
-  title:         () => result.value ? `${userName.value}님의 오늘의 운세 보러가기` : '오늘의 운세 보러가기',
-  ogTitle:       () => result.value ? `${userName.value}님의 오늘의 운세 보러가기` : '오늘의 운세 보러가기',
-  description:   () => result.value ? `${userName.value}님의 오늘 운세를 확인해보세요.` : '사주구리에서 오늘의 운세를 확인해보세요.',
-  ogDescription: () => result.value ? `${userName.value}님의 오늘 운세를 확인해보세요.` : '사주구리에서 오늘의 운세를 확인해보세요.',
+  title:         () => `${userName.value}님의 오늘의 운세 보러가기`,
+  ogTitle:       () => `${userName.value}님의 오늘의 운세 보러가기`,
+  description:   () => `${userName.value}님의 오늘 운세를 확인해보세요.`,
+  ogDescription: () => `${userName.value}님의 오늘 운세를 확인해보세요.`,
   ogImage:       `${config.public.siteUrl}/onboarding-illust.png`,
   ogUrl:         `${config.public.siteUrl}/daily/share/${token}`,
 })
@@ -70,7 +83,7 @@ useSeoMeta({
     </div>
 
     <!-- 로딩 -->
-    <div v-if="loading" class="center-state">
+    <div v-if="loading || (!result && !error && !shareError)" class="center-state">
       <svg class="animate-spin w-8 h-8" viewBox="0 0 40 40" fill="none">
         <circle cx="20" cy="20" r="17" stroke="var(--border-subtle)" stroke-width="3"/>
         <path d="M20 3a17 17 0 0 1 17 17" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
@@ -79,8 +92,8 @@ useSeoMeta({
     </div>
 
     <!-- 에러 -->
-    <div v-else-if="error" class="card" style="text-align:center;padding:32px;">
-      <p class="fs-body" style="color:var(--color-bad);">{{ error }}</p>
+    <div v-else-if="error || shareError" class="card" style="text-align:center;padding:32px;">
+      <p class="fs-body" style="color:var(--color-bad);">{{ error || '공유 링크를 불러오지 못했습니다.' }}</p>
       <NuxtLink to="/daily" class="btn-primary" style="margin-top:16px;max-width:200px;margin-inline:auto;">
         내 운세 보기
       </NuxtLink>
@@ -149,6 +162,7 @@ useSeoMeta({
   border-radius: 16px;
   border: 1px solid var(--border-default);
   background: var(--surface-1);
+  margin-top: 16px;
 }
 .cta-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .cta-title { font-size: var(--fs-body); font-weight: 700; color: var(--text-primary); }
