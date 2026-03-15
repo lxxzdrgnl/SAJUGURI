@@ -296,9 +296,9 @@ class SajuCalcResponse(BaseModel):
         description="8글자 위치별 오행 [{pillar, type, element}] — 궁성 가중치 계산·RAG용",
         examples=[[{"pillar": "year", "type": "stem", "element": "목"}]],
     )
-    wuxing_chars_hap: list[dict[str, str]] = Field(
-        description="합화 적용 위치별 오행 [{pillar, type, element}]",
-        examples=[[{"pillar": "year", "type": "branch", "element": "수"}]],
+    wuxing_hap_contributions: list[dict] = Field(
+        description="합화 기여 구조 [{pillar, type, hap_type, base_element, hap_element, hap_ratio}] — ratio 기반 부분합화",
+        examples=[[{"pillar": "year", "type": "branch", "hap_type": "yuk_hap", "base_element": "화", "hap_element": "수", "hap_ratio": 0.35}]],
     )
     dominant_elements: list[str] = Field(
         description="강한 오행 목록",

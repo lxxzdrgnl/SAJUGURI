@@ -36,10 +36,10 @@ JI_JANG_GAN: dict[str, dict] = {
     "축": {"primary": "기",  "secondary": "신", "residual": "계"},
     "인": {"primary": "갑",  "secondary": "병", "residual": "무"},
     "묘": {"primary": "을"},
-    "진": {"primary": "무",  "secondary": "을", "residual": "계"},
-    "사": {"primary": "병",  "secondary": "무", "residual": "경"},
+    "진": {"primary": "무",  "secondary": "계", "residual": "을"},
+    "사": {"primary": "병",  "secondary": "경", "residual": "무"},
     "오": {"primary": "정",  "secondary": "기"},
-    "미": {"primary": "기",  "secondary": "정", "residual": "을"},
+    "미": {"primary": "기",  "secondary": "을", "residual": "정"},
     "신": {"primary": "경",  "secondary": "임", "residual": "무"},
     "유": {"primary": "신"},
     "술": {"primary": "무",  "secondary": "신", "residual": "정"},
@@ -168,13 +168,14 @@ def get_branch_by_korean(korean: str) -> dict:
 
 
 def get_ji_jang_gan(branch: str) -> list[str]:
-    """지지에서 지장간 천간 목록 반환 (정기→중기→여기 순)"""
+    """지지에서 지장간 천간 목록 반환 (여기→중기→정기 순)"""
     jjg = JI_JANG_GAN[branch]
-    result = [jjg["primary"]]
-    if "secondary" in jjg:
-        result.append(jjg["secondary"])
+    result = []
     if "residual" in jjg:
         result.append(jjg["residual"])
+    if "secondary" in jjg:
+        result.append(jjg["secondary"])
+    result.append(jjg["primary"])
     return result
 
 

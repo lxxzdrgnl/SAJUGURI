@@ -1,9 +1,19 @@
 <script setup lang="ts">
 import type { YongSin } from '~/types/saju'
 
-defineProps<{
+const props = defineProps<{
   yongSin: YongSin
+  wuxingPct?: Record<string, number>   // 현재 오행 비율 (작동도 계산용)
 }>()
+
+// 용신 작동도: 용신 오행 비율 기준 (이상: 20%, 과다면 이미 충족, 부족하면 낮음)
+const activation = computed(() => {
+  const pct = props.wuxingPct?.[props.yongSin.primary] ?? null
+  if (pct === null) return null
+  if (pct < 10) return { label: '낮음', desc: `${props.yongSin.primary} ${pct}% — 매우 부족`, color: 'var(--color-bad)' }
+  if (pct < 18) return { label: '보통', desc: `${props.yongSin.primary} ${pct}% — 약간 부족`, color: 'var(--el-토)' }
+  return { label: '양호', desc: `${props.yongSin.primary} ${pct}% — 충분히 존재`, color: 'var(--color-good)' }
+})
 
 // 오행 → 색상 (utils/elementColor.ts auto-import)
 function dotColor(el: string) { return elColor(el) }
@@ -81,23 +91,34 @@ function dotColor(el: string) { return elColor(el) }
     </div>
 
     <!-- 구분선 -->
-    <div class="pt-3 flex flex-wrap gap-2" style="border-top: 1px solid var(--surface-3);">
-      <!-- 용신 레이블 -->
-      <span
-        v-if="yongSin.yong_sin_label"
-        class="px-2.5 py-1 text-xs rounded-full border"
-        style="background: var(--surface-3); color: var(--text-muted); border-color: var(--border-subtle);"
-      >
-        {{ yongSin.yong_sin_label }}
-      </span>
-      <!-- 추론 우선순위 -->
-      <span
-        v-if="yongSin.reasoning_priority"
-        class="px-2.5 py-1 text-xs rounded-full border"
-        style="background: var(--surface-3); color: var(--text-muted); border-color: var(--border-subtle);"
-      >
-        {{ yongSin.reasoning_priority }}
-      </span>
+    <div class="pt-3 space-y-2" style="border-top: 1px solid var(--surface-3);">
+      <div class="flex flex-wrap gap-2">
+        <!-- 용신 레이블 -->
+        <span
+          v-if="yongSin.yong_sin_label"
+          class="px-2.5 py-1 text-xs rounded-full border"
+          style="background: var(--surface-3); color: var(--text-muted); border-color: var(--border-subtle);"
+        >
+          {{ yongSin.yong_sin_label }}
+        </span>
+        <!-- 추론 우선순위 -->
+        <span
+          v-if="yongSin.reasoning_priority"
+          class="px-2.5 py-1 text-xs rounded-full border"
+          style="background: var(--surface-3); color: var(--text-muted); border-color: var(--border-subtle);"
+        >
+          {{ yongSin.reasoning_priority }}
+        </span>
+      </div>
+      <!-- 용신 작동도 -->
+      <div v-if="activation" class="flex items-center gap-2 fs-tiny">
+        <span style="color: var(--text-muted);">용신 활성도</span>
+        <span
+          class="px-2 py-0.5 rounded border font-semibold"
+          :style="`color: ${activation.color}; background: color-mix(in srgb, ${activation.color} 10%, transparent); border-color: color-mix(in srgb, ${activation.color} 25%, transparent);`"
+        >{{ activation.label }}</span>
+        <span style="color: var(--text-muted);">{{ activation.desc }}</span>
+      </div>
     </div>
   </div>
 </template>

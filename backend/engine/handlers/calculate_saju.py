@@ -3,6 +3,7 @@ calculate_saju MCP tool 핸들러.
 """
 
 from __future__ import annotations
+from collections import defaultdict
 from datetime import datetime, timedelta
 from engine.calc.saju import calculate_saju as _calc
 from engine.calc.ten_gods import generate_ten_gods_list, calculate_ten_gods_distribution, calculate_ten_god, get_branch_ten_god
@@ -75,7 +76,177 @@ def handle_calculate_saju(
         }
     pillars_enriched["hour_pillar"] = pillars_enriched.get("hour_pillar")  # None if unknown
 
-    ten_gods_dist = calculate_ten_gods_distribution(saju)
+    # ── 파이프라인 앞단: 합화 탐지 → 십성/강약은 합화 반영 단 1회 계산 ────────
+    # branch_rel: 필터링 + yuk_hap is_effective 선제 계산
+    branch_rel = {k: v for k, v in saju["branch_relations"].items() if v and k != "gong_mang"}
+    _interference_sets: dict[str, set[str]] = {
+        "chung": {b for item in saju["branch_relations"].get("chung", []) for b in item["pair"]},
+        "hyung": {b for name in saju["branch_relations"].get("sam_hyeong", []) for b in _SAM_HYEONG.get(name, [])},
+        "hae":   {b for item in saju["branch_relations"].get("yuk_hae", []) for b in item["pair"]},
+    }
+    if "yuk_hap" in branch_rel:
+        def _yuk_hap_entry(h: dict) -> dict:
+            pair = h["pair"]
+            found = [t for t, s in _interference_sets.items() if any(b in s for b in pair)]
+            broken = "chung" in found
+            return {**h, "is_effective": not broken, "interference_factors": found}
+        branch_rel["yuk_hap"] = [_yuk_hap_entry(h) for h in branch_rel["yuk_hap"]]
+
+    # 오행 분포 퍼센트
+    _wuxing_total = sum(saju["wuxing_count"].values())
+    wuxing_pct = (
+        {k: round(v / _wuxing_total * 100, 1) for k, v in saju["wuxing_count"].items()}
+        if _wuxing_total > 0 else saju["wuxing_count"]
+    )
+
+    # 기둥 순서 + dynamics (천간합·통근·오행흐름)
+    _pillar_order = [p for p in ["year", "month", "day", "hour"] if saju.get(f"{p}_pillar") is not None]
+    _dynamics = build_dynamics(saju, branch_rel, wuxing_pct)
+
+    # 기둥별 오행 목록 (base, 합화 없음)
+    _wuxing_chars: list[dict] = []
+    for _p in _pillar_order:
+        _pk = f"{_p}_pillar"
+        _wuxing_chars.append({"pillar": _p, "type": "stem",   "element": saju[_pk]["stem_element"]})
+        _wuxing_chars.append({"pillar": _p, "type": "branch", "element": saju[_pk]["branch_element"]})
+
+    # 합화 override 생성 (합 강도 + 천간 유인력 + 조건부 월지 cap)
+    _HAP_EL_STEMS: dict[str, set] = {
+        "목": {"갑", "을"}, "화": {"병", "정"},
+        "토": {"무", "기"}, "금": {"경", "신"}, "수": {"임", "계"},
+    }
+    _all_stems = {saju[_k]["stem"] for _k in ["year_pillar", "month_pillar", "day_pillar", "hour_pillar"] if saju.get(_k)}
+
+    # 육합 기둥별 base (월지는 계절 기준이므로 연/시보다 약간 크게)
+    _YUK_HAP_BASE: dict[str, float] = {
+        "year_pillar": 0.15, "month_pillar": 0.20,
+        "day_pillar":  0.20, "hour_pillar":  0.15,
+    }
+
+    def _branch_hap_ratio(hap_type: str, hap_subtype: str, result_el: str, pillar_key: str) -> float:
+        if hap_type == "sam_hap":
+            base = 0.30 if hap_subtype == "반합" else (0.45 if hap_subtype == "방합" else 0.50)
+            _stem_attract = 0.30
+        else:  # yuk_hap — 삼합보다 약하게, 기둥 위치별 차등
+            base = _YUK_HAP_BASE.get(pillar_key, 0.15)
+            _stem_attract = 0.20
+        _has_stem = bool(_HAP_EL_STEMS.get(result_el, set()) & _all_stems)
+        if _has_stem:
+            base += _stem_attract
+        if pillar_key == "month_pillar":
+            _full_combo = hap_subtype in ("삼합", "방합")
+            base = min(base, 0.80 if (_full_combo and _has_stem) else 0.50)
+        return min(base, 1.0)
+
+    def _stem_hap_ratio(result_el: str) -> float:
+        """천간합화: 항상 화하는 것이 아님 → 0.45"""
+        return 0.45
+
+    _branch_to_pillars: dict[str, list[str]] = {}
+    for _p in _pillar_order:
+        _branch_to_pillars.setdefault(saju[f"{_p}_pillar"]["branch"], []).append(f"{_p}_pillar")
+
+    # (element, ratio, hap_type) — hap_type은 contributions의 hap_type 필드에 사용
+    _hap_branch_overrides: dict[str, tuple[str, float, str]] = {}
+    for _sam in branch_rel.get("sam_hap", []):
+        _result_el = _sam.get("element", "")
+        _hap_subtype = _sam.get("type", "삼합")
+        for _br in _sam.get("branches", []):
+            for _pk in _branch_to_pillars.get(_br, []):
+                if _result_el == saju[_pk]["branch_element"]:
+                    continue
+                _ratio = _branch_hap_ratio("sam_hap", _hap_subtype, _result_el, _pk)
+                if _ratio > _hap_branch_overrides.get(_pk, ("", 0.0, ""))[1]:
+                    _hap_branch_overrides[_pk] = (_result_el, _ratio, "sam_hap")
+    for _yuk in branch_rel.get("yuk_hap", []):
+        if not _yuk.get("is_effective", True):
+            continue
+        _result_el = _yuk.get("element", "")
+        for _br in _yuk.get("pair", []):
+            for _pk in _branch_to_pillars.get(_br, []):
+                if _result_el == saju[_pk]["branch_element"]:
+                    continue
+                _ratio = _branch_hap_ratio("yuk_hap", "", _result_el, _pk)
+                if _ratio > _hap_branch_overrides.get(_pk, ("", 0.0, ""))[1]:
+                    _hap_branch_overrides[_pk] = (_result_el, _ratio, "yuk_hap")
+
+    _hap_stem_overrides: dict[str, tuple[str, float]] = {}
+    for _sh in _dynamics.get("stem_hap", []):
+        for _pl in _sh["pillars"]:
+            if _pl != "day":
+                _el = _sh["result_element"]
+                _pk = f"{_pl}_pillar"
+                _ratio = _stem_hap_ratio(_el)
+                if _ratio > _hap_stem_overrides.get(_pk, ("", 0.0))[1]:
+                    _hap_stem_overrides[_pk] = (_el, _ratio)
+
+    # overrides 완성 후 처리 ─────────────────────────────────────
+
+    # ① wuxing_hap_contributions + pct (단일 루프, defaultdict)
+    _wuxing_hap_contributions: list[dict] = []
+    _hap_pct_counts: defaultdict[str, float] = defaultdict(float)
+    for _p in _pillar_order:
+        _pk = f"{_p}_pillar"
+        # 천간
+        s_el = saju[_pk]["stem_element"]
+        stem_ov = _hap_stem_overrides.get(_pk)
+        _wuxing_hap_contributions.append({
+            "pillar": _p, "type": "stem",
+            "hap_type":     "stem_hap" if stem_ov else None,
+            "base_element": s_el,
+            "hap_element":  stem_ov[0] if stem_ov else None,
+            "hap_ratio":    stem_ov[1] if stem_ov else 0.0,
+        })
+        if stem_ov:
+            _hap_pct_counts[stem_ov[0]] += stem_ov[1]
+            _hap_pct_counts[s_el]       += 1.0 - stem_ov[1]
+        else:
+            _hap_pct_counts[s_el] += 1.0
+        # 지지
+        b_el = saju[_pk]["branch_element"]
+        branch_ov = _hap_branch_overrides.get(_pk)
+        _wuxing_hap_contributions.append({
+            "pillar": _p, "type": "branch",
+            "hap_type":     branch_ov[2] if branch_ov else None,
+            "base_element": b_el,
+            "hap_element":  branch_ov[0] if branch_ov else None,
+            "hap_ratio":    branch_ov[1] if branch_ov else 0.0,
+        })
+        if branch_ov:
+            _hap_pct_counts[branch_ov[0]] += branch_ov[1]
+            _hap_pct_counts[b_el]         += 1.0 - branch_ov[1]
+        else:
+            _hap_pct_counts[b_el] += 1.0
+
+    _hap_total = sum(_hap_pct_counts.values())
+    wuxing_hap_pct = (
+        {k: round(max(0.0, v) / _hap_total * 100, 1) for k, v in _hap_pct_counts.items()}
+        if _hap_total else dict(_hap_pct_counts)
+    )
+
+    # ② branch_rel hap 항목에 pillar_ratios 삽입 — loop으로 overwrite 방지
+    for _yuk in branch_rel.get("yuk_hap", []):
+        _yuk_el = _yuk.get("element", "")
+        _pr: dict[str, float] = {}
+        for _br in _yuk.get("pair", []):
+            for _pk in _branch_to_pillars.get(_br, []):
+                ov = _hap_branch_overrides.get(_pk)
+                if ov and ov[0] == _yuk_el and _pk not in _pr:
+                    _pr[_pk] = ov[1]
+        _yuk["pillar_ratios"] = _pr
+    for _sam in branch_rel.get("sam_hap", []):
+        _sam_el = _sam.get("element", "")
+        _pr = {}
+        for _br in _sam.get("branches", []):
+            for _pk in _branch_to_pillars.get(_br, []):
+                ov = _hap_branch_overrides.get(_pk)
+                if ov and ov[0] == _sam_el and _pk not in _pr:
+                    _pr[_pk] = ov[1]
+        _sam["pillar_ratios"] = _pr
+
+    # 십성 분포: 합화 override 반영 (단 1회 계산) — ten_gods는 (element, ratio) 2-tuple만 필요
+    _branch_hap_2t = {k: (v[0], v[1]) for k, v in _hap_branch_overrides.items()}
+    ten_gods_dist = calculate_ten_gods_distribution(saju, _branch_hap_2t, _hap_stem_overrides)
 
     # 공망(空亡) — 일주(천간+지지) 기준: starting_branch = (branch_idx - stem_idx) % 12
     _day_s_idx = STEMS_BY_KOREAN[saju["day_pillar"]["stem"]]["index"]
@@ -96,7 +267,7 @@ def handle_calculate_saju(
     ]
 
     # 4. 일간 강약
-    strength = analyze_day_master_strength(saju, ten_gods_dist)
+    strength = analyze_day_master_strength(saju, ten_gods_dist, branch_rel)
 
     # 5. 격국
     gyeok_guk = determine_gyeok_guk(ten_gods_dist)
@@ -149,24 +320,6 @@ def handle_calculate_saju(
         "timezone_note": get_historical_note(original_dt),
     }
 
-    # 빈 필드 제거: null·빈 리스트 키 제외
-    # gong_mang은 top-level에서 별도 관리하므로 branch_relations에서 제외
-    branch_rel = {k: v for k, v in saju["branch_relations"].items() if v and k != "gong_mang"}
-
-    # 육합 is_effective: 충·형·파 간섭 검사 (충이 있으면 합 파괴)
-    _interference_sets: dict[str, set[str]] = {
-        "chung": {b for item in saju["branch_relations"].get("chung", []) for b in item["pair"]},
-        "hyung": {b for name in saju["branch_relations"].get("sam_hyeong", []) for b in _SAM_HYEONG.get(name, [])},
-        "hae":   {b for item in saju["branch_relations"].get("yuk_hae", []) for b in item["pair"]},
-    }
-    if "yuk_hap" in branch_rel:
-        def _yuk_hap_entry(h: dict) -> dict:
-            pair = h["pair"]
-            found = [t for t, s in _interference_sets.items() if any(b in s for b in pair)]
-            broken = "chung" in found  # 충만 합 파괴, 형·파는 약화 참고
-            return {**h, "is_effective": not broken, "interference_factors": found}
-        branch_rel["yuk_hap"] = [_yuk_hap_entry(h) for h in branch_rel["yuk_hap"]]
-
     # 십성 분포: 0 제거 후 퍼센트 변환 (총합 100%)
     _dist_nonzero = {k: v for k, v in ten_gods_dist.items() if v > 0}
     _total = sum(_dist_nonzero.values())
@@ -179,7 +332,7 @@ def handle_calculate_saju(
         "비겁": ["비견", "겁재"], "식상": ["식신", "상관"],
         "재성": ["편재", "정재"], "관성": ["편관", "정관"], "인성": ["편인", "정인"],
     }
-    _ji_pillar_keys = list(saju["ji_jang_gan"].keys())  # hour 없으면 자동 제외
+    _ji_pillar_keys = list(saju["ji_jang_gan"].keys())
     ten_gods_void_info = []
     for cat, gods in _CATEGORIES.items():
         if all(ten_gods_dist_filtered.get(g, 0) == 0 for g in gods):
@@ -190,53 +343,6 @@ def handle_calculate_saju(
                 if stems:
                     hidden[pk] = stems
             ten_gods_void_info.append({"category": cat, "hidden_in_ji_jang_gan": hidden})
-
-    # 오행 분포 퍼센트 변환 (총합 8글자 기준, 0도 포함 — 결핍 오행도 의미 있음)
-    _wuxing_total = sum(saju["wuxing_count"].values())
-    wuxing_pct = (
-        {k: round(v / _wuxing_total * 100, 1) for k, v in saju["wuxing_count"].items()}
-        if _wuxing_total > 0 else saju["wuxing_count"]
-    )
-
-    # 8글자 위치별 오행 목록 (궁성 가중치 계산 및 RAG용)
-    _pillar_order = [p for p in ["year", "month", "day", "hour"]
-                     if saju.get(f"{p}_pillar") is not None]
-    _wuxing_chars: list[dict] = []
-    for _p in _pillar_order:
-        _pk = f"{_p}_pillar"
-        _wuxing_chars.append({"pillar": _p, "type": "stem",   "element": saju[_pk]["stem_element"]})
-        _wuxing_chars.append({"pillar": _p, "type": "branch", "element": saju[_pk]["branch_element"]})
-
-    # 합화 적용 오행 목록 (육합·삼합) — 프론트 토글 및 DB 저장용
-    _branch_name = {_p: saju[f"{_p}_pillar"]["branch"] for _p in _pillar_order}
-    _wuxing_chars_hap = [dict(c) for c in _wuxing_chars]
-
-    def _apply_hap(chars: list[dict], br: dict) -> None:
-        """육합·삼합 화화(化化) 적용 — 지지 오행 교체."""
-        for hap in br.get("yuk_hap", []):
-            if not hap.get("is_effective", True):
-                continue
-            for ch in chars:
-                if ch["type"] == "branch" and _branch_name[ch["pillar"]] in hap["pair"]:
-                    ch["element"] = hap["element"]
-        for sam in br.get("sam_hap", []):
-            for ch in chars:
-                if ch["type"] == "branch" and _branch_name[ch["pillar"]] in sam.get("branches", []):
-                    ch["element"] = sam["element"]
-
-    _apply_hap(_wuxing_chars_hap, saju["branch_relations"])
-
-    def _chars_to_pct(chars: list[dict]) -> dict[str, float]:
-        counts: dict[str, float] = {"목": 0, "화": 0, "토": 0, "금": 0, "수": 0}
-        for c in chars:
-            if c["element"] in counts:
-                counts[c["element"]] += 1
-        total = sum(counts.values())
-        if total == 0:
-            return counts
-        return {k: round(v / total * 100, 1) for k, v in counts.items()}
-
-    wuxing_hap_pct = _chars_to_pct(_wuxing_chars_hap)
 
     # 조후(調候) — 월지 기후와 일간의 관계
     _SEASON_MAP: dict[str, tuple] = {
@@ -274,7 +380,7 @@ def handle_calculate_saju(
 
     # 반복 연산 방지: 결과를 로컬 변수에 캐싱
     _structure_patterns = detect_structure_patterns(ten_gods_dist_filtered, strength["level"], wuxing_pct)
-    _dynamics = build_dynamics(saju, branch_rel, wuxing_pct)
+    # _dynamics는 위(합화 계산 전)에서 이미 계산됨
 
     # 천간합·천간충을 branch_relations에 추가 (dynamics에서 추출)
     if _dynamics.get("stem_hap"):
@@ -315,7 +421,7 @@ def handle_calculate_saju(
         "wuxing_count":      wuxing_pct,       # 기본 8글자
         "wuxing_count_hap":  wuxing_hap_pct,   # 육합·삼합 합화 적용
         "wuxing_chars":      _wuxing_chars,     # 위치별 오행 [{pillar,type,element}]
-        "wuxing_chars_hap":  _wuxing_chars_hap, # 합화 적용 위치별 오행
+        "wuxing_hap_contributions": _wuxing_hap_contributions,  # ratio 기반 부분합화 [{pillar,type,base_element,hap_element,hap_ratio}]
         "dominant_elements": saju["dominant_elements"],
         "weak_elements": saju["weak_elements"],
         "yin_yang_ratio": yin_yang_ratio,

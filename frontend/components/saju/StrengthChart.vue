@@ -6,14 +6,15 @@ const props = defineProps<{ strength: DayMasterStrength }>()
 
 const LEVELS = ['극약', '태약', '신약', '중화신약', '중화신강', '신강', '태강', '극왕']
 const LEVEL_IDX: Record<string, number> = Object.fromEntries(LEVELS.map((l, i) => [l, i]))
-const DIST = [5, 12, 17, 19, 24, 6, 1, 1]
+// 실제 사주 10,000건 시뮬레이션 결과 (scripts/compute_strength_dist.py)
+const DIST = [22.4, 15.7, 20.6, 9.2, 15.7, 25.0, 9.1, 0.8]
 const DIST_TOTAL = DIST.reduce((a, b) => a + b, 0)
 
-const ML = 32; const MB = 36; const MT = 14
-const SVG_W = 320; const SVG_H = 180
-const plotW = SVG_W - ML - 10
+const ML = 32; const MB = 40; const MT = 22
+const SVG_W = 320; const SVG_H = 188
+const plotW = SVG_W - ML - 18
 const plotH = SVG_H - MB - MT
-const MAX_DIST = 25
+const MAX_DIST = 30
 
 const pts = computed(() =>
   DIST.map((d, i) => ({
@@ -43,7 +44,7 @@ const deukList = [
   { key: 'deuk_se'     as const, label: '득세' },
 ]
 
-const yTicks = [0, 10, 20]
+const yTicks = [0, 10, 20, 30]
 </script>
 
 <template>
@@ -76,7 +77,7 @@ const yTicks = [0, 10, 20]
     </p>
 
     <!-- 차트 -->
-    <svg :viewBox="`0 0 ${SVG_W} ${SVG_H}`" class="w-full" xmlns="http://www.w3.org/2000/svg">
+    <svg :viewBox="`0 0 ${SVG_W} ${SVG_H}`" class="w-full" style="overflow: visible;" xmlns="http://www.w3.org/2000/svg">
       <!-- 유저 위치 강조 컬럼 -->
       <rect
         :x="userPt.x - (plotW / 7) / 2" :y="MT"
