@@ -59,6 +59,17 @@ class RefreshToken(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
 
 
+class DailyShare(Base):
+    """오늘의 운세 공유 — 생년월일만 저장, 결과는 접근 시 재계산."""
+
+    __tablename__ = "daily_shares"
+
+    id:          Mapped[int]       = mapped_column(Integer, primary_key=True)
+    share_token: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), unique=True, default=uuid.uuid4)
+    birth_input: Mapped[dict]      = mapped_column(JSONB, nullable=False)
+    created_at:  Mapped[datetime]  = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+
 class SharedResult(Base):
     __tablename__ = "shared_results"
 

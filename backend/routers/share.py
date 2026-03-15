@@ -5,10 +5,13 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import settings
-from db.models import Profile, SharedResult, User
+from db.models import DailyShare, Profile, SharedResult, User
 from dependencies.auth import get_optional_user
 from dependencies.db import get_db
-from schemas.share import ShareCreate, ShareResponse, SharedResultResponse
+from schemas.share import (
+    DailyShareCreate, DailyShareDetail, DailyShareResponse,
+    ShareCreate, ShareResponse, SharedResultResponse,
+)
 
 router = APIRouter(prefix="/api/share", tags=["공유"])
 
@@ -49,6 +52,36 @@ async def create_share(
         share_url=share_url,
         created_at=shared.created_at,
     )
+
+
+@router.post("/daily", response_model=DailyShareResponse, status_code=status.HTTP_201_CREATED, summary="오늘의 운세 공유 링크 생성")
+async def create_daily_share(
+    body: DailyShareCreate,
+    db: AsyncSession = Depends(get_db),
+):
+    shared = DailyShare(birth_input=body.birth_input)
+    db.add(shared)
+    await db.commit()
+    await db.refresh(shared)
+    return DailyShareResponse(
+        share_token=shared.share_token,
+        share_url=f"{settings.frontend_url}/daily/share/{shared.share_token}",
+        created_at=shared.created_at,
+    )
+
+
+@router.get("/daily/{token}", response_model=DailyShareDetail, summary="오늘의 운세 공유 조회 (비로그인 가능)")
+async def get_daily_share(
+    token: str,
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(DailyShare).where(DailyShare.share_token == token)
+    )
+    shared = result.scalar_one_or_none()
+    if not shared:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="공유 링크를 찾을 수 없습니다.")
+    return shared
 
 
 @router.get("/{token}", response_model=SharedResultResponse, summary="공유 결과 조회 (비로그인 가능)")

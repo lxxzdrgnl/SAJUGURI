@@ -4,12 +4,14 @@ from __future__ import annotations
 from fastapi import APIRouter, Query
 from schemas.saju import SajuCalcRequest, SajuCalcResponse
 from schemas.report import SajuReportRequest, SajuReportResponse
+from schemas.daily import DailyFortuneRequest, DailyFortuneResponse
 from core.errors import SWAGGER_ERRORS
 from core.exceptions import CalcFailedException, InvalidDateFormatException
 from engine.handlers.calculate_saju import handle_calculate_saju
 from engine.handlers.get_wol_un import handle_get_wol_un
 from engine.handlers.get_il_jin import handle_get_il_jin
 from engine.handlers.get_yeon_un import handle_get_yeon_un
+from engine.handlers.get_daily_fortune import handle_get_daily_fortune
 from llm.pipelines.saju_report import run_saju_report
 
 router = APIRouter(prefix="/api/saju", tags=["사주 계산"])
@@ -117,6 +119,47 @@ async def generate_saju_report(req: SajuReportRequest) -> SajuReportResponse:
         raise CalcFailedException(msg)
     except RuntimeError as e:
         raise CalcFailedException(str(e))
+    except Exception as e:
+        raise CalcFailedException(str(e))
+
+
+@router.post(
+    "/daily",
+    response_model=DailyFortuneResponse,
+    summary="오늘의 운세",
+    description="""
+생년월일시와 성별을 입력하면 오늘의 운세를 6개 카테고리로 반환합니다.
+
+**카테고리**: 시험운 · 재물운 · 연애운 · 직장운 · 건강운 · 대인관계운
+
+**계산 방식**:
+- 오늘 간지 × 일간 십성 → 카테고리별 점수
+- 오늘 지지 오행 × 용신/희신/기신 → 오행 보정
+- 오늘 지지 vs 일지·월지 충합 관계 → 관계 보정
+- 랜덤 없음: 동일 입력은 항상 동일 결과 반환
+
+**target_date**: 미입력 시 오늘 날짜 기준으로 계산합니다.
+""",
+    responses={**{k: v for k, v in SWAGGER_ERRORS.items() if k in (400, 422, 500)}},
+)
+async def get_daily_fortune(req: DailyFortuneRequest) -> DailyFortuneResponse:
+    try:
+        result = handle_get_daily_fortune(
+            birth_date=req.birth_date,
+            birth_time=req.birth_time,
+            gender=req.gender,
+            calendar=req.calendar,
+            is_leap_month=req.is_leap_month,
+            birth_longitude=req.birth_longitude,
+            birth_utc_offset=req.birth_utc_offset,
+            target_date=req.target_date,
+        )
+        return DailyFortuneResponse(**result)
+    except ValueError as e:
+        msg = str(e)
+        if "날짜" in msg or "date" in msg.lower():
+            raise InvalidDateFormatException(req.birth_date)
+        raise CalcFailedException(msg)
     except Exception as e:
         raise CalcFailedException(str(e))
 
