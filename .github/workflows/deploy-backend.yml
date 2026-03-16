@@ -39,11 +39,13 @@ jobs:
             "cd ~/servers/sajuguri/repo && \
              git fetch origin && git reset --hard origin/main && \
              cd ~/servers && \
-             docker compose up -d --build --no-deps sajuguri-backend && \
-             echo '⏳ Waiting for migration...' && \
-             sleep 5 && \
-             docker compose logs --tail=30 sajuguri-backend && \
-             docker compose ps sajuguri-backend | grep -q 'Up' && echo '✅ Backend deployed' || (echo '❌ Backend failed to start' && exit 1)"
+             docker rm -f sajuguri-backend 2>/dev/null || true && \
+             docker compose build --no-cache sajuguri-backend && \
+             docker compose up -d sajuguri-backend && \
+             echo '⏳ Waiting for startup...' && \
+             sleep 8 && \
+             docker logs sajuguri-backend --tail=5 && \
+             docker inspect -f '{{.State.Running}}' sajuguri-backend | grep -q 'true' && echo '✅ Backend deployed' || (echo '❌ Backend failed to start' && exit 1)"
 
       - name: Cleanup SSH Key
         if: always()
