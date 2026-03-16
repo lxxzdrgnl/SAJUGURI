@@ -23,7 +23,7 @@ function handleGoogleLogin() {
   <div class="login-wrap">
     <div class="login-card">
       <div class="login-illust-box">
-        <img src="/onboarding-illust.png" alt="" class="login-illust-img" />
+        <img src="/onboarding-illust.webp" alt="" class="login-illust-img" />
       </div>
       <h1 class="login-title" style="font-family: var(--font-ganji);">
         <span style="color: var(--text-primary);">사주</span><span style="color: var(--accent);">구리</span>

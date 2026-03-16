@@ -30,7 +30,7 @@ export default defineNuxtConfig({
         { property: 'og:type', content: 'website' },
         { property: 'og:title', content: '사주구리 — AI 사주 상담' },
         { property: 'og:description', content: 'AI가 분석한 나만의 사주 — 오늘의 운세부터 사주 상담까지' },
-        { property: 'og:image', content: `${process.env.NUXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/onboarding-illust.png` },
+        { property: 'og:image', content: `${process.env.NUXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/onboarding-illust.png?v=2` },
         { name: 'twitter:card', content: 'summary_large_image' },
       ],
       link: [
@@ -38,6 +38,14 @@ export default defineNuxtConfig({
           rel: 'icon',
           type: 'image/svg+xml',
           href: '/favicon.svg',
+        },
+        // 폰트 FOUT 방지 — 조선100년체 woff2 미리 다운로드
+        {
+          rel: 'preload',
+          as: 'font',
+          type: 'font/woff2',
+          href: 'https://gcore.jsdelivr.net/gh/projectnoonnu/noonfonts_2206-02@1.0/ChosunCentennial.woff2',
+          crossorigin: '',
         },
         {
           rel: 'preconnect',
@@ -68,6 +76,12 @@ export default defineNuxtConfig({
 
   routeRules: {
     '/api/**': { proxy: `${process.env.NUXT_PUBLIC_API_BASE ?? 'http://localhost:8000'}/api/**` },
+    // 정적 이미지·폰트 장기 캐싱
+    '/*.png':  { headers: { 'cache-control': 'public, max-age=604800, stale-while-revalidate=86400' } },
+    '/*.jpg':  { headers: { 'cache-control': 'public, max-age=604800, stale-while-revalidate=86400' } },
+    '/*.webp': { headers: { 'cache-control': 'public, max-age=604800, stale-while-revalidate=86400' } },
+    '/*.svg':  { headers: { 'cache-control': 'public, max-age=604800, stale-while-revalidate=86400' } },
+    '/_nuxt/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
   },
 
   typescript: {

@@ -5,11 +5,21 @@ const route = useRoute()
 const config = useRuntimeConfig()
 const token = route.params.token as string
 
-const pending = ref(true)
-const fetchError = ref(false)
-const result = ref<SajuCalcResponse | null>(null)
-const birthInput = ref<Record<string, unknown> | null>(null)
 const currentUrl = ref('')
+
+// SSR로 가져와야 카카오 크롤러가 동적 메타태그를 읽을 수 있음
+const { data: shareData, error: shareError } = await useAsyncData(
+  `share-${token}`,
+  () => $fetch<{
+    calc_snapshot: SajuCalcResponse
+    birth_input: Record<string, unknown> | null
+  }>(`${config.public.apiBase}/api/share/${token}`),
+)
+
+const result = computed(() => shareData.value?.calc_snapshot ?? null)
+const birthInput = computed(() => shareData.value?.birth_input ?? null)
+const pending = computed(() => !shareData.value && !shareError.value)
+const fetchError = computed(() => !!shareError.value)
 
 const personName = computed(() => (birthInput.value?.name as string) || '사주구리')
 
@@ -18,24 +28,12 @@ useSeoMeta({
   ogTitle:        () => `${personName.value}님의 사주 만세력 보러가기`,
   description:    () => `${personName.value}님의 사주 분석 결과를 확인해보세요.`,
   ogDescription:  () => `${personName.value}님의 사주 분석 결과를 확인해보세요.`,
-  ogImage:        `${config.public.siteUrl}/onboarding-illust.png`,
-  ogUrl:          () => `${config.public.siteUrl}/share/${token}`,
+  ogImage:        `${config.public.siteUrl}/onboarding-illust.png?v=2`,
+  ogUrl:          `${config.public.siteUrl}/share/${token}`,
 })
 
-onMounted(async () => {
+onMounted(() => {
   currentUrl.value = window.location.href
-  try {
-    const data = await $fetch<{
-      calc_snapshot: SajuCalcResponse
-      birth_input: Record<string, unknown> | null
-    }>(`${config.public.apiBase}/api/share/${token}`)
-    result.value = data.calc_snapshot
-    birthInput.value = data.birth_input
-  } catch {
-    fetchError.value = true
-  } finally {
-    pending.value = false
-  }
 })
 
 const inputSummary = computed(() => {

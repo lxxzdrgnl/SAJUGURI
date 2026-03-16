@@ -147,7 +147,11 @@ const goToLogin = useGoToLogin()
 
 function goLogin() {
   if (lastBirthInput.value) {
-    localStorage.setItem('daily_pending_input', JSON.stringify(lastBirthInput.value))
+    localStorage.setItem('daily_pending_input', JSON.stringify({
+      birthInput: lastBirthInput.value,
+      result: result.value,
+      userName: userName.value,
+    }))
   }
   goToLogin()
 }
@@ -158,17 +162,26 @@ onMounted(() => {
   if (pending) {
     localStorage.removeItem('daily_pending_input')
     try {
-      const b = JSON.parse(pending)
+      const { birthInput: b, result: savedResult, userName: savedName } = JSON.parse(pending)
       fromDirectInput.value = true
-      step.value = 'input'  // 로딩 오버레이 표시용
-      calcFortune({
-        birth_date:      b.birth_date,
-        birth_time:      b.birth_time ?? null,
-        gender:          b.gender,
-        calendar:        b.calendar ?? 'solar',
-        is_leap_month:   b.is_leap_month ?? false,
-        birth_longitude: b.birth_longitude ?? undefined,
-      }, b.name || '')
+      lastBirthInput.value = b
+      if (savedResult) {
+        // 결과까지 저장된 경우 → API 재호출 없이 즉시 복원
+        result.value = savedResult
+        userName.value = savedName || b?.name || '나'
+        step.value = 'result'
+      } else {
+        // 결과 없으면 재계산
+        step.value = 'input'
+        calcFortune({
+          birth_date:      b.birth_date,
+          birth_time:      b.birth_time ?? null,
+          gender:          b.gender,
+          calendar:        b.calendar ?? 'solar',
+          is_leap_month:   b.is_leap_month ?? false,
+          birth_longitude: b.birth_longitude ?? undefined,
+        }, b.name || '')
+      }
     } catch { /* ignore */ }
   }
 })
@@ -289,7 +302,7 @@ const branchEl = computed(() => result.value ? BRANCH_EL[result.value.day_ganji.
           </div>
           <p class="ilju-desc fs-sub">오늘 일진으로 보는 나의 운세</p>
         </div>
-        <img src="/daily-illust.png" class="ilju-illust" alt="" />
+        <img src="/daily-illust.webp" class="ilju-illust" alt="" />
       </div>
 
       <!-- 방법 선택 -->
@@ -376,7 +389,7 @@ const branchEl = computed(() => result.value ? BRANCH_EL[result.value.day_ganji.
                 <circle cx="20" cy="20" r="17" stroke="var(--border-subtle)" stroke-width="3"/>
                 <path d="M20 3a17 17 0 0 1 17 17" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
               </svg>
-              <img v-else src="/profile-illust.jpg" alt="" />
+              <img v-else src="/profile-illust.webp" alt="" />
             </div>
           </div>
         </button>

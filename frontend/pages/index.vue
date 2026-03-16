@@ -186,7 +186,7 @@ function goToMyProfile() {
               </p>
             </div>
             <div class="profile-illust-mini">
-              <img src="/profile-illust.jpg" alt="" />
+              <img src="/profile-illust.webp" alt="" />
             </div>
           </div>
         </button>
@@ -194,7 +194,7 @@ function goToMyProfile() {
         <!-- 프로필 없을 때 온보딩 -->
         <div v-else class="onboarding-inline">
           <div class="illust-box">
-            <img src="/onboarding-illust.png" alt="사주 일러스트" class="illust-img" />
+            <img src="/onboarding-illust.webp" alt="사주 일러스트" class="illust-img" />
           </div>
           <p class="onboarding-title">아직 프로필이 없으시네요</p>
           <p class="onboarding-desc">생년월일시만 알면 내 사주 프로필 바로 만들 수 있어요.</p>
@@ -239,7 +239,7 @@ function goToMyProfile() {
         <div class="service-grid">
           <NuxtLink to="/profile" class="service-card">
             <div class="service-card-img-wrap">
-              <img src="/home-illust.png" alt="만세력" class="service-card-img" />
+              <img src="/home-illust.webp" alt="만세력" class="service-card-img" />
             </div>
             <div class="service-card-footer">
               <div>
@@ -254,7 +254,7 @@ function goToMyProfile() {
 
           <NuxtLink to="/daily" class="service-card service-card-daily">
             <div class="service-card-img-wrap">
-              <img src="/daily-illust.png" alt="오늘의 운세" class="service-card-img" />
+              <img src="/daily-illust.webp" alt="오늘의 운세" class="service-card-img" />
             </div>
             <div class="service-card-footer">
               <div>

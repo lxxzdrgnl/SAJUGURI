@@ -139,7 +139,7 @@ async function setRepresentative(id: number) {
     <!-- 비어있음 -->
     <div v-else-if="!profiles.length" class="empty">
       <div class="empty-illust-box">
-        <img src="/onboarding-illust.png" alt="" class="empty-illust" />
+        <img src="/onboarding-illust.webp" alt="" class="empty-illust" />
       </div>
       <p class="empty-title">저장된 만세력이 없으시네요</p>
       <p class="empty-desc">생년월일시만 알면 내 사주 만세력을 바로 만들 수 있어요.</p>
