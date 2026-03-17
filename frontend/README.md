@@ -110,10 +110,43 @@ pnpm build && pnpm preview   # 프로덕션 빌드
 
 | Composable | 설명 |
 |---|---|
-| `useSajuApi` | 백엔드 API 호출 래퍼 (calc, daily, question, share 등) |
+| `useAsync` | loading/error/try-catch-finally 래퍼. 모든 비동기 fetch에 필수 사용 |
+| `useSajuApi` | 백엔드 API 호출 단일 창구 (calc, daily, question, share, profiles 등) |
 | `useProfileSave` | 만세력 저장 상태 관리 (idle/loading/done/exists/error) |
 | `useLoginStatePersist` | 로그인 이동 시 상태 localStorage 임시 저장 → 복귀 시 자동 복원 |
 | `useGoToLogin` | 로그인 페이지 이동 (현재 경로 redirect 포함) |
+
+### `useAsync` 사용법
+
+```typescript
+const { loading, error, run } = useAsync()
+
+// 단일 fetch
+const data = await run(() => api.getList(), '불러오기 실패')
+if (data) list.value = data
+
+// 독립적인 두 로딩 상태가 필요한 경우 별도 생성
+const { loading,              run: runMain    } = useAsync()
+const { loading: profLoad,    run: runProfiles } = useAsync()
+```
+
+---
+
+## 공유 유틸리티 (`utils/`)
+
+인라인 재정의 금지. 아래 경로에서 import해서 사용한다.
+
+| 파일 | 주요 exports |
+|---|---|
+| `utils/ganji.ts` | `calcTodayIlju()`, `formatTodayLabel()`, `EL_SWATCH`, `scoreColor()`, 간지 상수 전체 |
+| `utils/category.ts` | `QUESTION_CATEGORY_LABELS`, `DAILY_CATEGORY_ICONS`, `DAILY_CATEGORY_ORDER` |
+| `utils/storageKeys.ts` | localStorage 키 상수 |
+
+---
+
+## 에러 페이지
+
+`error.vue` (루트) — Nuxt 전역 에러 페이지. 404/500 분기 처리, 홈 복귀 버튼 포함.
 
 ---
 

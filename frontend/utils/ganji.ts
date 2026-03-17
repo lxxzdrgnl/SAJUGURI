@@ -88,3 +88,20 @@ export function iljuColor(element: string | null | undefined): string {
   if (element === '수') return '#888'
   return `var(--el-${element})`
 }
+
+/** 오행 → 배경 스와치 CSS 변수 맵 (도넛 차트·카드 색상 등에 사용) */
+export const EL_SWATCH: Record<string, string> = {
+  '목': 'var(--el-목)',
+  '화': 'var(--el-화)',
+  '토': 'var(--el-토)',
+  '금': 'var(--el-금)',
+  '수': 'var(--el-수)',
+}
+
+/** 운세 점수(0-100) → CSS 색상 변수 */
+export function scoreColor(score: number): string {
+  if (score >= 80) return 'var(--color-good)'
+  if (score >= 60) return 'var(--accent)'
+  if (score >= 45) return '#c07818'
+  return 'var(--color-bad)'
+}

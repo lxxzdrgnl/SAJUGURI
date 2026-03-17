@@ -1,16 +1,9 @@
 <script setup lang="ts">
 import type { ConsultationDetail } from '~/types/saju'
+import { QUESTION_CATEGORY_LABELS as CATEGORY_LABELS } from '~/utils/category'
 
 const route = useRoute()
 const config = useRuntimeConfig()
-
-const CATEGORY_LABELS: Record<string, string> = {
-  career: '직업·이직',
-  love:   '연애·결혼',
-  money:  '재물·투자',
-  health: '건강',
-  general: '기타',
-}
 
 const token = route.params.token as string
 

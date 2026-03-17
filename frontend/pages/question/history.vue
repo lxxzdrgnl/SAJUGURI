@@ -1,20 +1,15 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import type { ConsultationHistoryItem } from '~/types/saju'
+import { QUESTION_CATEGORY_LABELS as CATEGORY_LABELS } from '~/utils/category'
 
 const auth = useAuthStore()
 const { listConsultations, createConsultationShare, deleteConsultation } = useSajuApi()
 
-const CATEGORY_LABELS: Record<string, string> = {
-  career:  '직업·이직',
-  love:    '연애·결혼',
-  money:   '재물·투자',
-  health:  '건강',
-  general: '기타',
-}
+const { loading, run: runLoad } = useAsync()
+loading.value = true  // 마운트 전 빈 목록 깜빡임 방지
 
 const items      = ref<ConsultationHistoryItem[]>([])
-const loading    = ref(true)
 const visible    = ref<Set<number>>(new Set())
 const expanded   = ref<number | null>(null)
 const copyStates = ref<Record<number, 'idle' | 'loading' | 'done'>>({})
@@ -22,21 +17,13 @@ const deleting   = ref<Set<number>>(new Set())
 const fadeOut    = ref<Set<number>>(new Set())
 
 async function load() {
-  loading.value = true
-  visible.value = new Set()
+  visible.value  = new Set()
   expanded.value = null
-  try {
-    items.value = await listConsultations(auth.token as string)
-    items.value.forEach((item, i) => {
-      setTimeout(() => {
-        visible.value = new Set([...visible.value, item.id])
-      }, i * 80)
-    })
-  } catch {
-    items.value = []
-  } finally {
-    loading.value = false
-  }
+  const data = await runLoad(() => listConsultations(auth.token as string))
+  items.value = data ?? []
+  items.value.forEach((item, i) => {
+    setTimeout(() => { visible.value = new Set([...visible.value, item.id]) }, i * 80)
+  })
 }
 
 function toggle(id: number) {

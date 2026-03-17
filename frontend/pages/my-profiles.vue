@@ -1,37 +1,21 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import { useSajuStore } from '~/stores/saju'
-import type { SajuCalcRequest } from '~/types/saju'
+import type { SajuCalcRequest, ProfileResponse } from '~/types/saju'
 import { iljuColor, formatIljuHanja, formatIljuLabel } from '~/utils/ganji'
-
-interface Profile {
-  id: number
-  name: string
-  birth_date: string
-  birth_time: string | null
-  calendar: string
-  gender: string
-  is_leap_month: boolean
-  city: string | null
-  longitude: number | null
-  is_representative: boolean
-  day_stem: string | null
-  day_branch: string | null
-  day_stem_element: string | null
-}
 
 const auth = useAuthStore()
 const store = useSajuStore()
 const config = useRuntimeConfig()
 const base = config.public.apiBase
 
-const profiles = ref<Profile[]>([])
+const profiles = ref<ProfileResponse[]>([])
 const pending = ref(true)
 const openingId = ref<number | null>(null)
 
 async function fetchProfiles() {
   try {
-    profiles.value = await auth.authFetch<Profile[]>(`${base}/api/profiles`)
+    profiles.value = await auth.authFetch<ProfileResponse[]>(`${base}/api/profiles`)
   } finally {
     pending.value = false
   }
@@ -39,10 +23,10 @@ async function fetchProfiles() {
 
 onMounted(fetchProfiles)
 
-function iljuHanja(p: Profile) { return formatIljuHanja(p.day_stem, p.day_branch) }
-function iljuLabel(p: Profile) { return formatIljuLabel(p.day_stem, p.day_branch) }
+function iljuHanja(p: ProfileResponse) { return formatIljuHanja(p.day_stem, p.day_branch) }
+function iljuLabel(p: ProfileResponse) { return formatIljuLabel(p.day_stem, p.day_branch) }
 
-function birthLabel(p: Profile) {
+function birthLabel(p: ProfileResponse) {
   const [y, m, d] = p.birth_date.split('-')
   const cal = p.calendar === 'lunar' ? '음력' : '양력'
   return `${y}년 ${m}월 ${d}일 (${cal})`
@@ -51,7 +35,7 @@ function birthLabel(p: Profile) {
 const deletingId = ref<number | null>(null)
 const repSettingId = ref<number | null>(null)
 
-async function openProfile(p: Profile) {
+async function openProfile(p: ProfileResponse) {
   openingId.value = p.id
   const req: SajuCalcRequest = {
     name: p.name,

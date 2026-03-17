@@ -1,21 +1,9 @@
 <script setup lang="ts">
 import type { DailyFortuneResponse } from '~/types/saju'
-import { STEM_HANJA, BRANCH_HANJA, STEM_ELEMENT as STEM_EL, BRANCH_ELEMENT as BRANCH_EL, iljuColor as elColor } from '~/utils/ganji'
+import { STEM_HANJA, BRANCH_HANJA, STEM_ELEMENT as STEM_EL, BRANCH_ELEMENT as BRANCH_EL, iljuColor as elColor, EL_SWATCH, scoreColor } from '~/utils/ganji'
+import { DAILY_CATEGORY_ORDER as CAT_ORDER } from '~/utils/category'
 
 defineProps<{ result: DailyFortuneResponse }>()
-
-const EL_SWATCH: Record<string,string> = {
-  '목':'var(--el-목)', '화':'var(--el-화)', '토':'var(--el-토)',
-  '금':'var(--el-금)', '수':'var(--el-수)',
-}
-const CAT_ORDER = ['exam','money','love','career','health','social']
-
-function scoreColor(score: number) {
-  if (score >= 80) return 'var(--color-good)'
-  if (score >= 60) return 'var(--accent)'
-  if (score >= 45) return '#c07818'
-  return 'var(--color-bad)'
-}
 </script>
 
 <template>

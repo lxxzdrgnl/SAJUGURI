@@ -1,34 +1,24 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
-import type { SajuCalcRequest, ConsultationResponse, QuestionCategory } from '~/types/saju'
+import type { SajuCalcRequest, ConsultationResponse, QuestionCategory, ProfileResponse } from '~/types/saju'
 import { STORAGE_KEYS } from '~/utils/storageKeys'
-import type { ProfileItem } from '~/components/saju/ProfileList.vue'
+import { QUESTION_CATEGORY_LABELS as CATEGORY_LABELS } from '~/utils/category'
 
 const auth   = useAuthStore()
-const config = useRuntimeConfig()
-const base   = config.public.apiBase
-const { askQuestion, createConsultationShare } = useSajuApi()
+const { askQuestion, createConsultationShare, getProfiles } = useSajuApi()
 const goToLogin = useGoToLogin()
 
 // ── 상태 ─────────────────────────────────────────────────────────────────────
 type Step = 'select' | 'input' | 'profile' | 'question' | 'result'
 
 
-const CATEGORY_LABELS: Record<QuestionCategory, string> = {
-  career: '직업·이직',
-  love:   '연애·결혼',
-  money:  '재물·투자',
-  health: '건강',
-  general: '기타',
-}
-
 const step              = ref<Step>('select')
-const loading           = ref(false)
-const error             = ref('')
 const result            = ref<ConsultationResponse | null>(null)
-const profiles          = ref<ProfileItem[]>([])
-const profLoad          = ref(false)
+const profiles          = ref<ProfileResponse[]>([])
 const showLoginDialog   = ref(false)
+
+const { loading,              error, run: runSubmit   } = useAsync()
+const { loading: profLoad,          run: runProfiles  } = useAsync()
 const pendingBirthInput = ref<SajuCalcRequest | null>(null)
 const pendingName       = ref('')
 const shareLoading         = ref(false)
@@ -89,11 +79,7 @@ useLoginStatePersist(
 // ── 프로필 로드 ───────────────────────────────────────────────────────────────
 async function loadProfiles() {
   if (!auth.isLoggedIn) return
-  profLoad.value = true
-  try {
-    profiles.value = await auth.authFetch<ProfileItem[]>(`${base}/api/profiles`)
-  } catch { profiles.value = [] }
-  finally { profLoad.value = false }
+  profiles.value = (await runProfiles(() => getProfiles(auth.token as string))) ?? []
 }
 
 function goProfile() {
@@ -110,7 +96,7 @@ function onFormSubmit(req: SajuCalcRequest) {
   step.value              = 'question'
 }
 
-function onProfileSelect(p: ProfileItem) {
+function onProfileSelect(p: ProfileResponse) {
   fromDirectInput.value   = false
   pendingBirthInput.value = {
     birth_date:    p.birth_date,
@@ -126,20 +112,18 @@ function onProfileSelect(p: ProfileItem) {
 // ── 상담 실행 ──────────────────────────────────────────────────────────────
 async function submitQuestion() {
   if (!pendingBirthInput.value || !questionValid.value) return
-  loading.value = true
-  error.value   = ''
-  try {
-    result.value = await askQuestion({
-      ...pendingBirthInput.value,
-      name: pendingBirthInput.value.name?.trim() || pendingName.value?.trim() || undefined,
+  const r = await runSubmit(
+    () => askQuestion({
+      ...pendingBirthInput.value!,
+      name: pendingBirthInput.value!.name?.trim() || pendingName.value?.trim() || undefined,
       question: question.value,
-    }, auth.token)
-    step.value = 'result'
+    }, auth.token),
+    '상담을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.',
+  )
+  if (r) {
+    result.value = r
+    step.value   = 'result'
     if (!auth.isLoggedIn) showLoginPromoDialog.value = true
-  } catch {
-    error.value = '상담을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'
-  } finally {
-    loading.value = false
   }
 }
 

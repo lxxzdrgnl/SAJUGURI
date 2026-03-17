@@ -1,63 +1,32 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import { useSajuStore } from '~/stores/saju'
-import type { SajuCalcRequest, DailyFortuneResponse } from '~/types/saju'
+import type { SajuCalcRequest, DailyFortuneResponse, ProfileResponse } from '~/types/saju'
 import {
-  STEM_HANJA, BRANCH_HANJA, STEM_COLOR, STEM_ELEMENT, BRANCH_ELEMENT, BRANCH_ANIMAL,
-  KOREAN_DAYS, iljuColor, stemLabelColor, formatIljuHanja, formatIljuLabel,
+  calcTodayIlju, formatTodayLabel, STEM_HANJA, BRANCH_HANJA, STEM_COLOR, STEM_ELEMENT, BRANCH_ELEMENT, BRANCH_ANIMAL,
+  iljuColor, stemLabelColor, formatIljuHanja, formatIljuLabel,
 } from '~/utils/ganji'
 
-interface ProfileItem {
-  id: number
-  name: string
-  birth_date: string
-  birth_time: string | null
-  calendar: string
-  gender: string
-  is_leap_month: boolean
-  city: string | null
-  longitude: number | null
-  is_representative: boolean
-  day_stem: string | null
-  day_branch: string | null
-  day_stem_element: string | null
-}
-
 const auth = useAuthStore()
-const config = useRuntimeConfig()
-const base = config.public.apiBase
 
 const pending = ref(true)
-const repProfile = ref<ProfileItem | null>(null)
+const repProfile = ref<ProfileResponse | null>(null)
 const dailyOverall = ref<string | null>(null)
-const { getDailyFortune } = useSajuApi()
+const { getDailyFortune, getRepresentativeProfile } = useSajuApi()
 
 // ── 오늘의 일진 계산 ──
-const todayIlju = computed(() => {
-  const today = new Date()
-  const base = new Date(1900, 0, 1)
-  const days = Math.floor((today.getTime() - base.getTime()) / 86400000)
-  const stemIdx = ((days % 10) + 10) % 10
-  const branchIdx = ((days + 10) % 12 + 12) % 12
-  const stem = ['갑','을','병','정','무','기','경','신','임','계'][stemIdx]
-  const branch = ['자','축','인','묘','진','사','오','미','신','유','술','해'][branchIdx]
-  return {
-    stem,
-    branch,
-    stemHanja: STEM_HANJA[stem],
-    branchHanja: BRANCH_HANJA[branch],
-    element: STEM_ELEMENT[stem],
-    branchElement: BRANCH_ELEMENT[branch],
-    animal: BRANCH_ANIMAL[branch],
-    colorLabel: STEM_COLOR[stem],
-    date: today,
-  }
-})
-
-const todayLabel = computed(() => {
-  const d = todayIlju.value.date
-  return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${KOREAN_DAYS[d.getDay()]})`
-})
+const { stem: _ts, branch: _tb } = calcTodayIlju()
+const todayIlju = {
+  stem:          _ts,
+  branch:        _tb,
+  stemHanja:     STEM_HANJA[_ts],
+  branchHanja:   BRANCH_HANJA[_tb],
+  element:       STEM_ELEMENT[_ts],
+  branchElement: BRANCH_ELEMENT[_tb],
+  animal:        BRANCH_ANIMAL[_tb],
+  colorLabel:    STEM_COLOR[_ts],
+}
+const todayLabel = formatTodayLabel()
 
 onMounted(async () => {
   if (!auth.isLoggedIn) {
@@ -65,7 +34,7 @@ onMounted(async () => {
     return
   }
   try {
-    const p = await auth.authFetch<ProfileItem>(`${base}/api/profiles/representative`)
+    const p = await getRepresentativeProfile(auth.token as string)
     repProfile.value = p
     // 한줄 운세 — 백그라운드로 조용히 로드
     getDailyFortune({

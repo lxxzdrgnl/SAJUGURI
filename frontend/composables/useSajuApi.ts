@@ -1,4 +1,4 @@
-import type { SajuCalcRequest, SajuCalcResponse, WolUnEntry, YeonUnEntry, IlJinEntry, DailyFortuneRequest, DailyFortuneResponse, QuestionRequest, ConsultationResponse, ConsultationDetail, ConsultationHistoryItem } from '~/types/saju'
+import type { SajuCalcRequest, SajuCalcResponse, WolUnEntry, YeonUnEntry, IlJinEntry, DailyFortuneRequest, DailyFortuneResponse, QuestionRequest, ConsultationResponse, ConsultationDetail, ConsultationHistoryItem, ProfileResponse } from '~/types/saju'
 
 export function useSajuApi() {
   const config = useRuntimeConfig()
@@ -82,5 +82,19 @@ export function useSajuApi() {
     })
   }
 
-  return { calcSaju, getWolUn, getYeonUn, getIlJin, getDailyFortune, createDailyShare, getDailyShareInput, askQuestion, listConsultations, createConsultationShare, getSharedConsultation, deleteConsultation }
+  // ── 프로필 API ──────────────────────────────────────────────────────────────
+
+  async function getProfiles(token: string): Promise<ProfileResponse[]> {
+    return $fetch<ProfileResponse[]>(`${base}/api/profiles`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+  }
+
+  async function getRepresentativeProfile(token: string): Promise<ProfileResponse> {
+    return $fetch<ProfileResponse>(`${base}/api/profiles/representative`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+  }
+
+  return { calcSaju, getWolUn, getYeonUn, getIlJin, getDailyFortune, createDailyShare, getDailyShareInput, askQuestion, listConsultations, createConsultationShare, getSharedConsultation, deleteConsultation, getProfiles, getRepresentativeProfile }
 }

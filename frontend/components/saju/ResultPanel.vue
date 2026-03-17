@@ -27,8 +27,8 @@ const auth = useAuthStore()
 const config = useRuntimeConfig()
 const goToLogin = useGoToLogin()
 
-// 깊은 복사로 Proxy 완전 해제 (Chart.js hasOwnProperty 오류 방지)
-const raw = computed(() => JSON.parse(JSON.stringify(props.result)) as SajuCalcResponse)
+// Proxy 해제 — Chart.js hasOwnProperty 오류 방지 (toRaw가 JSON 직렬화보다 빠름)
+const raw = computed(() => toRaw(props.result))
 
 // ── 오행 토글 ──────────────────────────────────────────────────────────────────
 const applyHap  = ref(false)

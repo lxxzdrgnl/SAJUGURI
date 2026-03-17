@@ -1,38 +1,24 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
-import type { SajuCalcRequest, DailyFortuneResponse } from '~/types/saju'
-import { STEMS, BRANCHES, STEM_HANJA, BRANCH_HANJA, STEM_ELEMENT as STEM_EL, BRANCH_ELEMENT as BRANCH_EL, KOREAN_DAYS, iljuColor as elColor } from '~/utils/ganji'
-import type { ProfileItem } from '~/components/saju/ProfileList.vue'
+import type { SajuCalcRequest, DailyFortuneResponse, ProfileResponse } from '~/types/saju'
+import { calcTodayIlju, formatTodayLabel, STEM_HANJA, BRANCH_HANJA, STEM_ELEMENT as STEM_EL, BRANCH_ELEMENT as BRANCH_EL, iljuColor as elColor } from '~/utils/ganji'
 import { STORAGE_KEYS } from '~/utils/storageKeys'
 
 const auth   = useAuthStore()
-const config = useRuntimeConfig()
-const base   = config.public.apiBase
-const { getDailyFortune } = useSajuApi()
-
-// ── 상수 ────────────────────────────────────────────────────────────────────
-const CAT_ICON: Record<string,string> = {
-  exam:'📚', money:'💰', love:'💕', career:'💼', health:'🌿', social:'🤝',
-}
-const CAT_ORDER = ['exam','money','love','career','health','social']
-const EL_SWATCH: Record<string,string> = {
-  '목':'var(--el-목)', '화':'var(--el-화)', '토':'var(--el-토)',
-  '금':'var(--el-금)', '수':'var(--el-수)',
-}
+const { getDailyFortune, createDailyShare: _createDailyShare, getProfiles } = useSajuApi()
 
 // ── 상태 ────────────────────────────────────────────────────────────────────
 type Step = 'select' | 'input' | 'profile' | 'result'
 
-
 const step            = ref<Step>('select')
-const loading         = ref(false)
-const error           = ref('')
 const result          = ref<DailyFortuneResponse | null>(null)
 const userName        = ref('')
-const profiles        = ref<ProfileItem[]>([])
-const profLoad        = ref(false)
+const profiles        = ref<ProfileResponse[]>([])
 const showLoginDialog = ref(false)
 const fromDirectInput = ref(false)
+
+const { loading,               error,  run: runCalc     } = useAsync()
+const { loading: profLoad,             run: runProfiles  } = useAsync()
 
 // ── 프로필 저장 ──────────────────────────────────────────────────────────────
 const { saveState: saveProfileState, saveProfile: _saveProfile, saveLabel: saveProfileLabel, saveDisabled: saveProfileDisabled } = useProfileSave()
@@ -59,14 +45,12 @@ const shareUrl      = ref('')
 const showShareModal = ref(false)
 const lastBirthInput = ref<Record<string, unknown> | null>(null)
 
-const { createDailyShare } = useSajuApi()
-
 async function doShare() {
   if (shareUrl.value) { showShareModal.value = true; return }
   if (!lastBirthInput.value) return
   shareState.value = 'loading'
   try {
-    const data = await createDailyShare(lastBirthInput.value)
+    const data = await _createDailyShare(lastBirthInput.value)
     shareUrl.value = data.share_url
     shareState.value = 'idle'
     showShareModal.value = true
@@ -78,29 +62,13 @@ async function doShare() {
 
 
 // ── 오늘 날짜 ────────────────────────────────────────────────────────────────
-const todayLabel = computed(() => {
-  const d = new Date()
-  return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${KOREAN_DAYS[d.getDay()]})`
-})
-
-const todayIlju = computed(() => {
-  const today = new Date()
-  const bdate = new Date(1900, 0, 1)
-  const days = Math.floor((today.getTime() - bdate.getTime()) / 86400000)
-  const stem   = STEMS[((days % 10) + 10) % 10]
-  const branch = BRANCHES[((days + 10) % 12 + 12) % 12]
-  return { stem, branch }
-})
+const todayLabel = formatTodayLabel()
+const todayIlju  = calcTodayIlju()
 
 // ── 프로필 로드 ──────────────────────────────────────────────────────────────
 async function loadProfiles() {
   if (!auth.isLoggedIn) return
-  profLoad.value = true
-  try {
-    profiles.value = await auth.authFetch<ProfileItem[]>(`${base}/api/profiles`, {
-    })
-  } catch { profiles.value = [] }
-  finally { profLoad.value = false }
+  profiles.value = (await runProfiles(() => getProfiles(auth.token as string))) ?? []
 }
 
 function goProfile() {
@@ -144,34 +112,29 @@ useLoginStatePersist(
 
 // ── 계산 ────────────────────────────────────────────────────────────────────
 async function calcFortune(req: SajuCalcRequest, name: string) {
-  loading.value = true
-  error.value   = ''
   userName.value = name || '나'
   shareUrl.value = ''   // 새 계산마다 공유 URL 초기화
   lastBirthInput.value = {
-    name:           req.name ?? name,
-    birth_date:     req.birth_date,
-    birth_time:     req.birth_time ?? null,
-    gender:         req.gender,
-    calendar:       req.calendar ?? 'solar',
-    is_leap_month:  req.is_leap_month ?? false,
+    name:            req.name ?? name,
+    birth_date:      req.birth_date,
+    birth_time:      req.birth_time ?? null,
+    gender:          req.gender,
+    calendar:        req.calendar ?? 'solar',
+    is_leap_month:   req.is_leap_month ?? false,
     birth_longitude: req.birth_longitude ?? null,
   }
-  try {
-    result.value = await getDailyFortune({
-      birth_date:    req.birth_date,
-      birth_time:    req.birth_time,
-      gender:        req.gender,
-      calendar:      req.calendar,
-      is_leap_month: req.is_leap_month,
+  const r = await runCalc(
+    () => getDailyFortune({
+      birth_date:      req.birth_date,
+      birth_time:      req.birth_time,
+      gender:          req.gender,
+      calendar:        req.calendar,
+      is_leap_month:   req.is_leap_month,
       birth_longitude: req.birth_longitude,
-    })
-    step.value = 'result'
-  } catch {
-    error.value = '운세를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'
-  } finally {
-    loading.value = false
-  }
+    }),
+    '운세를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.',
+  )
+  if (r) { result.value = r; step.value = 'result' }
 }
 
 function onFormSubmit(req: SajuCalcRequest) {
@@ -179,7 +142,7 @@ function onFormSubmit(req: SajuCalcRequest) {
   calcFortune(req, req.name ?? '')
 }
 
-function onProfileSelect(p: ProfileItem) {
+function onProfileSelect(p: ProfileResponse) {
   fromDirectInput.value = false
   calcFortune({
     birth_date:    p.birth_date,
@@ -198,22 +161,6 @@ function reset() {
   saveProfileState.value = 'idle'
 }
 
-// ── 색상 유틸 ────────────────────────────────────────────────────────────────
-function scoreColor(score: number): string {
-  if (score >= 80) return 'var(--color-good)'
-  if (score >= 60) return 'var(--accent)'
-  if (score >= 45) return '#c07818'
-  return 'var(--color-bad)'
-}
-
-// ── 결과 계산 ────────────────────────────────────────────────────────────────
-const orderedFortunes = computed(() => {
-  if (!result.value) return []
-  return CAT_ORDER.map(k => ({ key: k, ...result.value!.fortunes[k] }))
-})
-
-const stemEl   = computed(() => result.value ? STEM_EL[result.value.day_ganji.stem]    ?? '' : '')
-const branchEl = computed(() => result.value ? BRANCH_EL[result.value.day_ganji.branch] ?? '' : '')
 </script>
 
 <template>

@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import type { DailyFortuneResponse } from '~/types/saju'
+import { formatTodayLabel } from '~/utils/ganji'
 
 const route  = useRoute()
 const config = useRuntimeConfig()
 const token  = route.params.token as string
 const { getDailyShareInput, getDailyFortune } = useSajuApi()
+const { loading, error, run } = useAsync()
 
-const loading = ref(false)
-const error   = ref('')
-const result  = ref<DailyFortuneResponse | null>(null)
+const result = ref<DailyFortuneResponse | null>(null)
 
 // ── 공유 입력값 (SSR — 카카오 크롤러용 메타태그) ─────────────────────────────
 const { data: shareData, error: shareError } = await useAsyncData(
@@ -27,30 +27,23 @@ onMounted(async () => {
     error.value = '공유 링크를 불러오지 못했습니다.'
     return
   }
-  loading.value = true
-  try {
-    const b = shareData.value.birth_input
-    result.value = await getDailyFortune({
+  const b = shareData.value.birth_input
+  const r = await run(
+    () => getDailyFortune({
       birth_date:      b.birth_date as string,
       birth_time:      (b.birth_time as string | null) ?? null,
       gender:          (b.gender as 'male' | 'female'),
       calendar:        (b.calendar as 'solar' | 'lunar') ?? 'solar',
       is_leap_month:   (b.is_leap_month as boolean) ?? false,
       birth_longitude: (b.birth_longitude as number | null) ?? undefined,
-    })
-  } catch {
-    error.value = '운세를 불러오지 못했습니다.'
-  } finally {
-    loading.value = false
-  }
+    }),
+    '운세를 불러오지 못했습니다.',
+  )
+  if (r) result.value = r
 })
 
 // ── 날짜 ──────────────────────────────────────────────────────────────────────
-const todayLabel = computed(() => {
-  const d = new Date()
-  const days = ['일','월','화','수','목','금','토']
-  return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`
-})
+const todayLabel = formatTodayLabel()
 
 // ── SEO ───────────────────────────────────────────────────────────────────────
 useSeoMeta({

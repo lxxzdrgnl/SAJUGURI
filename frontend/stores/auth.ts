@@ -24,12 +24,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  /** 하위 호환성 — access token만 설정 */
-  function setToken(t: string) {
-    token.value = t
-    if (import.meta.client) localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, t)
-  }
-
   function logout() {
     // 서버에 로그아웃 요청 (fire-and-forget)
     if (token.value) {
@@ -109,5 +103,5 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  return { token, refreshToken, user, isLoggedIn, setTokens, setToken, logout, fetchMe, init, authFetch }
+  return { token, refreshToken, user, isLoggedIn, setTokens, logout, fetchMe, init, authFetch }
 })

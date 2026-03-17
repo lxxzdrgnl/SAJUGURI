@@ -126,6 +126,85 @@ SajuNara/
 
 ---
 
+## 8-1. 백엔드 아키텍처 패턴 (필수 준수)
+
+### 3-레이어 구조
+
+```
+Router  →  Service  →  CRUD  →  DB
+```
+
+| 레이어 | 책임 | 금지 |
+|---|---|---|
+| **Router** | HTTP 입출력, 의존성 주입만 | try/except, DB 직접 접근, 비즈니스 로직 |
+| **Service** | 비즈니스 흐름 제어, 예외 변환, 단일 commit | 여러 번 commit |
+| **CRUD** | DB 접근만 (select/add/flush) | 비즈니스 규칙, commit (단발 연산 제외) |
+
+### CRUD 작성 규칙
+
+- **읽기 전용 함수**: 그냥 `return`. commit/flush 없음.
+- **멀티스텝 연산의 쓰기 함수**: `db.add()` + `db.flush()` + `db.refresh()` 까지만. **commit은 Service가 마지막에 한 번만.**
+- **단발 단순 쓰기** (logout, share 생성 등): CRUD 내부에서 commit 허용. Service 레이어 불필요, Router에서 직결 호출.
+
+```python
+# ❌ 잘못된 패턴 — CRUD에 비즈니스 규칙
+async def create_profile(db, user_id, body):
+    if await check_duplicate(...):   # 비즈니스 규칙 → Service 레이어로
+        raise HTTPException(409)
+    if not await has_any(...):       # 대표 자동설정 규칙 → Service 레이어로
+        is_rep = True
+
+# ✅ 올바른 패턴 — CRUD는 저장만
+async def create_profile(db, user_id, birth_date, birth_time, is_representative, body):
+    obj = Profile(...)
+    db.add(obj)
+    await db.flush()
+    await db.refresh(obj)
+    return obj          # commit 없음
+```
+
+### Service 작성 규칙
+
+- 멀티스텝 흐름(검증 → 쓰기 → 재발급 등)을 제어하고 **마지막에 `await db.commit()` 한 번**.
+- 예외 변환 책임: engine `ValueError` → `CalcFailedException`, LLM `RuntimeError` → `LLMFailedException`.
+- OAuth 콜백처럼 `Request` 객체가 필요한 부분은 Router에 남기되, 추출한 **순수 데이터(email, social_id 등)** 만 Service로 전달.
+
+```python
+# ✅ 원자성 보장 패턴
+async def exchange_refresh_token(db, raw_token):
+    stored = await crud.get_active_refresh_token(db, hash_token(raw_token))  # 읽기
+    stored.revoked = True                                                      # 마킹
+    access, refresh = await crud.create_token_pair(db, user)                  # flush
+    await db.commit()   # 폐기 + 신규 발급이 하나의 트랜잭션 ← 핵심
+    return access, refresh
+```
+
+### Router 작성 규칙
+
+- 엔드포인트 본문은 **의존성 주입 + 단일 위임 호출**로 끝낼 것.
+- try/except 금지. 예외는 Service/CRUD가 `AppException` 서브클래스로 올리면 `main.py` 전역 핸들러가 처리.
+- 단발 단순 연산은 Service 없이 CRUD 직결 허용 (불필요한 레이어 추가 금지).
+
+```python
+# ✅ 올바른 Router
+@router.post("")
+async def create_profile(body: ProfileCreate, user=Depends(...), db=Depends(...)):
+    return await create_profile_for_user(db, user.id, body)  # 끝
+
+# ❌ 잘못된 Router
+@router.post("")
+async def create_profile(...):
+    try:
+        dup = await db.execute(select(Profile).where(...))   # DB 직접
+        if dup.scalar_one_or_none():
+            raise HTTPException(409)                          # 비즈니스 로직
+        ...
+    except Exception as e:
+        raise HTTPException(500)                              # 예외 변환
+```
+
+---
+
 ## 9. 구현 현황
 
 ### ✅ Phase 1 — 백엔드 엔진
@@ -215,3 +294,84 @@ SajuNara/
 
 - 사용자에게 보이는 텍스트에서 **"프로필" → "만세력"** 으로 표기
   - 예: "저장된 만세력", "만세력 저장하기", "내 만세력"
+
+---
+
+## 11-1. 프론트엔드 아키텍처 패턴 (필수 준수)
+
+### `useAsync()` — loading/error 보일러플레이트 금지
+
+`loading = ref(false)` + `error = ref('')` + `try/catch/finally`를 직접 작성하지 않는다.
+반드시 `useAsync()` composable을 사용한다.
+
+```typescript
+// ❌ 금지 — 직접 작성
+loading.value = true
+error.value   = ''
+try {
+  result.value = await api.getSomething()
+} catch {
+  error.value = '오류 메시지'
+} finally {
+  loading.value = false
+}
+
+// ✅ 올바른 패턴
+const { loading, error, run } = useAsync()
+const data = await run(() => api.getSomething(), '오류 메시지')
+if (data) result.value = data
+```
+
+같은 페이지에서 독립적인 두 작업(예: 메인 계산 + 프로필 로드)이 있으면 각자 `useAsync()`를 별도로 생성한다:
+
+```typescript
+const { loading,              error, run: runCalc     } = useAsync()
+const { loading: profLoad,          run: runProfiles  } = useAsync()
+```
+
+### `useSajuApi()` — API 호출 단일 창구
+
+백엔드 API 호출은 항상 `useSajuApi()` composable을 통해 한다.
+`$fetch`, `auth.authFetch`를 페이지/컴포넌트에서 직접 호출하지 않는다.
+
+현재 제공 메서드:
+
+| 메서드 | 설명 |
+|---|---|
+| `calcSaju(req)` | 만세력 계산 |
+| `getWolUn(year, dayStem)` | 월운 |
+| `getYeonUn(startYear, count, dayStem)` | 연운 |
+| `getIlJin(year, month)` | 일진 |
+| `getDailyFortune(req)` | 오늘의 운세 |
+| `createDailyShare(birthInput)` | 오늘의 운세 공유 링크 생성 |
+| `getDailyShareInput(token)` | 공유 운세 입력값 조회 |
+| `askQuestion(req, authToken?)` | 한줄 상담 |
+| `listConsultations(token)` | 상담 히스토리 목록 |
+| `createConsultationShare(id, token?)` | 상담 공유 링크 생성 |
+| `getSharedConsultation(shareToken)` | 공유 상담 조회 |
+| `deleteConsultation(id, token)` | 상담 삭제 |
+| `getProfiles(token)` | 저장된 만세력 목록 |
+| `getRepresentativeProfile(token)` | 대표 만세력 조회 |
+
+새로운 API 엔드포인트가 생기면 페이지가 아닌 `composables/useSajuApi.ts`에 추가한다.
+
+### 타입·상수 단일 소스
+
+중복 정의 금지. 아래 위치에만 존재한다:
+
+| 항목 | 위치 |
+|---|---|
+| `ProfileResponse` | `types/saju.ts` |
+| 한줄 상담 카테고리 레이블 | `utils/category.ts` → `QUESTION_CATEGORY_LABELS` |
+| 오늘의 운세 카테고리 아이콘·순서 | `utils/category.ts` → `DAILY_CATEGORY_ICONS`, `DAILY_CATEGORY_ORDER` |
+| 오행 → CSS 스와치 맵 | `utils/ganji.ts` → `EL_SWATCH` |
+| 운세 점수 → 색상 | `utils/ganji.ts` → `scoreColor(score)` |
+| 오늘 일주 계산 | `utils/ganji.ts` → `calcTodayIlju()` |
+| 오늘 날짜 포맷 | `utils/ganji.ts` → `formatTodayLabel()` |
+
+페이지나 컴포넌트에서 위 항목을 인라인으로 재정의하지 않는다.
+
+### 에러 페이지
+
+`frontend/error.vue` — Nuxt 전역 에러 페이지. 404/500 분기 처리.
+새로 만들지 말고, 수정이 필요하면 이 파일을 수정한다.

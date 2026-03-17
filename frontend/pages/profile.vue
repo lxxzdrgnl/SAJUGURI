@@ -8,6 +8,7 @@ const store  = useSajuStore()
 const auth   = useAuthStore()
 const route  = useRoute()
 const config = useRuntimeConfig()
+const { getProfiles } = useSajuApi()
 
 // ── 저장 모달 (프로필 0개 첫 계산 후) ────────────────────────────────────────
 const showFirstSaveModal = ref(false)
@@ -16,7 +17,7 @@ const firstSaveState = ref<'idle' | 'loading' | 'done' | 'error'>('idle')
 async function checkAndPromptSave() {
   if (!auth.isLoggedIn) return
   try {
-    const profiles = await auth.authFetch<unknown[]>(`${config.public.apiBase}/api/profiles`)
+    const profiles = await getProfiles(auth.token as string)
     if (profiles.length === 0) showFirstSaveModal.value = true
   } catch { /* 무시 */ }
 }

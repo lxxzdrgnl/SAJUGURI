@@ -1,27 +1,15 @@
 <script setup lang="ts">
 import { STEM_HANJA, BRANCH_HANJA, STEM_ELEMENT as STEM_EL, BRANCH_ELEMENT as BRANCH_EL, iljuColor as elColor } from '~/utils/ganji'
-
-export interface ProfileItem {
-  id: number
-  name: string
-  birth_date: string
-  birth_time: string | null
-  calendar: string
-  gender: string
-  is_leap_month: boolean
-  day_stem: string | null
-  day_stem_element: string | null
-  day_branch?: string | null
-}
+import type { ProfileResponse } from '~/types/saju'
 
 const props = defineProps<{
-  profiles: ProfileItem[]
+  profiles: ProfileResponse[]
   profLoad: boolean
   loading?: boolean
 }>()
 
 const emit = defineEmits<{
-  select: [profile: ProfileItem]
+  select: [profile: ProfileResponse]
 }>()
 </script>
 

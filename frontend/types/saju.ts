@@ -203,6 +203,25 @@ export interface IlJinEntry {
   solar_term?: string
 }
 
+// ── 프로필 ──────────────────────────────────────────────────────────────────
+
+/** 저장된 만세력 프로필 (Single Source of Truth — 모든 컴포넌트/페이지에서 이 타입 사용) */
+export interface ProfileResponse {
+  id: number
+  name: string
+  birth_date: string
+  birth_time: string | null
+  calendar: string
+  gender: string
+  is_leap_month: boolean
+  city: string | null
+  longitude: number | null
+  is_representative: boolean
+  day_stem: string | null
+  day_branch: string | null
+  day_stem_element: string | null
+}
+
 // ── 한줄 상담 ────────────────────────────────────────────────────────────────
 
 export type QuestionCategory = 'career' | 'love' | 'money' | 'health' | 'general'
