@@ -84,10 +84,7 @@ useSeoMeta({
 
     <!-- 로딩 -->
     <div v-if="loading || (!result && !error && !shareError)" class="center-state">
-      <svg class="animate-spin w-8 h-8" viewBox="0 0 40 40" fill="none">
-        <circle cx="20" cy="20" r="17" stroke="var(--border-subtle)" stroke-width="3"/>
-        <path d="M20 3a17 17 0 0 1 17 17" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
-      </svg>
+      <LoadingSpinner />
       <p class="fs-sub" style="color:var(--text-muted);margin-top:12px;">운세 계산 중…</p>
     </div>
 

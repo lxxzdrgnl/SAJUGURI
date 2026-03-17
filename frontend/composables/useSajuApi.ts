@@ -1,4 +1,4 @@
-import type { SajuCalcRequest, SajuCalcResponse, WolUnEntry, YeonUnEntry, IlJinEntry, DailyFortuneRequest, DailyFortuneResponse } from '~/types/saju'
+import type { SajuCalcRequest, SajuCalcResponse, WolUnEntry, YeonUnEntry, IlJinEntry, DailyFortuneRequest, DailyFortuneResponse, QuestionRequest, ConsultationResponse, ConsultationDetail, ConsultationHistoryItem } from '~/types/saju'
 
 export function useSajuApi() {
   const config = useRuntimeConfig()
@@ -50,5 +50,37 @@ export function useSajuApi() {
     return $fetch(`${base}/api/share/daily/${token}`)
   }
 
-  return { calcSaju, getWolUn, getYeonUn, getIlJin, getDailyFortune, createDailyShare, getDailyShareInput }
+  async function askQuestion(req: QuestionRequest, authToken?: string | null): Promise<ConsultationResponse> {
+    return $fetch<ConsultationResponse>(`${base}/api/question`, {
+      method: 'POST',
+      body: req,
+      headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined,
+    })
+  }
+
+  async function listConsultations(token: string): Promise<ConsultationHistoryItem[]> {
+    return $fetch<ConsultationHistoryItem[]>(`${base}/api/question/history`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+  }
+
+  async function createConsultationShare(id: number, token?: string | null): Promise<{ share_token: string }> {
+    return $fetch<{ share_token: string }>(`${base}/api/question/${id}/share`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    })
+  }
+
+  async function getSharedConsultation(shareToken: string): Promise<ConsultationDetail> {
+    return $fetch<ConsultationDetail>(`${base}/api/question/share/${shareToken}`)
+  }
+
+  async function deleteConsultation(id: number, token: string): Promise<void> {
+    await $fetch(`${base}/api/question/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    })
+  }
+
+  return { calcSaju, getWolUn, getYeonUn, getIlJin, getDailyFortune, createDailyShare, getDailyShareInput, askQuestion, listConsultations, createConsultationShare, getSharedConsultation, deleteConsultation }
 }

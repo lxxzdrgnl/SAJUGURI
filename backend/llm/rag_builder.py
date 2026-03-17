@@ -47,4 +47,5 @@ def build_rag_context(saju: dict, concern: str | None = None) -> dict:
         dynamics=saju.get("dynamics"),
         day_master_strength=saju.get("day_master_strength"),
         yong_sin=saju.get("yong_sin"),
+        sin_sals=saju.get("sin_sals"),
     )

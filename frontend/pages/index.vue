@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import { useSajuStore } from '~/stores/saju'
-import type { SajuCalcRequest } from '~/types/saju'
+import type { SajuCalcRequest, DailyFortuneResponse } from '~/types/saju'
+import {
+  STEM_HANJA, BRANCH_HANJA, STEM_COLOR, STEM_ELEMENT, BRANCH_ELEMENT, BRANCH_ANIMAL,
+  KOREAN_DAYS, iljuColor, stemLabelColor, formatIljuHanja, formatIljuLabel,
+} from '~/utils/ganji'
 
 interface ProfileItem {
   id: number
@@ -25,27 +29,18 @@ const base = config.public.apiBase
 
 const pending = ref(true)
 const repProfile = ref<ProfileItem | null>(null)
+const dailyOverall = ref<string | null>(null)
+const { getDailyFortune } = useSajuApi()
 
 // ── 오늘의 일진 계산 ──
-const STEMS = ['갑','을','병','정','무','기','경','신','임','계']
-const BRANCHES = ['자','축','인','묘','진','사','오','미','신','유','술','해']
-const STEM_ELEMENT: Record<string, string> = {
-  '갑':'목','을':'목','병':'화','정':'화','무':'토',
-  '기':'토','경':'금','신':'금','임':'수','계':'수',
-}
-const BRANCH_ELEMENT: Record<string, string> = {
-  '자':'수','축':'토','인':'목','묘':'목','진':'토','사':'화',
-  '오':'화','미':'토','신':'금','유':'금','술':'토','해':'수',
-}
-
 const todayIlju = computed(() => {
   const today = new Date()
   const base = new Date(1900, 0, 1)
   const days = Math.floor((today.getTime() - base.getTime()) / 86400000)
   const stemIdx = ((days % 10) + 10) % 10
   const branchIdx = ((days + 10) % 12 + 12) % 12
-  const stem = STEMS[stemIdx]
-  const branch = BRANCHES[branchIdx]
+  const stem = ['갑','을','병','정','무','기','경','신','임','계'][stemIdx]
+  const branch = ['자','축','인','묘','진','사','오','미','신','유','술','해'][branchIdx]
   return {
     stem,
     branch,
@@ -61,8 +56,7 @@ const todayIlju = computed(() => {
 
 const todayLabel = computed(() => {
   const d = todayIlju.value.date
-  const days = ['일','월','화','수','목','금','토']
-  return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`
+  return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${KOREAN_DAYS[d.getDay()]})`
 })
 
 onMounted(async () => {
@@ -71,7 +65,17 @@ onMounted(async () => {
     return
   }
   try {
-    repProfile.value = await auth.authFetch<ProfileItem>(`${base}/api/profiles/representative`)
+    const p = await auth.authFetch<ProfileItem>(`${base}/api/profiles/representative`)
+    repProfile.value = p
+    // 한줄 운세 — 백그라운드로 조용히 로드
+    getDailyFortune({
+      birth_date:      p.birth_date,
+      birth_time:      p.birth_time,
+      gender:          p.gender as 'male' | 'female',
+      calendar:        p.calendar as 'solar' | 'lunar',
+      is_leap_month:   p.is_leap_month,
+      birth_longitude: p.longitude ?? undefined,
+    }).then((r: DailyFortuneResponse) => { dailyOverall.value = r.overall }).catch(() => {})
   } catch {
     // 404 or error — 온보딩 화면 표시
   } finally {
@@ -79,44 +83,8 @@ onMounted(async () => {
   }
 })
 
-const STEM_HANJA: Record<string, string> = {
-  '갑': '甲', '을': '乙', '병': '丙', '정': '丁', '무': '戊',
-  '기': '己', '경': '庚', '신': '辛', '임': '壬', '계': '癸',
-}
-const BRANCH_HANJA: Record<string, string> = {
-  '자': '子', '축': '丑', '인': '寅', '묘': '卯', '진': '辰', '사': '巳',
-  '오': '午', '미': '未', '신': '申', '유': '酉', '술': '戌', '해': '亥',
-}
-const STEM_COLOR: Record<string, string> = {
-  '갑': '청', '을': '청',
-  '병': '붉은', '정': '붉은',
-  '무': '황', '기': '황',
-  '경': '흰', '신': '흰',
-  '임': '검은', '계': '검은',
-}
-const BRANCH_ANIMAL: Record<string, string> = {
-  '자': '쥐', '축': '소', '인': '호랑이', '묘': '토끼',
-  '진': '용', '사': '뱀', '오': '말', '미': '양',
-  '신': '원숭이', '유': '닭', '술': '개', '해': '돼지',
-}
-
-const iljuHanja = computed(() => {
-  const p = repProfile.value
-  if (!p?.day_stem || !p?.day_branch) return ''
-  return `${STEM_HANJA[p.day_stem] ?? p.day_stem}${BRANCH_HANJA[p.day_branch] ?? p.day_branch}`
-})
-
-function iljuColor(element: string | null): string {
-  if (!element) return 'var(--text-secondary)'
-  if (element === '수') return '#888'
-  return `var(--el-${element})`
-}
-
-const iljuLabel = computed(() => {
-  const p = repProfile.value
-  if (!p?.day_stem || !p?.day_branch) return ''
-  return `${STEM_COLOR[p.day_stem] ?? p.day_stem} ${BRANCH_ANIMAL[p.day_branch] ?? p.day_branch}`
-})
+const iljuHanja = computed(() => formatIljuHanja(repProfile.value?.day_stem, repProfile.value?.day_branch))
+const iljuLabel = computed(() => formatIljuLabel(repProfile.value?.day_stem, repProfile.value?.day_branch))
 
 const birthLabel = computed(() => {
   if (!repProfile.value) return ''
@@ -153,10 +121,7 @@ function goToMyProfile() {
 
     <!-- 로딩 -->
     <div v-if="pending" class="loading-state">
-      <svg class="animate-spin w-8 h-8" viewBox="0 0 40 40" fill="none">
-        <circle cx="20" cy="20" r="17" stroke="var(--border-subtle)" stroke-width="3"/>
-        <path d="M20 3a17 17 0 0 1 17 17" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
-      </svg>
+      <LoadingSpinner />
     </div>
 
     <div v-else-if="!pending" class="dashboard">
@@ -220,15 +185,25 @@ function goToMyProfile() {
             <div class="ilijn-divider" />
             <div class="ilijn-desc">
               <div class="ilijn-desc-row">
-                <span :style="`color: ${iljuColor(todayIlju.element)}`" class="ilijn-desc-val">{{ todayIlju.colorLabel }}</span>
+                <span :style="`color: ${stemLabelColor(todayIlju.colorLabel)}`" class="ilijn-desc-val">{{ todayIlju.colorLabel }}</span>
                 <span class="ilijn-desc-dot">·</span>
-                <span :style="`color: ${iljuColor(todayIlju.branchElement)}`" class="ilijn-desc-val">{{ todayIlju.animal }}</span>
+                <span :style="`color: ${stemLabelColor(todayIlju.colorLabel)}`" class="ilijn-desc-val">{{ todayIlju.animal }}</span>
               </div>
               <div class="ilijn-badges">
                 <span class="ilijn-element-badge" :style="`color: ${iljuColor(todayIlju.element)}; border-color: ${iljuColor(todayIlju.element)}`">천간 {{ todayIlju.element }}</span>
                 <span class="ilijn-element-badge" :style="`color: ${iljuColor(todayIlju.branchElement)}; border-color: ${iljuColor(todayIlju.branchElement)}`">지지 {{ todayIlju.branchElement }}</span>
               </div>
             </div>
+          </div>
+          <!-- 한줄 운세 (대표 프로필 있을 때) -->
+          <div v-if="hasProfile" class="ilijn-fortune">
+            <p class="ilijn-fortune-text" :class="{ 'ilijn-fortune-loading': !dailyOverall }">
+              {{ dailyOverall ?? '운세 불러오는 중…' }}
+            </p>
+            <NuxtLink to="/daily" class="ilijn-fortune-link">
+              오늘의 운세 자세히 보기
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </NuxtLink>
           </div>
         </div>
       </div>
@@ -260,6 +235,21 @@ function goToMyProfile() {
               <div>
                 <p class="service-name">오늘의 운세</p>
                 <p class="service-desc">시험·재물·연애·건강 6가지 분석</p>
+              </div>
+              <svg class="service-arrow" viewBox="0 0 24 24" fill="none">
+                <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </NuxtLink>
+
+          <NuxtLink to="/question" class="service-card service-card-question">
+            <div class="service-card-img-wrap" style="background:var(--surface-2);">
+              <span style="font-size:36px;line-height:1;">💬</span>
+            </div>
+            <div class="service-card-footer">
+              <div>
+                <p class="service-name">한줄 상담</p>
+                <p class="service-desc">사주 기반 고민 AI 단답 상담</p>
               </div>
               <svg class="service-arrow" viewBox="0 0 24 24" fill="none">
                 <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -650,4 +640,29 @@ function goToMyProfile() {
     aspect-ratio: 16 / 9;
   }
 }
+/* ── 한줄 운세 ── */
+.ilijn-fortune {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+.ilijn-fortune-text {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  margin: 0;
+}
+.ilijn-fortune-loading { color: var(--text-muted); }
+.ilijn-fortune-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: none;
+  width: fit-content;
+}
+.ilijn-fortune-link:hover { text-decoration: underline; }
 </style>

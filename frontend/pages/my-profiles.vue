@@ -2,6 +2,7 @@
 import { useAuthStore } from '~/stores/auth'
 import { useSajuStore } from '~/stores/saju'
 import type { SajuCalcRequest } from '~/types/saju'
+import { iljuColor, formatIljuHanja, formatIljuLabel } from '~/utils/ganji'
 
 interface Profile {
   id: number
@@ -38,40 +39,8 @@ async function fetchProfiles() {
 
 onMounted(fetchProfiles)
 
-const STEM_HANJA: Record<string, string> = {
-  '갑': '甲', '을': '乙', '병': '丙', '정': '丁', '무': '戊',
-  '기': '己', '경': '庚', '신': '辛', '임': '壬', '계': '癸',
-}
-const BRANCH_HANJA: Record<string, string> = {
-  '자': '子', '축': '丑', '인': '寅', '묘': '卯', '진': '辰', '사': '巳',
-  '오': '午', '미': '未', '신': '申', '유': '酉', '술': '戌', '해': '亥',
-}
-const STEM_COLOR: Record<string, string> = {
-  '갑': '청', '을': '청', '병': '붉은', '정': '붉은',
-  '무': '황', '기': '황', '경': '흰', '신': '흰',
-  '임': '검은', '계': '검은',
-}
-const BRANCH_ANIMAL: Record<string, string> = {
-  '자': '쥐', '축': '소', '인': '호랑이', '묘': '토끼',
-  '진': '용', '사': '뱀', '오': '말', '미': '양',
-  '신': '원숭이', '유': '닭', '술': '개', '해': '돼지',
-}
-
-function iljuHanja(p: Profile) {
-  if (!p.day_stem || !p.day_branch) return ''
-  return `${STEM_HANJA[p.day_stem] ?? p.day_stem}${BRANCH_HANJA[p.day_branch] ?? p.day_branch}`
-}
-
-function iljuLabel(p: Profile) {
-  if (!p.day_stem || !p.day_branch) return ''
-  return `${STEM_COLOR[p.day_stem] ?? p.day_stem} ${BRANCH_ANIMAL[p.day_branch] ?? p.day_branch}`
-}
-
-function iljuColor(element: string | null): string {
-  if (!element) return 'var(--text-secondary)'
-  if (element === '수') return '#888'
-  return `var(--el-${element})`
-}
+function iljuHanja(p: Profile) { return formatIljuHanja(p.day_stem, p.day_branch) }
+function iljuLabel(p: Profile) { return formatIljuLabel(p.day_stem, p.day_branch) }
 
 function birthLabel(p: Profile) {
   const [y, m, d] = p.birth_date.split('-')
@@ -130,10 +99,7 @@ async function setRepresentative(id: number) {
 
     <!-- 로딩 -->
     <div v-if="pending" class="loading">
-      <svg class="animate-spin w-8 h-8" viewBox="0 0 40 40" fill="none">
-        <circle cx="20" cy="20" r="17" stroke="var(--border-subtle)" stroke-width="3"/>
-        <path d="M20 3a17 17 0 0 1 17 17" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
-      </svg>
+      <LoadingSpinner />
     </div>
 
     <!-- 비어있음 -->

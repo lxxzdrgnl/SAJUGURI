@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { STORAGE_KEYS } from '~/utils/storageKeys'
 
 interface AuthUser {
   id: number
@@ -18,15 +19,15 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = accessToken
     refreshToken.value = rt
     if (import.meta.client) {
-      localStorage.setItem('auth_token', accessToken)
-      localStorage.setItem('refresh_token', rt)
+      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, accessToken)
+      localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, rt)
     }
   }
 
   /** 하위 호환성 — access token만 설정 */
   function setToken(t: string) {
     token.value = t
-    if (import.meta.client) localStorage.setItem('auth_token', t)
+    if (import.meta.client) localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, t)
   }
 
   function logout() {
@@ -41,8 +42,8 @@ export const useAuthStore = defineStore('auth', () => {
     refreshToken.value = null
     user.value = null
     if (import.meta.client) {
-      localStorage.removeItem('auth_token')
-      localStorage.removeItem('refresh_token')
+      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
+      localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
     }
   }
 
@@ -84,8 +85,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   function init() {
     if (!import.meta.client) return
-    const savedToken = localStorage.getItem('auth_token')
-    const savedRefresh = localStorage.getItem('refresh_token')
+    const savedToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
+    const savedRefresh = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
     if (savedToken) {
       token.value = savedToken
       if (savedRefresh) refreshToken.value = savedRefresh

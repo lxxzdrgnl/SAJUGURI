@@ -20,7 +20,7 @@ from core.exceptions import AppException
 from db.models import Base
 from db.session import engine
 from middleware.logging import AccessLogMiddleware
-from routers import saju, cities, auth, profiles, share
+from routers import saju, cities, auth, profiles, share, question
 
 # ─── 로깅 설정 ───────────────────────────────────────────────────────────────
 
@@ -119,7 +119,7 @@ app.include_router(profiles.router)
 app.include_router(share.router)
 # app.include_router(compatibility.router)   # 구현 예정
 # app.include_router(daily.router)           # 구현 예정
-# app.include_router(question.router)        # 구현 예정
+app.include_router(question.router)
 
 
 @app.get("/health", tags=["상태 확인"])

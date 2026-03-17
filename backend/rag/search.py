@@ -70,6 +70,7 @@ def handle_search_by_context(
     dynamics: dict | None = None,
     day_master_strength: dict | None = None,
     yong_sin: dict | None = None,
+    sin_sals: list[dict] | None = None,
     n_per_domain: int = 2,
 ) -> dict:
     """
@@ -84,6 +85,7 @@ def handle_search_by_context(
         dynamics             : 천간합·통근·충합 위치 정보
         day_master_strength  : {"level_8": "중화신강", "score": 62, ...}
         yong_sin             : {"primary": "금", "logic_type": "억부", ...}
+        sin_sals             : 활성 신살 목록 [{name, type, priority, location}, ...]
         n_per_domain         : 도메인별 시맨틱 검색 결과 수
 
     Returns:
@@ -96,6 +98,7 @@ def handle_search_by_context(
           "ilju":          {일주 전체 지식} or None,
           "concern":       [RAG chunk, ...],
           "dynamics":      [RAG chunk, ...],   # 합충 관계 기반 검색
+          "sin_sal_all":   [{name, priority, location, data}, ...],  # 전체 신살 지식
           "strength":      str | None,         # 신강/신약 레이블 (Writer 참고용)
           "yong_sin_summary": str | None,      # 용신 요약 (Writer 참고용)
         }
@@ -103,15 +106,17 @@ def handle_search_by_context(
     result: dict = {
         "career": [], "relationship": [], "wealth": [], "personality": [],
         "context": [], "ilju": None, "concern": [],
-        "dynamics": [], "strength": None, "yong_sin_summary": None,
+        "concern_hints": [],  # interpretation_tags 기반 규칙형 힌트
+        "dynamics": [], "sin_sal_all": [], "strength": None, "yong_sin_summary": None,
     }
 
     # 1. life_domain별 시맨틱 검색 (ten_gods + structure_patterns + wuxing)
     domain_collections = ["ten_gods", "structure_patterns", "wuxing"]
     for domain, tags in life_domains.items():
-        if domain not in result or not tags:
+        if domain not in result:
             continue
-        query = " ".join(tags[:4])
+        # tags가 비어있으면 도메인명을 fallback 쿼리로 사용
+        query = " ".join(tags) if tags else domain
         chunks = []
         for col in domain_collections:
             hits = search(col, query, n_per_domain)
@@ -140,13 +145,24 @@ def handle_search_by_context(
     if day_pillar:
         result["ilju"] = _find_by_field("ilju", "ilju", day_pillar)
 
-    # 4. concern 시맨틱 검색
+    # 4. concern 시맨틱 검색 + interpretation_tags 기반 힌트 추출
     if concern:
-        concern_chunks = search_multi(concern, ["ten_gods", "sin_sal", "ilju"], 2)
+        concern_chunks = search_multi(concern, ["ten_gods", "sin_sal", "structure_patterns"], 2)
         for hits in concern_chunks.values():
             result["concern"].extend(hits)
         result["concern"].sort(key=lambda x: x.get("distance") or 1.0)
         result["concern"] = result["concern"][:4]
+
+        # interpretation_tags → 규칙형 힌트 (문장 아닌 태그 키워드)
+        seen: set[str] = set()
+        for hit in result["concern"]:
+            tags_str = hit.get("metadata", {}).get("interpretation_tags", "")
+            for tag in tags_str.split(","):
+                tag = tag.strip()
+                if tag and tag not in seen:
+                    seen.add(tag)
+                    result["concern_hints"].append(tag)
+        result["concern_hints"] = result["concern_hints"][:12]
 
     # 5. 충·합·형·해·파 기반 dynamics 검색
     if branch_relations or dynamics:
@@ -178,7 +194,7 @@ def handle_search_by_context(
                 _dyn_keywords.append("통근 통기")
 
         if _dyn_keywords:
-            dyn_query = " ".join(filter(None, _dyn_keywords[:6]))
+            dyn_query = " ".join(filter(None, _dyn_keywords))
             dyn_hits = search_multi(dyn_query, ["dynamics", "structure_patterns"], n_per_domain)
             for hits in dyn_hits.values():
                 result["dynamics"].extend(hits)
@@ -195,6 +211,21 @@ def handle_search_by_context(
         logic   = yong_sin.get("logic_type", "")
         xi_sin  = "·".join(yong_sin.get("xi_sin", []))
         result["yong_sin_summary"] = f"용신:{primary} ({logic}), 희신:{xi_sin}"
+
+    # 8. 전체 활성 신살 상세 지식 조회 (우선순위 무관, pillar_nuance 포함)
+    if sin_sals:
+        for ss in sin_sals:
+            name = ss.get("name", "")
+            if not name:
+                continue
+            entry = _find_by_field("sin_sal", "name", name)
+            if entry:
+                result["sin_sal_all"].append({
+                    "name": name,
+                    "priority": ss.get("priority", "low"),
+                    "location": ss.get("location", []),
+                    "data": entry,
+                })
 
     return result
 

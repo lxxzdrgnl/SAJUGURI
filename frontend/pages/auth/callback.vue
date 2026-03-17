@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import { STORAGE_KEYS } from '~/utils/storageKeys'
 
 const route = useRoute()
 const auth = useAuthStore()
@@ -18,7 +19,7 @@ onMounted(async () => {
   await auth.fetchMe()
 
   // 로그인 전 저장 시도했던 만세력 자동 저장
-  const pending = localStorage.getItem('saju_pending_save')
+  const pending = localStorage.getItem(STORAGE_KEYS.SAJU_PENDING_SAVE)
   if (pending) {
     try {
       await $fetch(`${config.public.apiBase}/api/profiles`, {
@@ -27,11 +28,11 @@ onMounted(async () => {
         headers: { Authorization: `Bearer ${accessToken}` },
       })
     } catch { /* 저장 실패해도 계속 진행 */ }
-    localStorage.removeItem('saju_pending_save')
+    localStorage.removeItem(STORAGE_KEYS.SAJU_PENDING_SAVE)
   }
 
-  const redirect = localStorage.getItem('saju_login_redirect') || '/profile'
-  localStorage.removeItem('saju_login_redirect')
+  const redirect = localStorage.getItem(STORAGE_KEYS.SAJU_LOGIN_REDIRECT) || '/profile'
+  localStorage.removeItem(STORAGE_KEYS.SAJU_LOGIN_REDIRECT)
   navigateTo(redirect, { replace: true })
 })
 </script>

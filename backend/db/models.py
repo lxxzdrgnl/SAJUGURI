@@ -79,3 +79,19 @@ class SharedResult(Base):
     share_token:   Mapped[uuid.UUID]   = mapped_column(UUID(as_uuid=True), unique=True, default=uuid.uuid4)
     calc_snapshot: Mapped[dict]        = mapped_column(JSONB)
     created_at:    Mapped[datetime]    = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+
+class Consultation(Base):
+    """한줄 상담 저장."""
+
+    __tablename__ = "consultations"
+
+    id:          Mapped[int]            = mapped_column(Integer, primary_key=True)
+    user_id:     Mapped[int | None]     = mapped_column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    birth_input: Mapped[dict]           = mapped_column(JSONB, nullable=False)
+    question:    Mapped[str]            = mapped_column(Text, nullable=False)
+    category:    Mapped[str]            = mapped_column(String(20), nullable=False)
+    headline:    Mapped[str]            = mapped_column(Text, nullable=False)
+    content:     Mapped[str]            = mapped_column(Text, nullable=False)
+    share_token: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), unique=True, nullable=True, default=None)
+    created_at:  Mapped[datetime]       = mapped_column(DateTime(timezone=True), default=_utcnow)

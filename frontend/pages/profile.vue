@@ -2,6 +2,7 @@
 import type { SajuCalcRequest } from '~/types/saju'
 import { useSajuStore } from '~/stores/saju'
 import { useAuthStore } from '~/stores/auth'
+import { STORAGE_KEYS } from '~/utils/storageKeys'
 
 const store  = useSajuStore()
 const auth   = useAuthStore()
@@ -50,20 +51,15 @@ async function doFirstSave() {
   }
 }
 
+// 로그인 이동 시 결과 자동 저장 → 복귀 시 자동 복원
+useLoginStatePersist(
+  STORAGE_KEYS.SAJU_PENDING_STATE,
+  () => store.result && store.lastRequest ? { req: store.lastRequest, res: store.result } : null,
+  ({ req, res }) => store.restore(req, res),
+)
+
 // 페이지 떠날 때 스토어 초기화 (홈에서 프리로드한 결과가 남지 않도록)
 onBeforeRouteLeave(() => { store.reset() })
-
-// 로그인 후 복귀 시 이전 계산 결과 복원 / 내 만세력 진입 시 저장 상태 표시
-onMounted(() => {
-  const pending = localStorage.getItem('saju_pending_state')
-  if (pending) {
-    try {
-      const { req, res } = JSON.parse(pending)
-      store.restore(req, res)
-    } catch { /* ignore */ }
-    localStorage.removeItem('saju_pending_state')
-  }
-})
 
 async function onSubmit(req: SajuCalcRequest) {
   await store.calculate(req)
@@ -150,12 +146,7 @@ const inputSummary = computed(() => {
 
     <!-- 로딩 -->
     <div v-if="store.loading" class="mt-12 flex flex-col items-center gap-4" style="color: var(--text-muted);">
-      <div class="relative w-10 h-10">
-        <svg class="animate-spin w-10 h-10 absolute inset-0" viewBox="0 0 40 40" fill="none">
-          <circle cx="20" cy="20" r="17" stroke="var(--border-subtle)" stroke-width="3"/>
-          <path d="M20 3a17 17 0 0 1 17 17" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
-        </svg>
-      </div>
+      <LoadingSpinner size="lg" />
       <span class="text-sm tracking-wide" style="color: var(--text-muted);">사주를 계산하는 중...</span>
     </div>
 

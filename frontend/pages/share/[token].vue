@@ -68,12 +68,7 @@ const inputSummary = computed(() => {
 
     <!-- 로딩 -->
     <div v-if="pending" class="mt-16 flex flex-col items-center gap-4" style="color: var(--text-muted);">
-      <div class="relative w-10 h-10">
-        <svg class="animate-spin w-10 h-10 absolute inset-0" viewBox="0 0 40 40" fill="none">
-          <circle cx="20" cy="20" r="17" stroke="var(--border-subtle)" stroke-width="3"/>
-          <path d="M20 3a17 17 0 0 1 17 17" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
-        </svg>
-      </div>
+      <LoadingSpinner size="lg" />
       <span class="text-sm tracking-wide">불러오는 중...</span>
     </div>
 

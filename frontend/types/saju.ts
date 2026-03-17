@@ -202,3 +202,39 @@ export interface IlJinEntry {
   is_leap_month: boolean
   solar_term?: string
 }
+
+// ── 한줄 상담 ────────────────────────────────────────────────────────────────
+
+export type QuestionCategory = 'career' | 'love' | 'money' | 'health' | 'general'
+
+export interface QuestionRequest extends SajuCalcRequest {
+  question: string
+  category?: QuestionCategory  // 생략 시 백엔드 LLM이 자동 분류
+}
+
+export interface ConsultationResponse {
+  id: number
+  headline: string
+  content: string
+  category: string
+}
+
+export interface ConsultationHistoryItem {
+  id: number
+  question: string
+  category: string
+  headline: string
+  content: string
+  created_at: string
+  share_token: string | null
+}
+
+export interface ConsultationDetail {
+  id: number
+  question: string
+  category: string
+  headline: string
+  content: string
+  created_at: string
+  share_token: string | null
+}

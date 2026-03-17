@@ -1,35 +1,14 @@
 <script setup lang="ts">
 import type { DailyFortuneResponse } from '~/types/saju'
+import { STEM_HANJA, BRANCH_HANJA, STEM_ELEMENT as STEM_EL, BRANCH_ELEMENT as BRANCH_EL, iljuColor as elColor } from '~/utils/ganji'
 
 defineProps<{ result: DailyFortuneResponse }>()
 
-const STEM_HANJA: Record<string,string> = {
-  '갑':'甲','을':'乙','병':'丙','정':'丁','무':'戊',
-  '기':'己','경':'庚','신':'辛','임':'壬','계':'癸',
-}
-const BRANCH_HANJA: Record<string,string> = {
-  '자':'子','축':'丑','인':'寅','묘':'卯','진':'辰','사':'巳',
-  '오':'午','미':'未','신':'申','유':'酉','술':'戌','해':'亥',
-}
-const STEM_EL: Record<string,string> = {
-  '갑':'목','을':'목','병':'화','정':'화','무':'토',
-  '기':'토','경':'금','신':'금','임':'수','계':'수',
-}
-const BRANCH_EL: Record<string,string> = {
-  '자':'수','축':'토','인':'목','묘':'목','진':'토','사':'화',
-  '오':'화','미':'토','신':'금','유':'금','술':'토','해':'수',
-}
 const EL_SWATCH: Record<string,string> = {
   '목':'var(--el-목)', '화':'var(--el-화)', '토':'var(--el-토)',
   '금':'var(--el-금)', '수':'var(--el-수)',
 }
 const CAT_ORDER = ['exam','money','love','career','health','social']
-
-function elColor(el: string) {
-  if (!el) return 'var(--text-secondary)'
-  if (el === '수') return '#888'
-  return `var(--el-${el})`
-}
 
 function scoreColor(score: number) {
   if (score >= 80) return 'var(--color-good)'

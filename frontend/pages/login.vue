@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import { STORAGE_KEYS } from '~/utils/storageKeys'
 
 const auth = useAuthStore()
 const config = useRuntimeConfig()
@@ -7,9 +8,9 @@ const config = useRuntimeConfig()
 watchEffect(() => {
   if (auth.isLoggedIn) {
     const redirect = import.meta.client
-      ? (localStorage.getItem('saju_login_redirect') || '/')
+      ? (localStorage.getItem(STORAGE_KEYS.SAJU_LOGIN_REDIRECT) || '/')
       : '/'
-    if (import.meta.client) localStorage.removeItem('saju_login_redirect')
+    if (import.meta.client) localStorage.removeItem(STORAGE_KEYS.SAJU_LOGIN_REDIRECT)
     navigateTo(redirect, { replace: true })
   }
 })

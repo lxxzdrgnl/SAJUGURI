@@ -4,6 +4,17 @@ import { useAuthStore } from '~/stores/auth'
 const auth = useAuthStore()
 const config = useRuntimeConfig()
 const goToLogin = useGoToLogin()
+const route = useRoute()
+
+// 로그아웃 후 인증 필요 페이지면 홈으로, 결과/공유 페이지는 그대로 유지
+const AUTH_REQUIRED_PATHS = ['/', '/my-profiles']
+function handleLogout() {
+  auth.logout()
+  closeMenu()
+  if (AUTH_REQUIRED_PATHS.includes(route.path)) {
+    window.location.href = '/'
+  }
+}
 
 const menuOpen = ref(false)
 
@@ -41,8 +52,12 @@ onMounted(() => {
                   <svg viewBox="0 0 24 24" fill="none"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                   내 만세력
                 </NuxtLink>
+                <NuxtLink to="/question/history" class="menu-item" @click="closeMenu">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  상담 목록
+                </NuxtLink>
                 <div class="menu-divider" />
-                <button class="menu-item menu-item-danger" @click="auth.logout(); closeMenu()">
+                <button class="menu-item menu-item-danger" @click="handleLogout">
                   <svg viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                   로그아웃
                 </button>

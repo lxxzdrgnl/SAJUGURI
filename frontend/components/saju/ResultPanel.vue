@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { SajuCalcResponse } from '~/types/saju'
 import { useAuthStore } from '~/stores/auth'
+import { STORAGE_KEYS } from '~/utils/storageKeys'
 
 interface InputSummary {
   name: string
@@ -170,7 +171,7 @@ function buildProfileBody() {
 async function saveProfile() {
   if (!props.birthInput) return
   if (!auth.isLoggedIn) {
-    localStorage.setItem('saju_pending_save', JSON.stringify(buildProfileBody()))
+    localStorage.setItem(STORAGE_KEYS.SAJU_PENDING_SAVE, JSON.stringify(buildProfileBody()))
     showLoginModal.value = true
     return
   }
@@ -206,7 +207,7 @@ async function copyShareUrl() {
 function confirmLogin() {
   // 로그인 후 결과 복원을 위해 현재 상태 저장
   if (import.meta.client && props.birthInput && props.result) {
-    localStorage.setItem('saju_pending_state', JSON.stringify({
+    localStorage.setItem(STORAGE_KEYS.SAJU_PENDING_STATE, JSON.stringify({
       req: props.birthInput,
       res: props.result,
     }))

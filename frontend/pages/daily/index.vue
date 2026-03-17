@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import type { SajuCalcRequest, DailyFortuneResponse } from '~/types/saju'
+import { STEMS, BRANCHES, STEM_HANJA, BRANCH_HANJA, STEM_ELEMENT as STEM_EL, BRANCH_ELEMENT as BRANCH_EL, KOREAN_DAYS, iljuColor as elColor } from '~/utils/ganji'
+import { STORAGE_KEYS } from '~/utils/storageKeys'
 
 const auth   = useAuthStore()
 const config = useRuntimeConfig()
@@ -8,24 +10,6 @@ const base   = config.public.apiBase
 const { getDailyFortune } = useSajuApi()
 
 // ── 상수 ────────────────────────────────────────────────────────────────────
-const STEMS    = ['갑','을','병','정','무','기','경','신','임','계']
-const BRANCHES = ['자','축','인','묘','진','사','오','미','신','유','술','해']
-const STEM_HANJA: Record<string,string> = {
-  '갑':'甲','을':'乙','병':'丙','정':'丁','무':'戊',
-  '기':'己','경':'庚','신':'辛','임':'壬','계':'癸',
-}
-const BRANCH_HANJA: Record<string,string> = {
-  '자':'子','축':'丑','인':'寅','묘':'卯','진':'辰','사':'巳',
-  '오':'午','미':'未','신':'申','유':'酉','술':'戌','해':'亥',
-}
-const STEM_EL: Record<string,string> = {
-  '갑':'목','을':'목','병':'화','정':'화','무':'토',
-  '기':'토','경':'금','신':'금','임':'수','계':'수',
-}
-const BRANCH_EL: Record<string,string> = {
-  '자':'수','축':'토','인':'목','묘':'목','진':'토','사':'화',
-  '오':'화','미':'토','신':'금','유':'금','술':'토','해':'수',
-}
 const CAT_ICON: Record<string,string> = {
   exam:'📚', money:'💰', love:'💕', career:'💼', health:'🌿', social:'🤝',
 }
@@ -110,8 +94,7 @@ async function copyShareUrl() {
 // ── 오늘 날짜 ────────────────────────────────────────────────────────────────
 const todayLabel = computed(() => {
   const d = new Date()
-  const days = ['일','월','화','수','목','금','토']
-  return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`
+  return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${KOREAN_DAYS[d.getDay()]})`
 })
 
 const todayIlju = computed(() => {
@@ -144,47 +127,34 @@ function goProfile() {
 }
 
 const goToLogin = useGoToLogin()
+function goLogin() { goToLogin() }
 
-function goLogin() {
-  if (lastBirthInput.value) {
-    localStorage.setItem('daily_pending_input', JSON.stringify({
-      birthInput: lastBirthInput.value,
-      result: result.value,
-      userName: userName.value,
-    }))
-  }
-  goToLogin()
-}
-
-// ── 로그인 후 복원 ────────────────────────────────────────────────────────────
-onMounted(() => {
-  const pending = localStorage.getItem('daily_pending_input')
-  if (pending) {
-    localStorage.removeItem('daily_pending_input')
-    try {
-      const { birthInput: b, result: savedResult, userName: savedName } = JSON.parse(pending)
-      fromDirectInput.value = true
-      lastBirthInput.value = b
-      if (savedResult) {
-        // 결과까지 저장된 경우 → API 재호출 없이 즉시 복원
-        result.value = savedResult
-        userName.value = savedName || b?.name || '나'
-        step.value = 'result'
-      } else {
-        // 결과 없으면 재계산
-        step.value = 'input'
-        calcFortune({
-          birth_date:      b.birth_date,
-          birth_time:      b.birth_time ?? null,
-          gender:          b.gender,
-          calendar:        b.calendar ?? 'solar',
-          is_leap_month:   b.is_leap_month ?? false,
-          birth_longitude: b.birth_longitude ?? undefined,
-        }, b.name || '')
-      }
-    } catch { /* ignore */ }
-  }
-})
+// ── 로그인 이동 시 자동 저장 → 복귀 시 자동 복원 ──────────────────────────────
+useLoginStatePersist(
+  STORAGE_KEYS.DAILY_PENDING_INPUT,
+  () => lastBirthInput.value
+    ? { birthInput: lastBirthInput.value, result: result.value, userName: userName.value }
+    : null,
+  ({ birthInput: b, result: savedResult, userName: savedName }) => {
+    fromDirectInput.value = true
+    lastBirthInput.value = b
+    if (savedResult) {
+      result.value = savedResult
+      userName.value = savedName || b?.name || '나'
+      step.value = 'result'
+    } else {
+      step.value = 'input'
+      calcFortune({
+        birth_date:      b.birth_date,
+        birth_time:      b.birth_time ?? null,
+        gender:          b.gender,
+        calendar:        b.calendar ?? 'solar',
+        is_leap_month:   b.is_leap_month ?? false,
+        birth_longitude: b.birth_longitude ?? undefined,
+      }, b.name || '')
+    }
+  },
+)
 
 // ── 계산 ────────────────────────────────────────────────────────────────────
 async function calcFortune(req: SajuCalcRequest, name: string) {
@@ -243,12 +213,6 @@ function reset() {
 }
 
 // ── 색상 유틸 ────────────────────────────────────────────────────────────────
-function elColor(el: string): string {
-  if (!el) return 'var(--text-secondary)'
-  if (el === '수') return '#888'
-  return `var(--el-${el})`
-}
-
 function scoreColor(score: number): string {
   if (score >= 80) return 'var(--color-good)'
   if (score >= 60) return 'var(--accent)'
@@ -331,10 +295,7 @@ const branchEl = computed(() => result.value ? BRANCH_EL[result.value.day_ganji.
 
       <!-- 로딩 오버레이 -->
       <div v-if="loading" class="loading-overlay">
-        <svg class="animate-spin w-8 h-8" viewBox="0 0 40 40" fill="none">
-          <circle cx="20" cy="20" r="17" stroke="var(--border-subtle)" stroke-width="3"/>
-          <path d="M20 3a17 17 0 0 1 17 17" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
-        </svg>
+        <LoadingSpinner />
         <p class="fs-sub" style="color:var(--text-muted);margin-top:12px;">운세 계산 중…</p>
       </div>
     </div>
@@ -342,10 +303,7 @@ const branchEl = computed(() => result.value ? BRANCH_EL[result.value.day_ganji.
     <!-- ── Step 2b: 프로필 선택 ──────────────────────────────────────────── -->
     <div v-else-if="step === 'profile'" class="profile-step animate-fade-up">
       <div v-if="profLoad" class="center-state">
-        <svg class="animate-spin w-7 h-7" viewBox="0 0 40 40" fill="none">
-          <circle cx="20" cy="20" r="17" stroke="var(--border-subtle)" stroke-width="3"/>
-          <path d="M20 3a17 17 0 0 1 17 17" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
-        </svg>
+        <LoadingSpinner size="sm" />
       </div>
       <div v-else-if="profiles.length === 0" class="card" style="text-align:center;padding:32px;">
         <p class="fs-body" style="color:var(--text-muted);">저장된 프로필이 없습니다.</p>
@@ -385,10 +343,7 @@ const branchEl = computed(() => result.value ? BRANCH_EL[result.value.day_ganji.
               </p>
             </div>
             <div class="profile-illust-mini">
-              <svg v-if="loading" class="animate-spin" viewBox="0 0 40 40" fill="none" style="width:28px;height:28px;">
-                <circle cx="20" cy="20" r="17" stroke="var(--border-subtle)" stroke-width="3"/>
-                <path d="M20 3a17 17 0 0 1 17 17" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
-              </svg>
+              <LoadingSpinner v-if="loading" size="sm" />
               <img v-else src="/profile-illust.webp" alt="" />
             </div>
           </div>

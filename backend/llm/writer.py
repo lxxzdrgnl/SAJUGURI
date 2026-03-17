@@ -11,8 +11,9 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.messages import SystemMessage, HumanMessage
 
 from schemas.report import WriterOutput
+from schemas.question import ConsultationOutput
 from llm.providers import get_llm
-from llm.prompts import SYSTEM_PROMPT, format_user_message
+from llm.prompts import SYSTEM_PROMPT, format_user_message, QUESTION_SYSTEM_PROMPT, format_question_message
 
 logger = logging.getLogger(__name__)
 
@@ -79,3 +80,53 @@ async def generate_report(
         except Exception as fix_exc:
             logger.error("2차 파싱도 실패: %s", fix_exc)
             raise RuntimeError(f"Writer 출력 파싱 최종 실패: {fix_exc}") from fix_exc
+
+
+async def generate_consultation(
+    saju: dict,
+    rag_ctx: dict,
+    question: str,
+    category: str = "general",
+    provider: str | None = None,
+) -> ConsultationOutput:
+    """
+    한줄 상담 LLM 호출 — ConsultationOutput(headline, content) 반환.
+    """
+    llm = get_llm(provider)
+
+    parser: PydanticOutputParser[ConsultationOutput] = PydanticOutputParser(
+        pydantic_object=ConsultationOutput
+    )
+    format_instructions = parser.get_format_instructions()
+
+    user_text = format_question_message(saju, rag_ctx, question, category, format_instructions)
+    messages = [
+        SystemMessage(content=QUESTION_SYSTEM_PROMPT),
+        HumanMessage(content=user_text),
+    ]
+
+    try:
+        response = await llm.ainvoke(messages)
+        raw = response.content if hasattr(response, "content") else str(response)
+    except Exception as exc:
+        logger.error("Consultation LLM 호출 실패: %s", exc)
+        raise
+
+    try:
+        return parser.parse(raw)
+    except Exception as parse_exc:
+        logger.warning("Consultation 1차 파싱 실패, 재시도: %s", parse_exc)
+        try:
+            fix_messages = [
+                SystemMessage(content="You are a JSON fixer. Return only valid JSON."),
+                HumanMessage(content=(
+                    f"Fix to match schema:\n{format_instructions}\n\n"
+                    f"Original:\n{raw}\n\nReturn ONLY fixed JSON."
+                )),
+            ]
+            fix_response = await get_llm(provider).ainvoke(fix_messages)
+            fix_raw = fix_response.content if hasattr(fix_response, "content") else str(fix_response)
+            return parser.parse(fix_raw)
+        except Exception as fix_exc:
+            logger.error("Consultation 파싱 최종 실패: %s", fix_exc)
+            raise RuntimeError(f"Consultation 파싱 실패: {fix_exc}") from fix_exc
