@@ -42,9 +42,11 @@ class _GeminiEmbeddingFunction(EmbeddingFunction):
     """ChromaDB 호환 Gemini Embedding Function (google-genai 신규 SDK)."""
 
     def __init__(self, api_key: str, model: str):
+        import logging
         from google import genai
         self._client = genai.Client(api_key=api_key)
         self._model = model
+        self._logger = logging.getLogger(__name__)
 
     def __call__(self, input: list[str]) -> Embeddings:
         import time
@@ -59,7 +61,10 @@ class _GeminiEmbeddingFunction(EmbeddingFunction):
             except Exception as e:
                 if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
                     wait = 40 * (attempt + 1)
-                    print(f"  Rate limit 도달. {wait}초 대기 후 재시도... ({attempt+1}/{max_retries})")
+                    self._logger.warning(
+                        "Gemini embedding rate limit. %d초 대기 후 재시도 (%d/%d)",
+                        wait, attempt + 1, max_retries,
+                    )
                     time.sleep(wait)
                 else:
                     raise

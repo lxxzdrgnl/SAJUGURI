@@ -1,9 +1,7 @@
 """프로필 CRUD — 사주 입력 저장/조회/삭제."""
 
-from datetime import date, time as time_type
-
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select, update, and_
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from crud.profile import attach_ilju, get_profile_or_404
@@ -11,6 +9,7 @@ from db.models import Profile, User
 from dependencies.auth import get_current_user
 from dependencies.db import get_db
 from schemas.profile import ProfileCreate, ProfileResponse
+from services.profile import create_profile_for_user
 
 router = APIRouter(prefix="/api/profiles", tags=["프로필"])
 
@@ -21,40 +20,7 @@ async def create_profile(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    birth_date = date.fromisoformat(body.birth_date)
-    birth_time = time_type.fromisoformat(body.birth_time) if body.birth_time else None
-
-    # 동일 생년월일+생시+음양력+성별 중복 체크
-    time_cond = Profile.birth_time.is_(None) if birth_time is None else Profile.birth_time == birth_time
-    dup = await db.execute(
-        select(Profile).where(
-            and_(
-                Profile.user_id == user.id,
-                Profile.birth_date == birth_date,
-                time_cond,
-                Profile.calendar == body.calendar,
-                Profile.gender == body.gender,
-            )
-        ).limit(1)
-    )
-    if dup.scalar_one_or_none():
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="이미 저장된 프로필입니다.")
-
-    # 첫 프로필이면 자동으로 대표 설정
-    existing = await db.execute(select(Profile).where(Profile.user_id == user.id).limit(1))
-    is_first = existing.scalar_one_or_none() is None
-
-    profile = Profile(
-        user_id=user.id,
-        birth_date=birth_date,
-        birth_time=birth_time,
-        is_representative=is_first,
-        **{k: v for k, v in body.model_dump().items() if k not in ("birth_date", "birth_time")},
-    )
-    db.add(profile)
-    await db.commit()
-    await db.refresh(profile)
-    return profile
+    return await create_profile_for_user(db, user.id, body)
 
 
 @router.get("", response_model=list[ProfileResponse], summary="내 프로필 목록")
