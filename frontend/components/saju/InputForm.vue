@@ -122,7 +122,11 @@ watch([hourVal, minuteVal], () => {
   if (timeUnknown.value) return
   const h = hourVal.value.padStart(2, '0')
   const m = minuteVal.value.padStart(2, '0')
-  if (hourVal.value !== '' && minuteVal.value !== '') form.birth_time = `${h}:${m}`
+  if (hourVal.value !== '' && minuteVal.value !== '') {
+    form.birth_time = `${h}:${m}`
+  } else if (hourVal.value === '' && minuteVal.value === '') {
+    form.birth_time = null
+  }
 })
 
 watch(timeUnknown, (v) => {
@@ -132,6 +136,15 @@ watch(timeUnknown, (v) => {
 const onHourInput     = makeSegInput({ maxLen: 2, maxVal: 23, target: hourVal,   nextFocus: minuteRef, eagerThreshold: 2 })
 const onMinuteInput   = makeSegInput({ maxLen: 2, maxVal: 59, target: minuteVal })
 const onMinuteKeydown = makeBackspace(minuteVal, hourRef, hourVal)
+
+const timeError = computed((): string | null => {
+  if (timeUnknown.value) return null
+  const hasHour   = hourVal.value !== ''
+  const hasMinute = minuteVal.value !== ''
+  if (hasHour && !hasMinute) return '분을 입력해 주세요.'
+  if (!hasHour && hasMinute) return '시를 입력해 주세요.'
+  return null
+})
 
 // ── 도시 검색 ────────────────────────────────────────────────────────
 const cityQuery    = ref('')
@@ -240,7 +253,7 @@ const birthDateError = computed((): string | null => {
 
 function onSubmit() {
   submitAttempted.value = true
-  if (nameError.value || !form.birth_date || dateError.value) return
+  if (nameError.value || !form.birth_date || dateError.value || timeError.value) return
   // 도시를 타이핑만 하고 선택 안 한 경우 입력 초기화
   if (cityQuery.value && !selectedCity.value) {
     cityQuery.value = ''
@@ -383,6 +396,10 @@ function onSubmit() {
         <p v-if="birthDateError" class="text-xs font-medium" style="color: var(--color-bad);">
           {{ birthDateError }}
         </p>
+        <!-- 시각 유효성 에러 -->
+        <p v-if="submitAttempted && timeError" class="text-xs font-medium" style="color: var(--color-bad);">
+          {{ timeError }}
+        </p>
         <!-- 시간 모름 안내 -->
         <p v-if="timeUnknown" class="text-xs" style="color: var(--text-muted);">
           시주(時柱) 미산출 — 자녀·노년운, 시신살 등 시주 관련 분석이 생략됩니다.
@@ -405,8 +422,8 @@ function onSubmit() {
       <button
         type="submit"
         class="btn-primary w-full mt-1 text-base"
-        :disabled="submitAttempted && !!(nameError || birthDateError)"
-        :style="submitAttempted && (nameError || birthDateError) ? 'opacity: 0.45; cursor: not-allowed;' : ''"
+        :disabled="submitAttempted && !!(nameError || birthDateError || timeError)"
+        :style="submitAttempted && (nameError || birthDateError || timeError) ? 'opacity: 0.45; cursor: not-allowed;' : ''"
       >
         {{ props.submitLabel }}
       </button>
