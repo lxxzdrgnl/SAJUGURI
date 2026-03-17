@@ -137,7 +137,9 @@ const inputSummary = computed(() => {
       :class="store.result ? 'max-w-3xl' : 'max-w-lg'"
     >
       <ClientOnly v-if="!store.result">
-        <SajuInputForm @submit="onSubmit" />
+        <div class="animate-fade-up">
+          <SajuInputForm @submit="onSubmit" />
+        </div>
         <template #fallback>
           <div class="rounded-2xl px-8 py-8" style="background:var(--surface-1); border:1px solid var(--border-subtle); min-height: 420px;" />
         </template>

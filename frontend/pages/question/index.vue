@@ -2,6 +2,7 @@
 import { useAuthStore } from '~/stores/auth'
 import type { SajuCalcRequest, ConsultationResponse, QuestionCategory } from '~/types/saju'
 import { STORAGE_KEYS } from '~/utils/storageKeys'
+import type { ProfileItem } from '~/components/saju/ProfileList.vue'
 
 const auth   = useAuthStore()
 const config = useRuntimeConfig()
@@ -12,11 +13,6 @@ const goToLogin = useGoToLogin()
 // ── 상태 ─────────────────────────────────────────────────────────────────────
 type Step = 'select' | 'input' | 'profile' | 'question' | 'result'
 
-interface ProfileItem {
-  id: number; name: string; birth_date: string; birth_time: string | null
-  calendar: string; gender: string; is_leap_month: boolean
-  day_stem: string | null; day_stem_element: string | null
-}
 
 const CATEGORY_LABELS: Record<QuestionCategory, string> = {
   career: '직업·이직',
@@ -36,7 +32,6 @@ const showLoginDialog   = ref(false)
 const pendingBirthInput = ref<SajuCalcRequest | null>(null)
 const pendingName       = ref('')
 const shareLoading         = ref(false)
-const shareCopied          = ref(false)
 const shareUrl             = ref('')
 const fromDirectInput      = ref(false)
 const showLoginPromoDialog = ref(false)
@@ -155,7 +150,6 @@ function reset() {
   pendingBirthInput.value = null
   pendingName.value       = ''
   shareLoading.value      = false
-  shareCopied.value       = false
   shareUrl.value          = ''
   fromDirectInput.value   = false
   saveProfileState.value  = 'idle'
@@ -165,35 +159,19 @@ function reset() {
 async function shareResult() {
   if (!result.value) return
 
-  // 이미 URL 있으면 API 재호출 없이 바로 복사/다이얼로그
-  if (shareUrl.value) {
+  if (!shareUrl.value) {
+    shareLoading.value = true
     try {
-      await navigator.clipboard.writeText(shareUrl.value)
-      shareCopied.value = true
-      setTimeout(() => { shareCopied.value = false }, 3000)
+      const { share_token } = await createConsultationShare(result.value.id, auth.token)
+      shareUrl.value = `${window.location.origin}/question/share/${share_token}`
     } catch {
-      showShareDialog.value = true
+      return
+    } finally {
+      shareLoading.value = false
     }
-    return
   }
 
-  shareLoading.value = true
-  try {
-    const { share_token } = await createConsultationShare(result.value.id, auth.token)
-    const url = `${window.location.origin}/question/share/${share_token}`
-    shareUrl.value = url
-    try {
-      await navigator.clipboard.writeText(url)
-      shareCopied.value = true
-      setTimeout(() => { shareCopied.value = false }, 3000)
-    } catch {
-      showShareDialog.value = true
-    }
-  } catch {
-    shareUrl.value = ''
-  } finally {
-    shareLoading.value = false
-  }
+  showShareDialog.value = true
 }
 </script>
 
@@ -241,30 +219,12 @@ async function shareResult() {
 
     <!-- ── Step 2b: 프로필 선택 ── -->
     <div v-else-if="step === 'profile'" class="profile-step animate-fade-up">
-      <div v-if="profLoad" class="center-state"><LoadingSpinner size="sm" /></div>
-      <div v-else-if="profiles.length === 0" class="card" style="text-align:center;padding:32px;">
-        <p class="fs-body" style="color:var(--text-muted);">저장된 만세력이 없습니다.</p>
-        <NuxtLink to="/profile" class="btn-primary" style="margin-top:16px;max-width:200px;margin-inline:auto;">
-          만세력 보러가기
-        </NuxtLink>
-      </div>
-      <div v-else class="profiles-list">
-        <button
-          v-for="p in profiles" :key="p.id"
-          class="profile-card-item"
-          :disabled="loading"
-          @click="onProfileSelect(p)"
-        >
-          <div class="profile-card-inner">
-            <div class="profile-info">
-              <p class="profile-name">{{ p.name }}</p>
-              <p class="profile-birth">
-                {{ p.birth_date.replace(/-/g, '.') }} · {{ p.gender === 'male' ? '남' : '여' }}
-              </p>
-            </div>
-          </div>
-        </button>
-      </div>
+      <SajuProfileList
+        :profiles="profiles"
+        :prof-load="profLoad"
+        :loading="loading"
+        @select="onProfileSelect"
+      />
     </div>
 
     <!-- ── 로딩 ── -->
@@ -328,8 +288,7 @@ async function shareResult() {
           :disabled="shareLoading"
           @click="shareResult"
         >
-          <span v-if="shareCopied">링크 복사됨 ✓</span>
-          <span v-else-if="shareLoading">생성 중…</span>
+          <span v-if="shareLoading">생성 중…</span>
           <span v-else>공유하기</span>
         </button>
         <button class="btn-secondary" @click="reset">다른 고민 상담하기</button>
@@ -357,19 +316,8 @@ async function shareResult() {
     <button class="btn-primary" style="width:100%" @click="goToLogin()">로그인하러 가기</button>
   </AppDialog>
 
-  <!-- 공유 URL 다이얼로그 (clipboard 권한 없을 때) -->
-  <AppDialog
-    v-model:show="showShareDialog"
-    title="링크를 복사해 주세요"
-    cancel-text="닫기"
-  >
-    <input
-      class="share-url-input"
-      :value="shareUrl"
-      readonly
-      @click="($event.target as HTMLInputElement).select()"
-    />
-  </AppDialog>
+  <!-- 공유 모달 -->
+  <UiShareModal v-model:show="showShareDialog" :url="shareUrl" />
 
   <!-- 로그인 프로모 (결과 확인 후 비로그인) -->
   <AppDialog
@@ -433,18 +381,7 @@ async function shareResult() {
 .method-btn-outline:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
 
 /* Step2b */
-.center-state { min-height: 200px; display: flex; align-items: center; justify-content: center; }
 .profile-step { display: flex; flex-direction: column; gap: 10px; }
-.profiles-list { display: flex; flex-direction: column; gap: 10px; }
-.profile-card-item {
-  border-radius: 16px; border: 1px solid var(--border-default);
-  background: var(--surface-1); width: 100%; text-align: left;
-  cursor: pointer; transition: background 0.15s;
-}
-.profile-card-item:hover:not(:disabled) { background: var(--surface-2); }
-.profile-card-inner { padding: 18px 20px; }
-.profile-name { font-size: 16px; font-weight: 700; color: var(--text-primary); }
-.profile-birth { font-size: var(--fs-sub); color: var(--text-muted); margin-top: 4px; }
 
 /* 로딩 */
 .loading-step {
@@ -520,12 +457,6 @@ async function shareResult() {
 .btn-secondary:hover { background: var(--surface-2); }
 .save-profile-hint {
   color: var(--text-muted); text-align: left; font-size: 13px; margin-bottom: -4px;
-}
-.share-url-input {
-  width: 100%; padding: 10px 12px; border-radius: 8px;
-  border: 1px solid var(--border-default);
-  background: var(--surface-2); color: var(--text-primary);
-  font-size: var(--fs-label); cursor: text;
 }
 .btn-save-profile {
   width: 100%; padding: 12px; border-radius: 10px;

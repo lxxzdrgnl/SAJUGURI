@@ -143,7 +143,6 @@ const showLoginModal = ref(false)
 const shareState = ref<'idle' | 'loading' | 'error'>('idle')
 const shareUrl = ref('')
 const showShareModal = ref(false)
-const shareCopied = ref(false)
 
 onMounted(() => {
   if (props.initialSaved) saveState.value = 'exists'
@@ -198,11 +197,6 @@ async function createShare() {
   }
 }
 
-async function copyShareUrl() {
-  await navigator.clipboard.writeText(shareUrl.value)
-  shareCopied.value = true
-  setTimeout(() => { shareCopied.value = false }, 2000)
-}
 
 function confirmLogin() {
   // 로그인 후 결과 복원을 위해 현재 상태 저장
@@ -547,34 +541,7 @@ function confirmLogin() {
     <slot name="actions" />
 
     <!-- 공유 모달 -->
-    <Teleport to="body">
-      <Transition name="modal">
-        <div v-if="showShareModal" class="modal-backdrop" @click.self="showShareModal = false">
-          <div class="modal-sheet modal-sheet--left">
-            <div class="modal-header">
-              <p class="modal-title">공유하기</p>
-              <button class="modal-close" @click="showShareModal = false">
-                <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-              </button>
-            </div>
-            <p class="modal-subdesc">아래 링크를 공유하세요</p>
-            <div class="modal-link-box">
-              <span class="modal-link-text">{{ shareUrl }}</span>
-            </div>
-            <button class="modal-copy-btn" @click="copyShareUrl">
-              <svg v-if="shareCopied" class="w-4 h-4" viewBox="0 0 24 24" fill="none">
-                <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <svg v-else class="w-4 h-4" viewBox="0 0 24 24" fill="none">
-                <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-              </svg>
-              {{ shareCopied ? '복사됨!' : '링크 복사' }}
-            </button>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
+    <UiShareModal v-model:show="showShareModal" :url="shareUrl" />
 
     <!-- 로그인 유도 모달 -->
     <Teleport to="body">

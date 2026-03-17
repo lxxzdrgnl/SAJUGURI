@@ -2,6 +2,7 @@
 import { useAuthStore } from '~/stores/auth'
 import type { SajuCalcRequest, DailyFortuneResponse } from '~/types/saju'
 import { STEMS, BRANCHES, STEM_HANJA, BRANCH_HANJA, STEM_ELEMENT as STEM_EL, BRANCH_ELEMENT as BRANCH_EL, KOREAN_DAYS, iljuColor as elColor } from '~/utils/ganji'
+import type { ProfileItem } from '~/components/saju/ProfileList.vue'
 import { STORAGE_KEYS } from '~/utils/storageKeys'
 
 const auth   = useAuthStore()
@@ -22,11 +23,6 @@ const EL_SWATCH: Record<string,string> = {
 // ── 상태 ────────────────────────────────────────────────────────────────────
 type Step = 'select' | 'input' | 'profile' | 'result'
 
-interface ProfileItem {
-  id: number; name: string; birth_date: string; birth_time: string | null
-  calendar: string; gender: string; is_leap_month: boolean
-  day_stem: string | null; day_stem_element: string | null
-}
 
 const step            = ref<Step>('select')
 const loading         = ref(false)
@@ -45,19 +41,15 @@ async function saveProfile() {
   if (!auth.isLoggedIn) { showLoginDialog.value = true; return }
   if (!lastBirthInput.value) return
   const b = lastBirthInput.value
-  const dp = result.value?.birth_day_pillar
   await _saveProfile({
-    name:             (b.name as string)?.trim() || '내 사주',
-    birth_date:       b.birth_date as string,
-    birth_time:       (b.birth_time as string | null) ?? null,
-    calendar:         (b.calendar as string) ?? 'solar',
-    gender:           b.gender as string,
-    is_leap_month:    (b.is_leap_month as boolean) ?? false,
-    city:             (b.city as string | null) ?? null,
-    longitude:        (b.birth_longitude as number | null) ?? null,
-    day_stem:         dp?.stem ?? null,
-    day_branch:       dp?.branch ?? null,
-    day_stem_element: dp?.stem_element ?? null,
+    name:          (b.name as string)?.trim() || '내 사주',
+    birth_date:    b.birth_date as string,
+    birth_time:    (b.birth_time as string | null) ?? null,
+    calendar:      (b.calendar as string) ?? 'solar',
+    gender:        b.gender as string,
+    is_leap_month: (b.is_leap_month as boolean) ?? false,
+    city:          (b.city as string | null) ?? null,
+    longitude:     (b.birth_longitude as number | null) ?? null,
   })
 }
 
@@ -65,7 +57,6 @@ async function saveProfile() {
 const shareState    = ref<'idle' | 'loading' | 'error'>('idle')
 const shareUrl      = ref('')
 const showShareModal = ref(false)
-const shareCopied   = ref(false)
 const lastBirthInput = ref<Record<string, unknown> | null>(null)
 
 const { createDailyShare } = useSajuApi()
@@ -85,11 +76,6 @@ async function doShare() {
   }
 }
 
-async function copyShareUrl() {
-  await navigator.clipboard.writeText(shareUrl.value)
-  shareCopied.value = true
-  setTimeout(() => { shareCopied.value = false }, 2000)
-}
 
 // ── 오늘 날짜 ────────────────────────────────────────────────────────────────
 const todayLabel = computed(() => {
@@ -302,53 +288,12 @@ const branchEl = computed(() => result.value ? BRANCH_EL[result.value.day_ganji.
 
     <!-- ── Step 2b: 프로필 선택 ──────────────────────────────────────────── -->
     <div v-else-if="step === 'profile'" class="profile-step animate-fade-up">
-      <div v-if="profLoad" class="center-state">
-        <LoadingSpinner size="sm" />
-      </div>
-      <div v-else-if="profiles.length === 0" class="card" style="text-align:center;padding:32px;">
-        <p class="fs-body" style="color:var(--text-muted);">저장된 프로필이 없습니다.</p>
-        <NuxtLink to="/profile" class="btn-primary" style="margin-top:16px;max-width:200px;margin-inline:auto;">
-          만세력 보러가기
-        </NuxtLink>
-      </div>
-      <div v-else class="profiles-list">
-        <button
-          v-for="p in profiles"
-          :key="p.id"
-          class="profile-card-item"
-          :disabled="loading"
-          @click="onProfileSelect(p)"
-        >
-          <div class="profile-card-inner">
-            <div class="profile-info">
-              <p class="profile-name">
-                {{ p.name }}
-                <span
-                  v-if="p.day_stem"
-                  class="profile-name-ilju"
-                  :style="`color: ${elColor(p.day_stem_element ?? '')}`"
-                >
-                  ({{ STEM_HANJA[p.day_stem] ?? p.day_stem }})
-                </span>
-              </p>
-              <p class="profile-birth">
-                {{ p.birth_date.replace(/-/g, '.') }} · {{ p.gender === 'male' ? '남' : '여' }}
-                <template v-if="p.birth_time"> · {{ p.birth_time }}</template>
-              </p>
-              <p v-if="p.day_stem" class="profile-ilju">
-                <span class="ilju-value" :style="`color: ${elColor(p.day_stem_element ?? '')}`">
-                  {{ STEM_HANJA[p.day_stem] ?? p.day_stem }}
-                  {{ BRANCH_HANJA[(p as any).day_branch ?? ''] ?? '' }}
-                </span>
-              </p>
-            </div>
-            <div class="profile-illust-mini">
-              <LoadingSpinner v-if="loading" size="sm" />
-              <img v-else src="/profile-illust.webp" alt="" />
-            </div>
-          </div>
-        </button>
-      </div>
+      <SajuProfileList
+        :profiles="profiles"
+        :prof-load="profLoad"
+        :loading="loading"
+        @select="onProfileSelect"
+      />
       <p v-if="error" class="error-msg fs-label">{{ error }}</p>
     </div>
 
@@ -384,19 +329,7 @@ const branchEl = computed(() => result.value ? BRANCH_EL[result.value.day_ganji.
   </div>
 
   <!-- 공유 모달 -->
-  <AppDialog
-    v-model:show="showShareModal"
-    title="오늘의 운세 공유"
-    desc="링크를 열면 오늘 날짜 기준으로 재계산됩니다."
-    cancel-text="닫기"
-  >
-    <div class="share-url-row">
-      <span class="share-url-text fs-tiny">{{ shareUrl }}</span>
-      <button class="share-copy-btn fs-label" @click="copyShareUrl">
-        {{ shareCopied ? '복사됨!' : '복사' }}
-      </button>
-    </div>
-  </AppDialog>
+  <UiShareModal v-model:show="showShareModal" :url="shareUrl" />
 
   <!-- 로그인 유도 다이얼로그 -->
   <AppDialog
@@ -546,75 +479,6 @@ const branchEl = computed(() => result.value ? BRANCH_EL[result.value.day_ganji.
 
 /* ── Step2b: 프로필 ── */
 .profile-step { display: flex; flex-direction: column; gap: 10px; }
-.profiles-list { display: flex; flex-direction: column; gap: 10px; }
-
-.profile-card-item {
-  border-radius: 20px;
-  border: 1px solid var(--border-default);
-  background: var(--surface-1);
-  overflow: hidden;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.profile-card-item:hover:not(:disabled) { background: var(--surface-2); }
-.profile-card-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 20px 20px 24px;
-  gap: 16px;
-}
-.profile-info {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-.profile-illust-mini {
-  width: 72px;
-  height: 72px;
-  border-radius: 14px;
-  overflow: hidden;
-  flex-shrink: 0;
-  background: var(--surface-2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.profile-illust-mini img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.profile-name {
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
-}
-.profile-name-ilju {
-  font-size: 14px;
-  font-weight: 600;
-  font-family: var(--font-ganji);
-  letter-spacing: 0.03em;
-}
-.profile-birth {
-  font-size: var(--fs-sub);
-  color: var(--text-muted);
-}
-.profile-ilju {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 2px;
-}
-.ilju-value {
-  font-size: 16px;
-  font-weight: 700;
-  font-family: var(--font-ganji);
-  letter-spacing: 0.05em;
-}
 
 .error-msg {
   color: var(--color-bad);
@@ -652,37 +516,7 @@ const branchEl = computed(() => result.value ? BRANCH_EL[result.value.day_ganji.
 .btn-share:disabled { opacity: 0.5; cursor: not-allowed; }
 .share-icon { width: 18px; height: 18px; flex-shrink: 0; }
 
-/* 공유 URL 행 */
-.share-url-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: var(--surface-2);
-  border: 1px solid var(--border-subtle);
-  margin-top: 4px;
-}
-.share-url-text {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--text-secondary);
-}
-.share-copy-btn {
-  flex-shrink: 0;
-  padding: 4px 10px;
-  border-radius: 6px;
-  border: 1px solid var(--accent);
-  background: transparent;
-  color: var(--accent);
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.share-copy-btn:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+
 
 /* 프로필 저장 버튼 */
 .btn-save-profile {

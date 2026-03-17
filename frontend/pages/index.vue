@@ -124,12 +124,12 @@ function goToMyProfile() {
       <LoadingSpinner />
     </div>
 
-    <div v-else-if="!pending" class="dashboard">
+    <div v-else-if="!pending" class="dashboard animate-fade-up">
 
       <!-- 왼쪽: 일진 + 프로필 or 온보딩 -->
       <div class="dashboard-left">
         <!-- 프로필 카드 (있을 때만) -->
-        <button v-if="hasProfile" class="profile-card" @click="goToMyProfile">
+        <button v-if="hasProfile" class="profile-card animate-fade-up" @click="goToMyProfile">
           <div class="profile-card-inner">
             <div class="profile-info">
               <p class="profile-name">
@@ -157,7 +157,7 @@ function goToMyProfile() {
         </button>
 
         <!-- 프로필 없을 때 온보딩 -->
-        <div v-else class="onboarding-inline">
+        <div v-else class="onboarding-inline animate-fade-up">
           <div class="illust-box">
             <img src="/onboarding-illust.webp" alt="사주 일러스트" class="illust-img" />
           </div>
@@ -172,7 +172,7 @@ function goToMyProfile() {
         </div>
 
         <!-- 오늘의 일진 카드 -->
-        <div class="ilijn-card">
+        <div class="ilijn-card animate-fade-up animate-delay-100">
           <div class="ilijn-header">
             <span class="ilijn-label">오늘의 일진</span>
             <span class="ilijn-date">{{ todayLabel }}</span>
@@ -209,7 +209,7 @@ function goToMyProfile() {
       </div>
 
       <!-- 오른쪽: 서비스 목록 -->
-      <div class="dashboard-right">
+      <div class="dashboard-right animate-fade-up animate-delay-200">
         <p class="service-label">서비스</p>
         <div class="service-grid">
           <NuxtLink to="/profile" class="service-card">

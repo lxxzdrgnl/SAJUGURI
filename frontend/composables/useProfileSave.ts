@@ -11,9 +11,6 @@ export interface ProfileSaveBody {
   is_leap_month: boolean
   city?: string | null
   longitude?: number | null
-  day_stem?: string | null
-  day_branch?: string | null
-  day_stem_element?: string | null
 }
 
 export function useProfileSave() {

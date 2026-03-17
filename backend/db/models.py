@@ -42,9 +42,6 @@ class Profile(Base):
     city:               Mapped[str | None]  = mapped_column(String(100), nullable=True)
     longitude:          Mapped[float | None] = mapped_column(Numeric(7, 4), nullable=True)
     is_representative:  Mapped[bool]         = mapped_column(Boolean, default=False, nullable=False)
-    day_stem:           Mapped[str | None]   = mapped_column(String(5), nullable=True)
-    day_branch:         Mapped[str | None]   = mapped_column(String(5), nullable=True)
-    day_stem_element:   Mapped[str | None]   = mapped_column(String(5), nullable=True)
     created_at:         Mapped[datetime]     = mapped_column(DateTime(timezone=True), default=_utcnow)
 
 
