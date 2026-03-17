@@ -4,10 +4,10 @@ from __future__ import annotations
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.models import Consultation, User
+from crud import consultation as consult_crud
+from db.models import User
 from dependencies.auth import get_current_user, get_optional_user
 from dependencies.db import get_db
 from schemas.question import (
@@ -18,8 +18,7 @@ from schemas.question import (
     ShareTokenResponse,
 )
 from core.errors import SWAGGER_ERRORS
-from core.exceptions import CalcFailedException
-from llm.pipelines.question import run_question_consultation
+from services.consultation import create_consultation_flow
 
 router = APIRouter(prefix="/api/question", tags=["한줄 상담"])
 
@@ -48,44 +47,7 @@ async def ask_question(
     user: User | None = Depends(get_optional_user),
     db: AsyncSession = Depends(get_db),
 ) -> QuestionResponse:
-    try:
-        result = await run_question_consultation(
-            birth_date=req.birth_date,
-            birth_time=req.birth_time,
-            gender=req.gender,
-            calendar=req.calendar,
-            is_leap_month=req.is_leap_month,
-            birth_longitude=req.birth_longitude,
-            birth_utc_offset=req.birth_utc_offset,
-            question=req.question,
-        )
-    except Exception as exc:
-        raise CalcFailedException(str(exc)) from exc
-
-    # 자동 저장 (로그인 시 user_id 연결, 비로그인은 null)
-    birth_input: dict = {
-        "birth_date": req.birth_date,
-        "birth_time": req.birth_time,
-        "gender": req.gender,
-        "calendar": req.calendar,
-        "is_leap_month": req.is_leap_month,
-        "birth_longitude": req.birth_longitude,
-        "birth_utc_offset": req.birth_utc_offset,
-    }
-    if req.name:
-        birth_input["name"] = req.name
-    row = Consultation(
-        user_id=user.id if user else None,
-        birth_input=birth_input,
-        question=req.question,
-        category=result.get("category", "general"),
-        headline=result["headline"],
-        content=result["content"],
-    )
-    db.add(row)
-    await db.commit()
-    await db.refresh(row)
-
+    row = await create_consultation_flow(db, req, user.id if user else None)
     return QuestionResponse(
         id=row.id,
         headline=row.headline,
@@ -103,13 +65,7 @@ async def list_consultations(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> list[ConsultationHistoryItem]:
-    result = await db.execute(
-        select(Consultation)
-        .where(Consultation.user_id == user.id)
-        .order_by(Consultation.created_at.desc())
-        .limit(50)
-    )
-    rows = result.scalars().all()
+    rows = await consult_crud.get_user_consultations(db, user.id)
     return [
         ConsultationHistoryItem(
             id=r.id,
@@ -134,19 +90,10 @@ async def create_share(
     user: User | None = Depends(get_optional_user),
     db: AsyncSession = Depends(get_db),
 ) -> ShareTokenResponse:
-    result = await db.execute(
-        select(Consultation).where(Consultation.id == consultation_id)
-    )
-    row = result.scalar_one_or_none()
-    if not row:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="상담 기록을 찾을 수 없습니다.")
-    # 로그인 상담은 본인만 공유 가능
+    row = await consult_crud.get_consultation_or_404(db, consultation_id)
     if row.user_id is not None and (user is None or user.id != row.user_id):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="권한이 없습니다.")
-    if not row.share_token:
-        row.share_token = uuid.uuid4()
-        await db.commit()
-        await db.refresh(row)
+    row = await consult_crud.ensure_share_token(db, row)
     return ShareTokenResponse(share_token=str(row.share_token))
 
 
@@ -160,15 +107,7 @@ async def delete_consultation(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> None:
-    result = await db.execute(
-        select(Consultation).where(
-            Consultation.id == consultation_id,
-            Consultation.user_id == user.id,
-        )
-    )
-    row = result.scalar_one_or_none()
-    if not row:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="상담 기록을 찾을 수 없습니다.")
+    row = await consult_crud.get_consultation_or_404(db, consultation_id, user.id)
     await db.delete(row)
     await db.commit()
 
@@ -186,17 +125,13 @@ async def get_shared_consultation(
         token_uuid = uuid.UUID(token)
     except ValueError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="유효하지 않은 공유 링크입니다.")
-    result = await db.execute(
-        select(Consultation).where(Consultation.share_token == token_uuid)
-    )
-    row = result.scalar_one_or_none()
+    row = await consult_crud.get_by_share_token(db, token_uuid)
     if not row:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="상담 기록을 찾을 수 없습니다.")
     bi = row.birth_input if isinstance(row.birth_input, dict) else None
-    name = bi.get("name") or None if bi else None
     return ConsultationDetail(
         id=row.id,
-        name=name,
+        name=bi.get("name") or None if bi else None,
         birth_input=bi,
         question=row.question,
         category=row.category,

@@ -100,3 +100,14 @@ class DatabaseException(AppException):
             "데이터베이스 오류가 발생했습니다.",
             {"detail": detail} if detail else None,
         )
+
+
+class LLMFailedException(AppException):
+    """LLM 호출 또는 응답 파싱 실패 — 사용자 입력과 무관한 서버 오류."""
+
+    def __init__(self, detail: str = ""):
+        super().__init__(
+            ErrorCode.INTERNAL_SERVER_ERROR,
+            "AI 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+            {"detail": detail} if detail else None,
+        )

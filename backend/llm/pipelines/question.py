@@ -16,13 +16,15 @@ from concurrent.futures import ThreadPoolExecutor
 
 from datetime import datetime
 
+from langchain_core.messages import SystemMessage, HumanMessage
+
 from engine.handlers.calculate_saju import handle_calculate_saju
 from engine.handlers.get_wol_un import handle_get_wol_un
 from engine.handlers.get_yeon_un import handle_get_yeon_un
 from llm.writer import generate_consultation
 from llm.providers import get_llm
 from rag.db import search_multi
-from rag.search import _find_by_field
+from rag.search import handle_get_ilju_profile
 
 logger = logging.getLogger(__name__)
 
@@ -166,7 +168,7 @@ def _build_question_rag(
     # 일주 직접 조회 (CORE)
     dp = saju.get("day_pillar", {})
     day_pillar_str = dp.get("stem", "") + dp.get("branch", "")
-    ilju = _find_by_field("ilju", "ilju", day_pillar_str) if day_pillar_str else None
+    ilju = handle_get_ilju_profile(day_pillar_str) if day_pillar_str else None
 
     # 신강신약 + 용신 요약
     dms = saju.get("day_master_strength", {})
@@ -239,7 +241,6 @@ async def _guard_and_classify(question: str, provider: str | None = None) -> tup
         category:   'career' | 'love' | 'money' | 'health' | 'general'
         is_instant: True면 즉시 답변 반환 (사주 분석 생략)
     """
-    from langchain_core.messages import SystemMessage, HumanMessage
     llm = get_llm(provider)
     resp = await llm.ainvoke([
         SystemMessage(content=_GUARD_PROMPT),

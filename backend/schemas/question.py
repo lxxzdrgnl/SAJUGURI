@@ -6,22 +6,16 @@ from datetime import datetime
 from typing import Literal
 from pydantic import BaseModel, Field
 
+from schemas.saju import SajuCalcRequest
+
 
 CATEGORIES = Literal['career', 'love', 'money', 'health', 'general']
 
 
-class QuestionRequest(BaseModel):
+class QuestionRequest(SajuCalcRequest):
     """한줄 상담 요청."""
 
     name: str | None = Field(default=None, description="이름 (표시용)", examples=["홍길동"])
-    birth_date: str = Field(description="생년월일 (YYYY-MM-DD)", examples=["1990-03-15"])
-    birth_time: str | None = Field(default=None, description="출생 시각 (HH:MM). 모를 경우 null", examples=["14:30"])
-    gender: str = Field(description="성별", examples=["male"], pattern="^(male|female)$")
-    calendar: str = Field(default="solar", pattern="^(solar|lunar)$")
-    is_leap_month: bool = Field(default=False)
-    birth_longitude: float | None = Field(default=None)
-    birth_utc_offset: int | None = Field(default=None)
-
     question: str = Field(
         description="고민 원문 (10~200자)",
         min_length=10,

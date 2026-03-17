@@ -3,7 +3,7 @@
 from __future__ import annotations
 from uuid import UUID
 from pydantic import BaseModel, Field
-from schemas.saju import SajuCalcResponse
+from schemas.saju import SajuCalcRequest, SajuCalcResponse
 
 
 # ─── 공통 입력 ───────────────────────────────────────────────────────────────
@@ -31,34 +31,9 @@ class QuestionRequest(BirthRequest):
 
 # ─── 사주 리포트 ─────────────────────────────────────────────────────────────
 
-class SajuReportRequest(BaseModel):
+class SajuReportRequest(SajuCalcRequest):
     """사주 리포트 생성 요청."""
 
-    birth_date: str = Field(
-        description="생년월일 (YYYY-MM-DD)",
-        examples=["1990-03-15"],
-    )
-    birth_time: str = Field(
-        description="출생 시각 (HH:MM, 24시 기준). 정확한 시각 모를 경우 '12:00' 사용",
-        examples=["14:30"],
-    )
-    gender: str = Field(
-        description="성별",
-        examples=["male"],
-        pattern="^(male|female)$",
-    )
-    calendar: str = Field(
-        default="solar",
-        description="양력(solar) 또는 음력(lunar)",
-        pattern="^(solar|lunar)$",
-    )
-    is_leap_month: bool = Field(default=False, description="음력 윤달 여부")
-    birth_longitude: float | None = Field(
-        default=None, description="출생지 경도. 미입력 시 서울(126.97°) 적용", examples=[126.97],
-    )
-    birth_utc_offset: int | None = Field(
-        default=None, description="UTC 오프셋(분) — 해외 출생 시 필수", examples=[None],
-    )
     concern: str | None = Field(
         default=None,
         description="사용자 고민 원문. 입력하면 고민 맞춤 탭이 생성됩니다.",

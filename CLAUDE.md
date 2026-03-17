@@ -31,49 +31,24 @@ Frontend
 
 ## 3. 4가지 기능 및 파이프라인
 
-### 사주 정밀 분석 `POST /api/saju/calc`
-```
-Engine.calculate_saju()
-  → context_ranking + life_domains
-  → RAG 검색 (도메인별 청크)
-  → Context Filter (primary 우선 + concern 시맨틱 merge)
-  → Writer → 10개 결론형 탭
-```
-
-### 궁합 `POST /api/compatibility`
-```
-Engine.calculate_saju(person1) + Engine.calculate_saju(person2)
-  → Synastry Engine (천간합·월지삼합충·용신보완·십성패턴)
-  → RAG 검색 (interaction_tags)
-  → Writer → 궁합 리포트 (총점 + 항목별 분석)
-```
-
-### 오늘의 운세 `POST /api/daily`
-```
-Engine.calculate_saju() + Engine.get_un_flow(today)
-  → Daily Flow (오늘 천간 × 일간 십성, 오늘 지지 × 월지 충합)
-  → RAG 검색 (daily_tags)
-  → Writer → 오늘 운세 (1탭, 간결)
-```
-
-### 한줄 상담 `POST /api/question`
-```
-Engine.calculate_saju() → behavior_profile + core_keywords
-  → 가중 RAG 검색 (question 시맨틱 + saju keywords boost)
-  → Writer → 단답형 상담 (1탭, 500자)
-```
+| 기능 | 엔드포인트 | 상태 |
+|---|---|---|
+| 만세력 정밀 분석 | `POST /api/saju/calc` | ✅ 엔진 완료, AI 탭 미구현 |
+| 오늘의 운세 | `POST /api/saju/daily` | ✅ 완료 (AI 없는 명리 기반) |
+| 한줄 상담 | `POST /api/question` | ✅ 완료 (OpenAI GPT-4o) |
+| 궁합 | `POST /api/compatibility` | ❌ 미구현 |
 
 ---
 
-## 4. Engine 12단계 파이프라인
+## 4. Engine 12단계 파이프라인 (`engine/calc/`)
 
 `calculate_saju()` 한 번 호출로 순차 실행:
 
 ```
 ① 4기둥          연·월·일·시주 (진태양시 -30분 보정)
 ② 십성·12운성    기둥별 태그
-③ 신살           역마·도화·화개·귀문관살 등 10종
-④ 일간 강약      점수화 (strong/medium/weak)
+③ 신살           역마·도화·화개·귀문관살 등 18종
+④ 일간 강약      점수화 + 8단계 + 득령/득지/득시/득세
 ⑤ 격국           13종
 ⑥ 용신           억부/조후/통관
 ⑦ 대운           3일=1년 공식 (10구간)
@@ -92,7 +67,7 @@ Engine.calculate_saju() → behavior_profile + core_keywords
 |---|---|---|
 | ilju | 60 | 60갑자 일주론 (성격·직업·연애) |
 | ten_gods | 10 | 십성 해석 (비견~정인) |
-| sin_sal | 가변 | 신살 의미 (역마·도화·귀문관살 등) |
+| sin_sal | 가변 | 신살 의미 |
 | structure_patterns | 가변 | 구조 패턴 해석 |
 | dynamics | 가변 | 동역학 해석 |
 | wuxing | 가변 | 오행 상생·상극 해석 |
@@ -107,21 +82,20 @@ Embedding: Gemini embedding-001
 SajuNara/
 ├── CLAUDE.md
 ├── README.md
-├── frontend/           # Vue.js 3 + Nuxt.js (구현 예정)
+├── frontend/               # Vue.js 3 + Nuxt.js ✅
 └── backend/
     ├── engine/
-    │   ├── calc/       # 순수 계산 (15개 모듈)
-    │   ├── analysis/   # 후처리 분석 (6개 모듈)
-    │   ├── handlers/   # 기능별 핸들러
-    │   └── data/       # 정적 명리학 데이터
-    ├── rag/            # ChromaDB 검색 + knowledge JSON
-    ├── llm/            # Writer LLM (구현 예정)
-    ├── pipelines/      # 기능별 파이프라인 (구현 예정)
-    ├── routers/        # FastAPI 라우터
-    ├── schemas/        # Pydantic 스키마
-    ├── db/             # SQLAlchemy 모델·세션
-    ├── core/           # pydantic-settings 설정
-    └── dependencies/   # FastAPI 의존성
+    │   ├── calc/           # 순수 계산 (15개 모듈) ✅
+    │   ├── analysis/       # 후처리 분석 ✅
+    │   └── data/           # 정적 명리학 데이터 ✅
+    ├── rag/                # ChromaDB 검색 + knowledge JSON ✅
+    ├── llm/                # Writer LLM (미구현)
+    ├── pipelines/          # 기능별 파이프라인 (미구현)
+    ├── routers/            # FastAPI 라우터 ✅
+    ├── schemas/            # Pydantic 스키마 ✅
+    ├── db/                 # SQLAlchemy 모델·세션 ✅
+    ├── core/               # pydantic-settings 설정 ✅
+    └── dependencies/       # FastAPI 의존성 ✅
 ```
 
 ---
@@ -133,7 +107,7 @@ SajuNara/
 | Language | Python 3.10+ (Main), TypeScript (Frontend) |
 | Frontend | Vue.js 3, Pinia, Nuxt.js, Tailwind CSS |
 | Backend | FastAPI, LangChain (LCEL) |
-| AI / LLM | Gemini 2.0 Flash (기본) — Strategy Pattern (OpenAI·Claude 교체 가능) |
+| AI / LLM | OpenAI GPT-4o (Writer) — Strategy Pattern (Gemini·Claude 교체 가능) |
 | Output Parser | PydanticOutputParser + OutputFixingParser |
 | Vector DB | ChromaDB (Gemini embedding-001) |
 | Relational DB | PostgreSQL + SQLAlchemy 2.0 (async) |
@@ -152,149 +126,43 @@ SajuNara/
 
 ---
 
-## 9. 구현 TODO (포스텔러 수준 만세력 리포트)
+## 9. 구현 현황
 
-목표: 포스텔러 만세력 2.2와 동등한 사주 리포트 + AI 탭 리포트
+### ✅ Phase 1 — 백엔드 엔진
+- 12신살 (기둥별), 신살 18종, 공망, 득령/득지/득시/득세, 신강/신약 8단계
+- 월운 API `GET /api/saju/wol-un`, 일진 달력 API `GET /api/saju/il-jin`
+- 용신 표기 `yong_sin_label`
 
-### Phase 1 — 백엔드 엔진 보완
+### ✅ Phase 2 — 프론트엔드 기반
+- Nuxt.js 3, Tailwind CSS, Pinia, 입력 폼, API 클라이언트
 
-- [x] **12신살 (기둥별)** — 지살·겁살·망신살·육해살·재살·천살·년살·월살·일살·시살 per-pillar 추가
-- [x] **신살 종류 확장** — 현침살·태극귀인·문곡귀인·관귀학관·홍염살·고신살·월덕귀인·황은대사 (+8종)
-  > **주의**: 신살 확장은 프론트 표시용. RAG 검색·Writer 입력은 기존 context_ranking(priority high/medium 기준) 그대로 유지.
-- [x] **공망(空亡) 계산** — 일주 기준 공망 지지 2개 + 해당 기둥 반환 (`gong_mang` 최상위 필드)
-- [x] **득령/득지/득시/득세 boolean 4개** — day_master_strength 출력에 추가
-- [x] **신강/신약 8단계** — 극약·태약·신약·중화신약·중화신강·신강·태강·극왕 + 백분율
-- [x] **합충 위치 정보** — dynamics.active_relations에 기둥 위치 태그 이미 포함
-- [x] **월운 API** — `GET /api/saju/wol-un?year=&day_stem=`
-- [x] **일진 달력 API** — `GET /api/saju/il-jin?year=&month=`
-- [x] **용신 표기** — `yong_sin_label` 필드 추가 (억부용신/통관용신)
+### ✅ Phase 3 — 만세력 리포트 컴포넌트
+- SajuTable, HapChungPanel, WuxingPentagram, WuxingDonutChart, SipseongDonutChart
+- StrengthChart, YongSinBadge, DaeUnSlider, YeonUnSlider, WolUnSlider, IlJinCalendar
 
-### Phase 2 — 프론트엔드 세팅
+### ✅ Phase 4 — 인증·프로필·공유
+- 구글 OAuth2 로그인
+- 만세력 저장 (비로그인 시 localStorage 임시 보존 → 로그인 후 자동 저장)
+- 내 만세력 목록 (`/my-profiles`) — 선택 → 실시간 재계산
+- 결과 공유 — UUID 링크 → `/share/{uuid}` 비로그인 접근 가능
 
-- [x] **Nuxt.js 3 프로젝트 초기화** — frontend/ 디렉토리, Tailwind CSS, Pinia
-- [x] **입력 폼** — 생년월일시·음양력·윤달·성별 선택 (components/saju/InputForm.vue)
-- [x] **Pinia store** — saju 계산 결과 상태 관리 (stores/saju.ts)
-- [x] **API 클라이언트** — backend `/api/saju/calc` 호출 래퍼 (composables/useSajuApi.ts)
+### ✅ Phase 4.5 — 오늘의 운세 + 한줄 상담
+- 오늘의 운세: 명리 기반 6카테고리, AI 없음
+- 한줄 상담: OpenAI GPT-4o 기반 단답형 상담, 공유/히스토리 페이지
 
-### Phase 3 — 만세력 리포트 컴포넌트 ✅
-
-- [x] **SajuTable** — 4기둥 그리드 (천간·십성·지지·십성·지장간·12운성·12신살, 음양 색상)
-- [x] **HapChungPanel** — 합충 탭 버튼 (천간합·지지육합·삼합·방합·충·공망·형·파·해·원진) + 해당 기둥 하이라이트
-- [x] **WuxingPentagram** — 오행 오각형 SVG (상생 파란 화살표·상극 빨간 별, 원 비율 채우기)
-- [x] **WuxingDonutChart** — 오행 도넛 차트 (Chart.js)
-- [x] **SipseongDonutChart** — 십성 도넛 차트
-- [x] **StrengthChart** — 신강/신약 8단계 분포 라인 차트 + 득령/득지/득시/득세 뱃지
-- [x] **YongSinBadge** — 용신·희신·기신 표시
-- [x] **DaeUnSlider** — 대운 수평 스크롤 (천간/지지 칩, 십성·12운성 레이블)
-- [x] **YeonUnSlider** — 연운 수평 스크롤
-- [x] **WolUnSlider** — 월운 수평 스크롤
-- [x] **IlJinCalendar** — 일진 달력 (월 네비게이션, 일별 간지·음력 날짜)
-
-### Phase 4 — 인증·프로필·공유 ← **현재 개발 중**
-
-#### DB 테이블 설계
-
-**users** — 계정 및 권한
-| 컬럼 | 타입 | 설명 |
-|---|---|---|
-| id | SERIAL PK | |
-| email | VARCHAR(255) UNIQUE | |
-| hashed_password | VARCHAR(255) NULL | 소셜 로그인 시 NULL |
-| provider | VARCHAR(20) | `local` / `google` / `kakao` |
-| social_id | VARCHAR(255) NULL | 소셜 고유 ID |
-| role | VARCHAR(20) | `admin` / `tester` / `user` |
-| created_at | TIMESTAMP | |
-
-
-**profiles** — 사주 입력 데이터 (재계산용, 결과 캐시 없음)
-| 컬럼 | 타입 | 설명 |
-|---|---|---|
-| id | SERIAL PK | |
-| user_id | INTEGER FK | users.id |
-| name | VARCHAR(50) | 프로필 이름 (나, 엄마 등) |
-| birth_date | DATE | 생년월일 |
-| birth_time | TIME NULL | 생시 (모를 경우 NULL) |
-| calendar | VARCHAR(10) | `solar` / `lunar` |
-| gender | VARCHAR(10) | `male` / `female` |
-| is_leap_month | BOOLEAN | 윤달 여부 |
-| city | VARCHAR(100) NULL | 진태양시 보정용 |
-| longitude | DECIMAL(7,4) NULL | |
-| created_at | TIMESTAMP | |
-
-**shared_results** — 계산 결과 공유 스냅샷
-| 컬럼 | 타입 | 설명 |
-|---|---|---|
-| id | SERIAL PK | |
-| profile_id | INTEGER FK NULL | 로그인 공유 시 연결 |
-| birth_input | JSONB NULL | 비로그인 공유 시 입력값 저장 |
-| share_token | UUID UNIQUE | `/share/{uuid}` 링크용 |
-| calc_snapshot | JSONB | 공유 시점 엔진 결과 전체 |
-| created_at | TIMESTAMP | |
-> CHECK: `profile_id IS NOT NULL OR birth_input IS NOT NULL`
-
-**wallets** — 솜사탕 잔액 캐시 (원장은 candy_transactions)
-| 컬럼 | 타입 | 설명 |
-|---|---|---|
-| id | SERIAL PK | |
-| user_id | INTEGER FK | users.id |
-| candy_count | INTEGER | 현재 보유량 |
-| updated_at | TIMESTAMP | |
-
-**candy_transactions** — 솜사탕 입출 내역
-| 컬럼 | 타입 | 설명 |
-|---|---|---|
-| id | SERIAL PK | |
-| user_id | INTEGER FK | users.id |
-| delta | INTEGER | +지급 / -소모 |
-| reason | VARCHAR(50) | `signup_bonus` / `consultation` / `admin_grant` |
-| ref_id | INTEGER NULL | report_id 등 참조 |
-| created_at | TIMESTAMP | |
-
-**reports** — AI 상담 결과 (Phase 5 연계)
-| 컬럼 | 타입 | 설명 |
-|---|---|---|
-| id | SERIAL PK | |
-| user_id | INTEGER FK | users.id |
-| profile_id | INTEGER FK | profiles.id |
-| concern | TEXT | 고민 입력값 |
-| calc_snapshot | JSONB | 생성 시점 엔진 결과 |
-| tabs | JSONB | AI 생성 탭 배열 |
-| candy_cost | INTEGER | 소모된 솜사탕 |
-| created_at | TIMESTAMP | |
-
----
-
-#### 구현 태스크
-
-- [x] **구글 로그인** — OAuth2, `users` 테이블
-- [x] **프로필 저장** — 결과 페이지 "저장하기" → 로그인 확인 → `profiles` 저장
-  - 비로그인 시: `localStorage`에 `birth_input` 임시 보존 → 로그인 후 자동 저장
-- [x] **내 프로필 목록** — 저장된 프로필 선택 → 실시간 재계산 → 결과 화면
-- [x] **결과 공유** — "공유하기" → UUID 링크 → `/share/{uuid}` 비로그인 접근 가능
-
-### Phase 4.5 — AI 없는 오늘의 운세 ✅
-
-- [x] **`POST /api/saju/daily`** — 명리 기반 6카테고리 점수·레벨·설명 반환 (랜덤 없음)
-- [x] **`engine/calc/daily_fortune.py`** — 십성 보정 + 오행(희신/기신) 보정 + 지지 충합 보정
-- [x] **`frontend/pages/daily/index.vue`** — 결과 페이지 (대표 프로필 자동 로드)
-- [x] **홈 화면 서비스 카드** — 만세력 아래 오늘의 운세 진입 카드 추가
-
-### Phase 5 — AI 탭 리포트 (Headline-Driven Insights)
-
-- [ ] **Writer LLM 세팅** — llm/providers.py Gemini 연결
-- [ ] **프롬프트 작성** — 사주 calc 결과 + 고민 → 10개 결론형 헤드라인
-- [ ] **PydanticOutputParser** — ReportOutput(tabs: list[TabContent]) 스키마
+### 🔜 Phase 5 — AI 탭 리포트 (Headline-Driven Insights)
+- [ ] **Writer LLM 세팅** — `llm/providers.py` OpenAI GPT-4o 연결
+- [ ] **프롬프트 작성** — calc 결과 + 고민 → 10개 결론형 헤드라인
+- [ ] **PydanticOutputParser** — `ReportOutput(tabs: list[TabContent])` 스키마
 - [ ] **사주 분석 파이프라인** — Engine → RAG → Context Filter → Writer
 - [ ] **AI 리포트 탭 UI** — 헤드라인 탭 클릭 → 상세 내용 즉시 전환
-- [ ] **궁합 파이프라인** (Phase 5 후반)
-- [ ] **오늘의 운세 파이프라인** (Phase 5 후반)
-- [ ] **한줄 상담 파이프라인** (Phase 5 후반)
+- [ ] **궁합 파이프라인** — Synastry Engine → RAG → Writer
 
 ---
 
 ## 10. 핵심 계산 공식
 
-- **진태양시 보정**: -30분 (동경 127° 보정, 역사적 표준시 자동 적용)
+- **진태양시 보정**: -30분 (동경 127° 보정)
 - **연주 기준**: 1984년 = 갑자년, `(year-4)%10` = 천간, `(year-4)%12` = 지지
 - **일주 기준일**: 1900-01-01 = 갑술일 (stemIdx=0, branchIdx=10)
 - **월주 천간**: 갑·기년→병인월, 을·경년→무인월, 병·신년→경인월, 정·임년→임인월, 무·계년→갑인월
@@ -302,3 +170,48 @@ SajuNara/
 - **대운 공식**: 3일=1년, 1일=4개월, 1시진(2h)=10일, 최대 10세
 - **24절기**: ephem 라이브러리 실시간 천문 계산
 - **음력 변환**: korean-lunar-calendar 패키지
+
+---
+
+## 11. 프론트엔드 공통 컴포넌트
+
+> **규칙**: 아래 컴포넌트가 이미 있다. 새 기능 추가 시 별도 지시 없이 반드시 가져다 써라. 중복 구현 금지.
+
+### UI 범용 (`components/ui/`)
+
+| 컴포넌트 | Props | 비고 |
+|---|---|---|
+| `<LoadingSpinner>` | `size?: 'sm'\|'md'\|'lg'` | 기본 md |
+| `<UiShareModal>` | `v-model:show`, `url: string` | 열릴 때 자동 클립보드 복사, 하단 sheet + PC 중앙 |
+| `<UiInfoTooltip>` | `text: string` | 호버/탭 토글, Teleport body |
+
+### 앱 레벨 (`components/`)
+
+| 컴포넌트 | Props / Slot | 비고 |
+|---|---|---|
+| `<AppDialog>` | `v-model:show`, `title`, `desc?`, `cancelText?` + default slot(액션 버튼) | Teleport body, 바깥 클릭 닫힘 |
+
+### 사주 도메인 (`components/saju/`)
+
+| 컴포넌트 | Props | 비고 |
+|---|---|---|
+| `<SajuInputForm>` | `submitLabel?`, emit `submit(SajuCalcRequest)` | 생년월일시·음양력·성별 입력 |
+| `<SajuProfileList>` | `profiles`, `profLoad`, `loading?`, emit `select` | 저장된 만세력 목록, 일주·이미지 포함 |
+
+### 애니메이션 규칙
+
+- 페이지 진입 시 주요 섹션에 `animate-fade-up` 클래스 적용
+- 순차 등장이 필요하면 `animate-delay-100` ~ `animate-delay-700` 조합
+- `ClientOnly` 안 실제 콘텐츠에 `animate-fade-up` 래퍼를 씌워야 hydration 후 애니메이션 동작
+
+### 로그인 유도 다이얼로그 표준 문구
+
+| 상황 | title | desc |
+|---|---|---|
+| 저장된 만세력 접근 | `로그인이 필요해요` | `저장된 만세력은 로그인 후 이용할 수 있어요.` |
+| 결과 저장 유도 | `매번 입력하기 번거로우시죠?` | `로그인하면 만세력을 저장해두고 바로 불러올 수 있어요.` |
+
+### UI 용어 규칙
+
+- 사용자에게 보이는 텍스트에서 **"프로필" → "만세력"** 으로 표기
+  - 예: "저장된 만세력", "만세력 저장하기", "내 만세력"

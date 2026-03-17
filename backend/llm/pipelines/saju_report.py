@@ -51,7 +51,7 @@ async def run_saju_report(
     Returns:
         (saju_dict, WriterOutput)
     """
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
 
     # ── 1. Engine 계산 (동기 → executor) ──
     logger.info("사주 계산 시작: %s %s %s", birth_date, birth_time, gender)
