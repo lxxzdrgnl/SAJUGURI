@@ -84,6 +84,7 @@ class ConsultationHistoryItem(BaseModel):
 class ConsultationDetail(BaseModel):
     """상담 상세 (공유 링크용 포함)."""
     id:          int
+    name:        str | None = None  # birth_input.name (표시용)
     question:    str
     category:    str
     headline:    str

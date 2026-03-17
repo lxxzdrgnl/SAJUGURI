@@ -190,8 +190,12 @@ async def get_shared_consultation(
     row = result.scalar_one_or_none()
     if not row:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="상담 기록을 찾을 수 없습니다.")
+    name = None
+    if row.birth_input and isinstance(row.birth_input, dict):
+        name = row.birth_input.get("name") or None
     return ConsultationDetail(
         id=row.id,
+        name=name,
         question=row.question,
         category=row.category,
         headline=row.headline,

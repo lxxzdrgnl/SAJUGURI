@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { ConsultationDetail, QuestionCategory } from '~/types/saju'
+import type { ConsultationDetail } from '~/types/saju'
 
 const route = useRoute()
-const { getSharedConsultation } = useSajuApi()
+const config = useRuntimeConfig()
 
 const CATEGORY_LABELS: Record<string, string> = {
   career: '직업·이직',
@@ -13,23 +13,32 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 
 const token = route.params.token as string
-const item  = ref<ConsultationDetail | null>(null)
-const error = ref(false)
 
-async function load() {
-  try {
-    item.value = await getSharedConsultation(token)
-  } catch {
-    error.value = true
-  }
-}
+const { data: item, error: fetchError } = await useAsyncData<ConsultationDetail>(
+  `question-share-${token}`,
+  () => $fetch<ConsultationDetail>(`${config.public.apiBase}/api/question/share/${token}`),
+)
+
+const personName = computed(() => item.value?.name || null)
+const ogTitle = computed(() =>
+  personName.value ? `${personName.value}님의 한줄상담 결과보기` : '한줄상담 결과보기'
+)
+const ogDesc = computed(() => item.value?.question ?? '사주구리 AI 한줄 상담')
+
+useSeoMeta({
+  title:         () => `사주구리 | ${ogTitle.value}`,
+  ogTitle:       () => ogTitle.value,
+  description:   () => ogDesc.value,
+  ogDescription: () => ogDesc.value,
+  ogType:        'website',
+})
+
+const error = computed(() => !!fetchError.value)
 
 function formatDate(iso: string) {
   const d = new Date(iso)
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
 }
-
-onMounted(load)
 </script>
 
 <template>

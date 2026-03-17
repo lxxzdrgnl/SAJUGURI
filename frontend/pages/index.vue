@@ -243,8 +243,8 @@ function goToMyProfile() {
           </NuxtLink>
 
           <NuxtLink to="/question" class="service-card service-card-question">
-            <div class="service-card-img-wrap" style="background:var(--surface-2);">
-              <span style="font-size:36px;line-height:1;">💬</span>
+            <div class="service-card-img-wrap">
+              <img src="/question-illust.webp" alt="한줄 상담" class="service-card-img" />
             </div>
             <div class="service-card-footer">
               <div>

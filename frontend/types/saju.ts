@@ -231,6 +231,7 @@ export interface ConsultationHistoryItem {
 
 export interface ConsultationDetail {
   id: number
+  name?: string | null
   question: string
   category: string
   headline: string
