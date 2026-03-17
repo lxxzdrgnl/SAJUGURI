@@ -7,8 +7,10 @@ Writer LLM — PydanticOutputParser 기반 사주 리포트 생성기.
 
 from __future__ import annotations
 import logging
+from typing import TypeVar
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.messages import SystemMessage, HumanMessage
+from pydantic import BaseModel
 
 from schemas.report import WriterOutput
 from schemas.question import ConsultationOutput
@@ -16,6 +18,37 @@ from llm.providers import get_llm
 from llm.prompts import SYSTEM_PROMPT, format_user_message, QUESTION_SYSTEM_PROMPT, format_question_message
 
 logger = logging.getLogger(__name__)
+
+_T = TypeVar("_T", bound=BaseModel)
+
+
+async def _parse_with_recovery(
+    llm,
+    raw: str,
+    parser: PydanticOutputParser[_T],
+    format_instructions: str,
+) -> _T:
+    """파싱 실패 시 JSON 수정 프롬프트로 한 번 재시도한다."""
+    try:
+        return parser.parse(raw)
+    except Exception as parse_exc:
+        logger.warning("1차 파싱 실패, 재시도: %s", parse_exc)
+        try:
+            fix_messages = [
+                SystemMessage(content="You are a JSON fixer. Return only valid JSON."),
+                HumanMessage(content=(
+                    f"Fix the following output to match this schema:\n"
+                    f"{format_instructions}\n\n"
+                    f"Original output:\n{raw}\n\n"
+                    f"Return ONLY the fixed JSON, no explanation."
+                )),
+            ]
+            fix_response = await llm.ainvoke(fix_messages)
+            fix_raw = fix_response.content if hasattr(fix_response, "content") else str(fix_response)
+            return parser.parse(fix_raw)
+        except Exception as fix_exc:
+            logger.error("2차 파싱도 실패: %s", fix_exc)
+            raise RuntimeError(f"출력 파싱 최종 실패: {fix_exc}") from fix_exc
 
 
 async def generate_report(
@@ -60,26 +93,7 @@ async def generate_report(
         raise
 
     # ── 4. 파싱 (실패 시 JSON 수정 프롬프트로 재시도) ──
-    try:
-        return parser.parse(raw)
-    except Exception as parse_exc:
-        logger.warning("1차 파싱 실패, 재시도: %s", parse_exc)
-        try:
-            fix_messages = [
-                SystemMessage(content="You are a JSON fixer. Return only valid JSON."),
-                HumanMessage(content=(
-                    f"Fix the following output to match this schema:\n"
-                    f"{format_instructions}\n\n"
-                    f"Original output:\n{raw}\n\n"
-                    f"Return ONLY the fixed JSON, no explanation."
-                )),
-            ]
-            fix_response = await get_llm(provider).ainvoke(fix_messages)
-            fix_raw = fix_response.content if hasattr(fix_response, "content") else str(fix_response)
-            return parser.parse(fix_raw)
-        except Exception as fix_exc:
-            logger.error("2차 파싱도 실패: %s", fix_exc)
-            raise RuntimeError(f"Writer 출력 파싱 최종 실패: {fix_exc}") from fix_exc
+    return await _parse_with_recovery(llm, raw, parser, format_instructions)
 
 
 async def generate_consultation(
@@ -112,21 +126,4 @@ async def generate_consultation(
         logger.error("Consultation LLM 호출 실패: %s", exc)
         raise
 
-    try:
-        return parser.parse(raw)
-    except Exception as parse_exc:
-        logger.warning("Consultation 1차 파싱 실패, 재시도: %s", parse_exc)
-        try:
-            fix_messages = [
-                SystemMessage(content="You are a JSON fixer. Return only valid JSON."),
-                HumanMessage(content=(
-                    f"Fix to match schema:\n{format_instructions}\n\n"
-                    f"Original:\n{raw}\n\nReturn ONLY fixed JSON."
-                )),
-            ]
-            fix_response = await get_llm(provider).ainvoke(fix_messages)
-            fix_raw = fix_response.content if hasattr(fix_response, "content") else str(fix_response)
-            return parser.parse(fix_raw)
-        except Exception as fix_exc:
-            logger.error("Consultation 파싱 최종 실패: %s", fix_exc)
-            raise RuntimeError(f"Consultation 파싱 실패: {fix_exc}") from fix_exc
+    return await _parse_with_recovery(llm, raw, parser, format_instructions)

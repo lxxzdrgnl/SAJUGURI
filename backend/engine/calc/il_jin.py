@@ -5,12 +5,15 @@
 
 from __future__ import annotations
 import calendar
+import logging
 from datetime import date
 from engine.data.heavenly_stems import get_stem_by_index
 from engine.data.earthly_branches import get_branch_by_index
 from engine.calc.solar_terms import get_solar_terms_for_year
 
 # 1900-01-01 기준 인덱스
+logger = logging.getLogger(__name__)
+
 _BASE_DATE = date(1900, 1, 1)
 _BASE_STEM_IDX   = 0   # 甲
 _BASE_BRANCH_IDX = 10  # 戌
@@ -69,7 +72,8 @@ def get_il_jin_calendar(year: int, month: int) -> dict:
             for t in all_terms
             if t["datetime"].month == month
         }
-    except Exception:
+    except Exception as exc:
+        logger.warning("절기 계산 실패 (%d-%d): %s", year, month, exc)
         term_map = {}
 
     _, last_day = calendar.monthrange(year, month)
@@ -86,8 +90,8 @@ def get_il_jin_calendar(year: int, month: int) -> dict:
                 lunar_month = _lunar.lunarMonth
                 lunar_day   = _lunar.lunarDay
                 is_leap     = bool(_lunar.isIntercalation)
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.warning("음력 변환 실패 (%d-%d-%d): %s", year, month, d, exc)
 
         days.append({
             "date":        target.isoformat(),

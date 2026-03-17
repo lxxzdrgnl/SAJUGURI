@@ -5,7 +5,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import settings
-from db.models import DailyShare, Profile, SharedResult, User
+from crud.profile import get_profile_or_404
+from db.models import DailyShare, SharedResult, User
 from dependencies.auth import get_optional_user
 from dependencies.db import get_db
 from schemas.share import (
@@ -27,11 +28,7 @@ async def create_share(
     if body.profile_id is not None:
         if not user:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="로그인이 필요합니다.")
-        result = await db.execute(
-            select(Profile).where(Profile.id == body.profile_id, Profile.user_id == user.id)
-        )
-        if not result.scalar_one_or_none():
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="프로필을 찾을 수 없습니다.")
+        await get_profile_or_404(db, body.profile_id, user.id)
 
     # profile_id도 없고 birth_input도 없으면 거부
     if body.profile_id is None and not body.birth_input:

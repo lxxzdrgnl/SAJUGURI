@@ -6,31 +6,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select, update, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from crud.profile import attach_ilju, get_profile_or_404
 from db.models import Profile, User
 from dependencies.auth import get_current_user
 from dependencies.db import get_db
 from schemas.profile import ProfileCreate, ProfileResponse
-from engine.calc.saju import calculate_saju
-
-
-def _attach_ilju(profile: Profile) -> ProfileResponse:
-    """ProfileResponse에 동적으로 계산한 일주를 추가."""
-    resp = ProfileResponse.model_validate(profile)
-    try:
-        saju = calculate_saju(
-            birth_date=resp.birth_date,
-            birth_time=resp.birth_time,
-            gender=resp.gender,
-            calendar=resp.calendar,
-            is_leap_month=resp.is_leap_month,
-        )
-        dp = saju["day_pillar"]
-        resp.day_stem = dp["stem"]
-        resp.day_branch = dp["branch"]
-        resp.day_stem_element = dp["stem_element"]
-    except Exception:
-        pass
-    return resp
 
 router = APIRouter(prefix="/api/profiles", tags=["프로필"])
 
@@ -87,7 +67,7 @@ async def list_profiles(
         .where(Profile.user_id == user.id)
         .order_by(Profile.is_representative.desc(), Profile.created_at.desc())
     )
-    return [_attach_ilju(p) for p in result.scalars().all()]
+    return [attach_ilju(p) for p in result.scalars().all()]
 
 
 @router.get("/representative", response_model=ProfileResponse, summary="대표 프로필 조회")
@@ -101,7 +81,7 @@ async def get_representative_profile(
     profile = result.scalar_one_or_none()
     if not profile:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="대표 프로필이 없습니다.")
-    return _attach_ilju(profile)
+    return attach_ilju(profile)
 
 
 @router.patch("/{profile_id}/representative", response_model=ProfileResponse, summary="대표 프로필 설정")
@@ -117,12 +97,7 @@ async def set_representative(
         .values(is_representative=False)
     )
     # 새 대표 설정
-    result = await db.execute(
-        select(Profile).where(Profile.id == profile_id, Profile.user_id == user.id)
-    )
-    profile = result.scalar_one_or_none()
-    if not profile:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="프로필을 찾을 수 없습니다.")
+    profile = await get_profile_or_404(db, profile_id, user.id)
     profile.is_representative = True
     await db.commit()
     await db.refresh(profile)
@@ -135,13 +110,8 @@ async def get_profile(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(
-        select(Profile).where(Profile.id == profile_id, Profile.user_id == user.id)
-    )
-    profile = result.scalar_one_or_none()
-    if not profile:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="프로필을 찾을 수 없습니다.")
-    return _attach_ilju(profile)
+    profile = await get_profile_or_404(db, profile_id, user.id)
+    return attach_ilju(profile)
 
 
 @router.delete("/{profile_id}", status_code=status.HTTP_204_NO_CONTENT, summary="프로필 삭제")
@@ -150,11 +120,6 @@ async def delete_profile(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(
-        select(Profile).where(Profile.id == profile_id, Profile.user_id == user.id)
-    )
-    profile = result.scalar_one_or_none()
-    if not profile:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="프로필을 찾을 수 없습니다.")
+    profile = await get_profile_or_404(db, profile_id, user.id)
     await db.delete(profile)
     await db.commit()

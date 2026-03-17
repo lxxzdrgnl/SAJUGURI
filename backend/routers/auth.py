@@ -4,7 +4,7 @@ authlib — OAuth 클라이언트 관리 (Google, Kakao 등 멀티 프로바이�
 CSRF state는 Starlette SessionMiddleware 쿠키로 관리.
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from authlib.integrations.starlette_client import OAuth
 from fastapi import APIRouter, Depends, Request
@@ -21,11 +21,8 @@ from core.exceptions import (
     TokenExpiredException,
     UnauthorizedException,
 )
-from core.security import (
-    create_access_token,
-    generate_refresh_token,
-    hash_token,
-)
+from core.security import hash_token
+from crud.auth import create_token_pair, get_or_create_user
 from db.models import RefreshToken, User
 from dependencies.auth import get_current_user
 from dependencies.db import get_db
@@ -63,28 +60,6 @@ class RefreshRequest(BaseModel):
     refresh_token: str
 
 
-# ─── 헬퍼 ──────────────────────────────────────────────────────────────────────
-
-async def _get_or_create_user(db: AsyncSession, email: str, social_id: str) -> User:
-    result = await db.execute(select(User).where(User.email == email))
-    user = result.scalar_one_or_none()
-    if not user:
-        user = User(email=email, provider="google", social_id=social_id, role="user")
-        db.add(user)
-        await db.commit()
-        await db.refresh(user)
-    return user
-
-
-async def _create_token_pair(db: AsyncSession, user: User) -> tuple[str, str]:
-    access_token = create_access_token(user.id)
-    refresh_token = generate_refresh_token()
-    expires_at = datetime.now(timezone.utc) + timedelta(days=settings.refresh_token_expire_days)
-    db.add(RefreshToken(user_id=user.id, token_hash=hash_token(refresh_token), expires_at=expires_at))
-    await db.commit()
-    return access_token, refresh_token
-
-
 # ─── 엔드포인트 ────────────────────────────────────────────────────────────────
 
 @router.get("/google", summary="Google OAuth 로그인 시작")
@@ -109,8 +84,8 @@ async def google_callback(request: Request, db: AsyncSession = Depends(get_db)):
         raise OAuthFailedException("이메일 정보가 없습니다.")
 
     try:
-        user = await _get_or_create_user(db, email, social_id)
-        access_token, refresh_token = await _create_token_pair(db, user)
+        user = await get_or_create_user(db, email, social_id)
+        access_token, refresh_token = await create_token_pair(db, user)
     except OAuthFailedException:
         raise
     except Exception as e:
@@ -152,7 +127,7 @@ async def refresh_token(body: RefreshRequest, db: AsyncSession = Depends(get_db)
     if not user:
         raise UnauthorizedException()
 
-    access_token, new_refresh_token = await _create_token_pair(db, user)
+    access_token, new_refresh_token = await create_token_pair(db, user)
     return TokenResponse(
         access_token=access_token,
         refresh_token=new_refresh_token,
