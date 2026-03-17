@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     # Frontend URL (OAuth 완료 후 리다이렉트)
     frontend_url: str = "http://localhost:3000"
 
+    # Session / HTTPS
+    https_only: bool = False  # True in production (behind HTTPS reverse proxy)
+
     # JWT
     jwt_secret: str = "change-me-in-production"
     jwt_algorithm: str = "HS256"

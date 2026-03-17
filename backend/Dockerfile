@@ -19,4 +19,4 @@ CMD ["sh", "-c", "\
     echo \"[retry $i/10] DB not ready, waiting 3s...\"; \
     sleep 3; \
   done && \
-  uv run uvicorn main:app --host 0.0.0.0 --port 8000"]
+  uv run uvicorn main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips='*'"]
