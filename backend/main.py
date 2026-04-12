@@ -19,7 +19,7 @@ from core.errors import ErrorCode, ErrorResponse, http_status
 from core.exceptions import AppException
 from db.models import Base
 from db.session import engine
-from middleware.logging import AccessLogMiddleware
+from core.middleware import AccessLogMiddleware
 from routers import saju, cities, auth, profiles, share, question
 
 # ─── 로깅 설정 ───────────────────────────────────────────────────────────────

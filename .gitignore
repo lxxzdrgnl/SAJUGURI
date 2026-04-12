@@ -77,3 +77,8 @@ logs/
 .mcp_cache/
 mcp_inspector/
 .claude/
+
+# =========================
+# Dev Notes
+# =========================
+curious.md

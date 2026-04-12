@@ -22,7 +22,7 @@ COLLECTIONS = [
 def _get_ef():
     global _ef
     if _ef is None:
-        from rag.providers import get_embedding_function
+        from rag.embedding import get_embedding_function
         _ef = get_embedding_function()
     return _ef
 

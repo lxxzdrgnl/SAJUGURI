@@ -2,9 +2,9 @@
 한줄 상담 파이프라인.
 
 흐름:
-  1. Engine.calculate_saju()
-  2. question-centric RAG (question + category + core_keywords[:3])
-  3. 용신/기신 기반 Reranking (_rerank_chunks)
+  1. Guard + 카테고리 분류 (llm.guard)
+  2. Engine.calculate_saju()
+  3. question-centric RAG + Reranking (llm.reranker)
   4. generate_consultation() — 1탭, 500자
 """
 
@@ -13,16 +13,14 @@ import asyncio
 import functools
 import logging
 from concurrent.futures import ThreadPoolExecutor
-
 from datetime import datetime
-
-from langchain_core.messages import SystemMessage, HumanMessage
 
 from engine.handlers.calculate_saju import handle_calculate_saju
 from engine.handlers.get_wol_un import handle_get_wol_un
 from engine.handlers.get_yeon_un import handle_get_yeon_un
+from llm.guard import guard_and_classify
+from llm.reranker import rerank_chunks, build_question_query, CATEGORY_QUERY_HINT, CATEGORY_TAG_MAP
 from llm.writer import generate_consultation
-from llm.providers import get_llm
 from rag.db import search_multi
 from rag.search import handle_get_ilju_profile
 
@@ -30,97 +28,8 @@ logger = logging.getLogger(__name__)
 
 _executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="question-pipeline")
 
-# ── 오행 키워드 매핑 ─────────────────────────────────────────────────────────
-ELEMENT_KEYWORDS: dict[str, list[str]] = {
-    "목": ["목", "木", "갑", "을", "인", "묘"],
-    "화": ["화", "火", "병", "정", "사", "오"],
-    "토": ["토", "土", "무", "기", "진", "술", "축", "미"],
-    "금": ["금", "金", "경", "신", "유"],
-    "수": ["수", "水", "임", "계", "자", "해"],
-}
-
-# ── 카테고리 → RAG 힌트 키워드 ───────────────────────────────────────────────
-CATEGORY_QUERY_HINT: dict[str, str] = {
-    "career":  "직업 이직 승진 사업 직장",
-    "love":    "연애 결혼 배우자 인연 이성",
-    "money":   "재물 투자 수입 재산 돈",
-    "health":  "건강 체력 기운 스트레스 몸",
-    "general": "",
-}
-
-CATEGORY_TAG_MAP: dict[str, list[str]] = {
-    "career":  ["career", "promotion", "business", "job", "leadership"],
-    "love":    ["relationship", "marriage", "romance", "partner", "attraction"],
-    "money":   ["wealth", "investment", "income", "finance"],
-    "health":  ["health", "energy", "vitality", "stress"],
-    "general": [],
-}
-
-
-def _build_question_query(question: str, category: str, core_keywords: list[str]) -> str:
-    """
-    RAG 검색용 쿼리 문자열 조립.
-    question + category 힌트 + core_keywords 최대 3개
-    """
-    parts = [question]
-    if hint := CATEGORY_QUERY_HINT.get(category, ""):
-        parts.append(hint)
-    parts.extend(core_keywords[:3])
-    return " ".join(filter(None, parts))
-
-
-def _rerank_chunks(
-    chunks: list[dict],
-    yong_sin: list[str],
-    ji_sin: list[str],
-    category: str,
-) -> list[dict]:
-    """
-    용신/기신 기반 Reranking.
-
-    - 용신 오행 관련 키워드 포함 시: score -= 0.2 (boost)
-    - 기신 오행 관련 키워드 포함 시: score += 0.3 (penalize)
-    - category 매칭 interpretation_tag 포함 시: score -= 0.1 (bonus)
-    - 결과: 상위 4개만 반환
-    """
-    if not chunks:
-        return []
-
-    scored: list[tuple[float, dict]] = []
-    cat_tags = CATEGORY_TAG_MAP.get(category, [])
-
-    for chunk in chunks:
-        score = chunk.get("distance") or 0.5
-        doc   = chunk.get("document", "").lower()
-        meta  = chunk.get("metadata", {})
-        interp_tags = meta.get("interpretation_tags", "").lower()
-        combined = doc + " " + interp_tags
-
-        # 용신 boost (먼저 적용)
-        yong_boosted = False
-        for el in yong_sin:
-            if any(kw in combined for kw in ELEMENT_KEYWORDS.get(el, [])):
-                score -= 0.2
-                yong_boosted = True
-                break
-
-        # 기신 penalize (용신 boost가 없을 때만 적용 — 양쪽 포함 청크는 boost 우선)
-        if not yong_boosted:
-            for el in ji_sin:
-                if any(kw in combined for kw in ELEMENT_KEYWORDS.get(el, [])):
-                    score += 0.3
-                    break
-
-        # 카테고리 bonus
-        if cat_tags and any(t in interp_tags for t in cat_tags):
-            score -= 0.1
-
-        chunk = dict(chunk)
-        chunk["_rerank_score"] = score
-        scored.append((score, chunk))
-
-    scored.sort(key=lambda x: x[0])
-    return [c for _, c in scored[:4]]
+# 시기 분석이 유의미한 카테고리
+_TIMING_CATEGORIES = {"love", "career", "money"}
 
 
 def _build_question_rag(
@@ -144,8 +53,7 @@ def _build_question_rag(
     ys_elements = [e for e in ys_elements if e]
     ji_elements = yong_sin.get("ji_sin", [])
 
-    # core_keywords: life_domains 태그 (한국어) + context_ranking top IDs
-    # ※ behavior_profile은 영문 벡터라 한국어 ChromaDB 검색에 부적합 — life_domains 사용
+    # core_keywords: life_domains 태그 + context_ranking top IDs
     life_domains = saju.get("life_domains", {})
     core_kw: list[str] = []
     for tags in life_domains.values():
@@ -154,7 +62,7 @@ def _build_question_rag(
     ctx_top = saju.get("context_ranking", {}).get("primary_context", [])
     core_kw += [c.get("id", "") for c in ctx_top[:2]]
 
-    query = _build_question_query(question, category, core_kw)
+    query = build_question_query(question, category, core_kw)
 
     # 검색: 고민 관련 컬렉션
     raw_results = search_multi(query, ["ten_gods", "sin_sal", "structure_patterns", "ilju"], 3)
@@ -163,7 +71,7 @@ def _build_question_rag(
         all_chunks.extend(hits)
 
     # Reranking
-    reranked = _rerank_chunks(all_chunks, ys_elements, ji_elements, category)
+    reranked = rerank_chunks(all_chunks, ys_elements, ji_elements, category)
 
     # 일주 직접 조회 (CORE)
     dp = saju.get("day_pillar", {})
@@ -178,8 +86,7 @@ def _build_question_rag(
     # 세운 + 월운: 시기가 의미 있는 카테고리에만 포함
     today    = datetime.now()
     day_stem = dp.get("stem", "")
-    TIMING_CATEGORIES = {"love", "career", "money"}
-    if category in TIMING_CATEGORIES:
+    if category in _TIMING_CATEGORIES:
         se_un  = handle_get_yeon_un(today.year, 2, day_stem)
         wol_un = handle_get_wol_un(today.year, day_stem)
     else:
@@ -195,84 +102,6 @@ def _build_question_rag(
         "wol_un":           wol_un,
         "current_month":    today.month,
     }
-
-
-_GUARD_PROMPT = """사용자의 고민을 보고 아래 네 가지 중 하나로 분류하세요.
-
-[BLOCK] 아래에 해당하면 차단:
-- 타인의 신체 접촉·성적 행위 요청
-- 범죄·폭력·불법 행위 조언 요청
-- 특정인 비방·스토킹·위협
-
-[MEDICAL] 실제 의료 결정이 필요한 상황. 아래 조건을 **모두** 충족해야 MEDICAL:
-- 실제로 발생 가능한 의료 상황이어야 함
-- 수술·약 복용·치료법·병원 방문 여부를 진지하게 고민하는 경우
-→ "건강 운세" 질문은 OK|health.
-→ 전제 자체가 비현실적이거나 농담성 질문은 MEDICAL 아님.
-  예: "엉덩이가 커서 절단할까?" → 절단은 비현실적 전제 → INSTANT로 유머 처리
-  예: "IBS 때문에 수술할까?" → IBS는 수술 적응증 아님 → INSTANT로 전제 교정
-
-[INSTANT] 아래 둘 중 하나에만 해당하면 INSTANT:
-- 즉각 행동이 답인 생리적 상황 (배고픔, 졸림, 화장실 등)
-- 전제 자체가 물리적으로 불가능한 황당한 질문 (예: "팔을 자를까", "화성에 이민 갈까")
-→ 질문에 딱 맞는 위트 있는 헤드라인(15자 이내)과 사주 느낌의 짧은 본문을 작성.
-  헤드라인은 질문의 핵심을 유쾌하게 비틀거나 직접 결론 짓는 문장.
-
-[OK] 그 외 **모든** 질문. 게임·오락·재미·음식·쇼핑·일상 고민도 모두 OK. 카테고리 분류:
-career(직업·이직·사업·시험) / love(연애·결혼·인간관계) / money(재물·투자) / health(건강·체력) / general(기타)
-
-반드시 아래 형식으로만 응답 (다른 텍스트 금지):
-OK|<카테고리>
-또는
-BLOCK: <사주 관점의 한 줄 경고문>
-또는
-INSTANT|<헤드라인>|<본문>
-또는
-MEDICAL"""
-
-
-async def _guard_and_classify(question: str, provider: str | None = None) -> tuple[str | None, str, bool]:
-    """
-    Guard + 카테고리 자동 분류를 LLM 호출 1회로 처리.
-
-    Returns:
-        (block_msg, category, is_instant)
-        block_msg:  차단 시 경고 문구, 통과 시 None
-        category:   'career' | 'love' | 'money' | 'health' | 'general'
-        is_instant: True면 즉시 답변 반환 (사주 분석 생략)
-    """
-    llm = get_llm(provider)
-    resp = await llm.ainvoke([
-        SystemMessage(content=_GUARD_PROMPT),
-        HumanMessage(content=f"고민: {question}"),
-    ])
-    raw = (resp.content if hasattr(resp, "content") else str(resp)).strip()
-
-    if raw.startswith("BLOCK:"):
-        return raw[len("BLOCK:"):].strip(), "general", False
-
-    if raw.strip() == "MEDICAL":
-        return "MEDICAL", "health", False
-
-    if raw.startswith("INSTANT|"):
-        parts = raw.split("|", 2)
-        headline = parts[1].strip() if len(parts) > 1 else "잠깐만요"
-        content  = parts[2].strip() if len(parts) > 2 else headline
-        return f"{headline}|||{content}", "general", True
-
-    # OK|career 형식 파싱
-    category = "general"
-    if "|" in raw:
-        category = raw.split("|", 1)[1].strip().lower()
-        if category not in ("career", "love", "money", "health", "general"):
-            category = "general"
-
-    # LLM이 놓친 경우 키워드 폴백 — 미용·성형 시술은 제외, 진짜 의료 결정만
-    _MEDICAL_KW = ("약 복용", "치료법", "처방", "입원", "항생제", "진통제", "항암", "방사선치료")
-    if any(kw in question for kw in _MEDICAL_KW):
-        return "MEDICAL", "health", False
-
-    return None, category, False
 
 
 async def run_question_consultation(
@@ -295,7 +124,7 @@ async def run_question_consultation(
     loop = asyncio.get_running_loop()
 
     # 0. Guard + 카테고리 자동 분류 (LLM 1회 호출)
-    guard_msg, category, is_instant = await _guard_and_classify(question, llm_provider)
+    guard_msg, category, is_instant = await guard_and_classify(question, llm_provider)
     if is_instant:
         logger.info("Instant answer: %s", question[:30])
         if guard_msg and "|||" in guard_msg:

@@ -31,11 +31,67 @@ def _load_knowledge(category: str) -> tuple[dict, ...]:
         return tuple(json.load(f))
 
 
+@functools.lru_cache(maxsize=64)
+def _build_index(category: str, field: str) -> dict[str, dict]:
+    """카테고리+필드 기준 O(1) 조회 인덱스."""
+    return {e[field]: e for e in _load_knowledge(category) if field in e}
+
+
 def _find_by_field(category: str, field: str, value: str) -> dict | None:
-    for entry in _load_knowledge(category):  # tuple[dict, ...]
-        if entry.get(field) == value:
-            return entry
-    return None
+    return _build_index(category, field).get(value)
+
+
+# ─── 태그 기반 규칙 매칭 (시맨틱 검색 대체) ─────────────────────────────
+
+def _collect_entry_tags(entry: dict) -> set[str]:
+    """지식 항목에서 매칭 가능한 모든 태그 수집."""
+    tags: set[str] = set()
+    for field in ("engine_tags", "interpretation_tags", "behavior_vector",
+                   "personality_vector", "career_hint"):
+        if vals := entry.get(field):
+            tags.update(vals)
+    if lp := entry.get("life_patterns"):
+        for domain_tags in lp.values():
+            tags.update(domain_tags)
+    if ch := entry.get("career_hint"):
+        tags.update(ch)
+    return tags
+
+
+def _match_by_tags(
+    query_tags: list[str],
+    categories: list[str],
+    top_n: int = 4,
+) -> list[dict]:
+    """
+    Engine life_domain 태그 → 지식 항목의 태그와 직접 매칭.
+
+    시맨틱 검색 대신 사용. 영어↔영어 태그 비교이므로 언어 불일치 없음.
+    임베딩 API 호출 0회.
+    """
+    if not query_tags:
+        return []
+
+    query_set = set(query_tags)
+    scored: list[tuple[int, str, dict]] = []
+
+    for cat in categories:
+        for entry in _load_knowledge(cat):
+            entry_tags = _collect_entry_tags(entry)
+            overlap = len(query_set & entry_tags)
+            if overlap > 0:
+                scored.append((overlap, cat, entry))
+
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return [
+        {
+            "id": entry.get("id", ""),
+            "category": cat,
+            "score": score,
+            "data": entry,
+        }
+        for score, cat, entry in scored[:top_n]
+    ]
 
 
 # ─── 범용 시맨틱 검색 ───────────────────────────────────────────────────
@@ -71,58 +127,31 @@ def handle_search_by_context(
     day_master_strength: dict | None = None,
     yong_sin: dict | None = None,
     sin_sals: list[dict] | None = None,
-    n_per_domain: int = 2,
+    n_per_domain: int = 4,
 ) -> dict:
     """
     saju-calc 출력 전체 → Writer용 RAG 청크 조립.
 
-    Args:
-        context_ranking      : {"primary_context": [...], "secondary_context": [...]}
-        life_domains         : {"career": [...], "relationship": [...], ...}
-        day_pillar           : 일주 간지 (예: "경오")
-        concern              : 사용자 고민 원문
-        branch_relations     : 충·합·형·해·파 관계 dict
-        dynamics             : 천간합·통근·충합 위치 정보
-        day_master_strength  : {"level_8": "중화신강", "score": 62, ...}
-        yong_sin             : {"primary": "금", "logic_type": "억부", ...}
-        sin_sals             : 활성 신살 목록 [{name, type, priority, location}, ...]
-        n_per_domain         : 도메인별 시맨틱 검색 결과 수
-
-    Returns:
-        {
-          "career":        [RAG chunk, ...],
-          "relationship":  [RAG chunk, ...],
-          "wealth":        [RAG chunk, ...],
-          "personality":   [RAG chunk, ...],
-          "context":       [RAG chunk, ...],   # primary_context 직접 조회
-          "ilju":          {일주 전체 지식} or None,
-          "concern":       [RAG chunk, ...],
-          "dynamics":      [RAG chunk, ...],   # 합충 관계 기반 검색
-          "sin_sal_all":   [{name, priority, location, data}, ...],  # 전체 신살 지식
-          "strength":      str | None,         # 신강/신약 레이블 (Writer 참고용)
-          "yong_sin_summary": str | None,      # 용신 요약 (Writer 참고용)
-        }
+    변경사항 (v2):
+      - 도메인별 검색: 시맨틱 → 태그 매칭 (언어 불일치 해결, 임베딩 0회)
+      - concern만 시맨틱 검색 유지 (사용자 자연어 입력)
+      - dynamics: 키워드 직접 조회로 전환
+      - 신살 중복 제거
     """
     result: dict = {
         "career": [], "relationship": [], "wealth": [], "personality": [],
         "context": [], "ilju": None, "concern": [],
-        "concern_hints": [],  # interpretation_tags 기반 규칙형 힌트
+        "concern_hints": [],
         "dynamics": [], "sin_sal_all": [], "strength": None, "yong_sin_summary": None,
     }
 
-    # 1. life_domain별 시맨틱 검색 (ten_gods + structure_patterns + wuxing)
+    # 1. life_domain별 태그 매칭 (임베딩 호출 0회)
     domain_collections = ["ten_gods", "structure_patterns", "wuxing"]
     for domain, tags in life_domains.items():
         if domain not in result:
             continue
-        # tags가 비어있으면 도메인명을 fallback 쿼리로 사용
-        query = " ".join(tags) if tags else domain
-        chunks = []
-        for col in domain_collections:
-            hits = search(col, query, n_per_domain)
-            chunks.extend(hits)
-        chunks.sort(key=lambda x: x.get("distance") or 1.0)
-        result[domain] = chunks[: n_per_domain * 2]
+        matched = _match_by_tags(tags if tags else [], domain_collections, n_per_domain)
+        result[domain] = matched
 
     # 2. primary_context / secondary_context 직접 조회
     all_ctx = (
@@ -145,7 +174,7 @@ def handle_search_by_context(
     if day_pillar:
         result["ilju"] = _find_by_field("ilju", "ilju", day_pillar)
 
-    # 4. concern 시맨틱 검색 + interpretation_tags 기반 힌트 추출
+    # 4. concern 시맨틱 검색 (사용자 자연어 → 벡터 검색이 유효한 유일한 지점)
     if concern:
         concern_chunks = search_multi(concern, ["ten_gods", "sin_sal", "structure_patterns"], 2)
         for hits in concern_chunks.values():
@@ -153,7 +182,7 @@ def handle_search_by_context(
         result["concern"].sort(key=lambda x: x.get("distance") or 1.0)
         result["concern"] = result["concern"][:4]
 
-        # interpretation_tags → 규칙형 힌트 (문장 아닌 태그 키워드)
+        # interpretation_tags → 규칙형 힌트
         seen: set[str] = set()
         for hit in result["concern"]:
             tags_str = hit.get("metadata", {}).get("interpretation_tags", "")
@@ -164,44 +193,32 @@ def handle_search_by_context(
                     result["concern_hints"].append(tag)
         result["concern_hints"] = result["concern_hints"][:12]
 
-    # 5. 충·합·형·해·파 기반 dynamics 검색
+    # 5. 충·합·형·해·파 기반 dynamics 직접 조회
     if branch_relations or dynamics:
-        _dyn_keywords: list[str] = []
+        _found_dynamics: list[dict] = []
 
-        br = branch_relations or {}
-        # 합화 관계 → 합화 오행 키워드
-        for hap in br.get("yuk_hap", []):
-            if hap.get("is_effective") and hap.get("element"):
-                _dyn_keywords.append(f"육합 {hap['element']}화")
-        if br.get("sam_hap"):
-            sh = br["sam_hap"]
-            _dyn_keywords.append(f"삼합 {sh.get('element', '')}화")
-        if br.get("cheon_gan_hap"):
-            for h in br["cheon_gan_hap"]:
-                _dyn_keywords.append(f"천간합 {h.get('name', '')}")
-        # 충
-        for pair in br.get("chung", []):
-            _dyn_keywords.append(f"{''.join(pair)}충")
-        # 형
-        for name in br.get("sam_hyeong", []):
-            _dyn_keywords.append(f"{name}")
-
-        # dynamics 천간합·통근 추가
+        # dynamics 천간합 → 이름으로 직접 조회
         if dynamics:
             for sh in dynamics.get("stem_hap", []):
-                _dyn_keywords.append(sh.get("name", ""))
-            if dynamics.get("rooting_map"):
-                _dyn_keywords.append("통근 통기")
+                name = sh.get("name", "")
+                if name:
+                    entry = _find_by_field("dynamics", "name", name)
+                    if entry:
+                        _found_dynamics.append(entry)
 
-        if _dyn_keywords:
-            dyn_query = " ".join(filter(None, _dyn_keywords))
-            dyn_hits = search_multi(dyn_query, ["dynamics", "structure_patterns"], n_per_domain)
-            for hits in dyn_hits.values():
-                result["dynamics"].extend(hits)
-            result["dynamics"].sort(key=lambda x: x.get("distance") or 1.0)
-            result["dynamics"] = result["dynamics"][:4]
+        # branch_relations 천간합
+        br = branch_relations or {}
+        if br.get("cheon_gan_hap"):
+            for h in br["cheon_gan_hap"]:
+                name = h.get("name", "")
+                if name and not any(d.get("name") == name for d in _found_dynamics):
+                    entry = _find_by_field("dynamics", "name", name)
+                    if entry:
+                        _found_dynamics.append(entry)
 
-    # 6. 신강/신약 레이블 → Writer 직접 참고용 (RAG 검색 아님, 메타데이터)
+        result["dynamics"] = _found_dynamics[:4]
+
+    # 6. 신강/신약 레이블 → Writer 직접 참고용
     if day_master_strength:
         result["strength"] = day_master_strength.get("level_8")
 
@@ -212,18 +229,30 @@ def handle_search_by_context(
         xi_sin  = "·".join(yong_sin.get("xi_sin", []))
         result["yong_sin_summary"] = f"용신:{primary} ({logic}), 희신:{xi_sin}"
 
-    # 8. 전체 활성 신살 상세 지식 조회 (우선순위 무관, pillar_nuance 포함)
+    # 8. 전체 활성 신살 상세 지식 조회 (이름 기준 중복 제거)
     if sin_sals:
+        seen_names: set[str] = set()
         for ss in sin_sals:
             name = ss.get("name", "")
-            if not name:
+            if not name or name in seen_names:
                 continue
+            seen_names.add(name)
             entry = _find_by_field("sin_sal", "name", name)
             if entry:
+                # 같은 신살이 여러 기둥에 있을 수 있으므로 location 합산
+                locations = [
+                    s.get("location", []) for s in sin_sals if s.get("name") == name
+                ]
+                merged_locations = []
+                for loc in locations:
+                    if isinstance(loc, list):
+                        merged_locations.extend(loc)
+                    else:
+                        merged_locations.append(loc)
                 result["sin_sal_all"].append({
                     "name": name,
                     "priority": ss.get("priority", "low"),
-                    "location": ss.get("location", []),
+                    "location": sorted(set(merged_locations)),
                     "data": entry,
                 })
 
@@ -248,7 +277,6 @@ def handle_get_structure_pattern(pattern_id: str) -> dict | None:
 
     calc 출력(예: 'sig_sang_saeng_jae')과 RAG 파일 id(예: 'sp_sig_sang_saeng_jae') 모두 처리.
     """
-    # calc는 prefix 없이 반환하므로 'sp_' 자동 보완
     result = _find_by_field("structure_patterns", "id", pattern_id)
     if result is None:
         result = _find_by_field("structure_patterns", "id", f"sp_{pattern_id}")
