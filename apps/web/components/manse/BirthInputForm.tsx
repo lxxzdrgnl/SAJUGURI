@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { searchCities, type CityOption } from '@sajuguri/api-client'
 import { api } from '@/lib/api'
+import Button from '@/components/ui/Button'
 import {
   processSegInput,
   shouldBackspaceToPrev,
@@ -221,27 +222,27 @@ export default function BirthInputForm({
   }
 
   const seg = (active: boolean) =>
-    `flex-1 py-2 text-center text-sm font-extrabold ${active ? 'bg-yellow' : 'text-text-sub'}`
+    `flex-1 py-2 text-center text-sm font-extrabold ${active ? 'bg-c-accent text-c-on-accent' : 'text-c-text-sub'}`
 
   const dateSeg =
-    'min-w-0 bg-transparent text-center text-sm font-bold tabular-nums outline-none placeholder:font-normal placeholder:text-text-sub'
+    'min-w-0 bg-transparent text-center text-sm font-bold tabular-nums outline-none placeholder:font-normal placeholder:text-c-text-sub'
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border-2 border-ink bg-surface p-4 shadow-brutal">
+    <div className="flex flex-col gap-5 rounded-card border border-c-line bg-c-surface p-5 text-c-text">
       {/* 이름 */}
       <label className="block">
         <span className="mb-1.5 block text-xs font-extrabold">
           {t('name')}
-          {!nameOptional && <em className="not-italic text-orange"> *</em>}
+          {!nameOptional && <em className="not-italic text-c-danger"> *</em>}
         </span>
         <input
           value={name}
           maxLength={20}
           onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-lg border-2 border-ink bg-bg-base px-3 py-2.5 text-sm"
+          className="focus-ring-within w-full rounded-xl border border-c-line bg-c-surface-soft px-3 py-2.5 text-sm"
         />
         {submitAttempted && nameError && (
-          <p className="mt-1 text-[11px] font-bold text-orange">{nameError}</p>
+          <p className="mt-1 text-[11px] font-bold text-c-danger">{nameError}</p>
         )}
       </label>
 
@@ -249,7 +250,7 @@ export default function BirthInputForm({
       <div>
         <span className="mb-1.5 block text-xs font-extrabold">{t('birthplace')}</span>
         <div className="relative">
-          <div className="focus-ring-within flex items-center gap-2 rounded-lg border-[1.5px] border-border-soft px-3">
+          <div className="focus-ring-within flex items-center gap-2 rounded-xl border border-c-line bg-c-surface-soft px-3">
             <input
               ref={cityInputRef}
               value={cityQuery}
@@ -258,23 +259,25 @@ export default function BirthInputForm({
               onBlur={() => setTimeout(() => setCityOpen(false), 150)}
               placeholder={t('birthplacePlaceholder')}
               autoComplete="off"
-              className="w-full bg-transparent py-2.5 text-sm outline-none placeholder:text-text-sub"
+              className="w-full bg-transparent py-2.5 text-sm outline-none placeholder:text-c-text-sub"
             />
             {city && (
               <button
                 type="button"
                 onClick={clearCity}
                 aria-label="clear"
-                className="shrink-0 text-sm text-text-sub"
+                className="shrink-0 text-sm text-c-text-sub"
               >
-                ✕
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                  <path d="M6 6 L18 18 M18 6 L6 18" />
+                </svg>
               </button>
             )}
           </div>
           {cityOpen && (cityLoading || cityResults.length > 0) && (
-            <ul className="absolute z-10 mt-1 max-h-44 w-full overflow-y-auto rounded-lg border-2 border-ink bg-surface shadow-brutal">
+            <ul className="absolute z-10 mt-1 max-h-44 w-full overflow-y-auto rounded-xl border border-c-line bg-c-surface">
               {cityLoading ? (
-                <li className="px-3 py-2 text-sm text-text-sub">{t('searching')}</li>
+                <li className="px-3 py-2 text-sm text-c-text-sub">{t('searching')}</li>
               ) : (
                 cityResults.map((c) => (
                   <li key={`${c.label}-${c.timezone}`}>
@@ -284,10 +287,10 @@ export default function BirthInputForm({
                         e.preventDefault()
                         selectCity(c)
                       }}
-                      className="flex w-full justify-between px-3 py-2 text-sm hover:bg-bg-base"
+                      className="flex w-full justify-between px-3 py-2 text-sm hover:bg-c-surface-soft"
                     >
                       <span className="font-bold">{c.label}</span>
-                      <span className="text-xs text-text-sub">{c.sublabel}</span>
+                      <span className="text-xs text-c-text-sub">{c.sublabel}</span>
                     </button>
                   </li>
                 ))
@@ -295,7 +298,7 @@ export default function BirthInputForm({
             </ul>
           )}
         </div>
-        <p className="mt-1 text-[11px] text-text-sub">
+        <p className="mt-1 text-[11px] text-c-text-sub">
           {city ? city.timezone : t('birthplaceHint')}
         </p>
       </div>
@@ -304,19 +307,19 @@ export default function BirthInputForm({
       <div>
         <div className="mb-1.5 flex items-center justify-between">
           <span className="text-xs font-extrabold">{t('datetime')}</span>
-          <label className="flex items-center gap-1.5 text-[11px] text-text-sub">
+          <label className="flex items-center gap-1.5 text-[11px] text-c-text-sub">
             <input
               type="checkbox"
               checked={timeUnknown}
               onChange={(e) => setTimeUnknown(e.target.checked)}
-              className="h-3.5 w-3.5 accent-[var(--ink)]"
+              className="h-3.5 w-3.5 accent-[var(--c-text)]"
             />
             {t('timeUnknown')}
           </label>
         </div>
 
         {/* 세그먼트 날짜 + 시각 입력바 */}
-        <div className="focus-ring-within flex items-center gap-1 rounded-lg border-2 border-ink bg-bg-base px-2 py-2.5 text-sm">
+        <div className="focus-ring-within flex items-center gap-1 rounded-xl border border-c-line bg-c-surface-soft px-2 py-2.5 text-sm">
           <input
             ref={yearRef}
             inputMode="numeric"
@@ -326,7 +329,7 @@ export default function BirthInputForm({
             onChange={(e) => handleSeg(e.target.value, YEAR_SEG, setYear, monthRef)}
             className={`${dateSeg} w-[44px] flex-[2]`}
           />
-          <span className="text-text-sub">/</span>
+          <span className="text-c-text-sub">/</span>
           <input
             ref={monthRef}
             inputMode="numeric"
@@ -337,7 +340,7 @@ export default function BirthInputForm({
             onKeyDown={(e) => handleBackspace(e, month, yearRef, year, setYear)}
             className={`${dateSeg} w-[28px] flex-1`}
           />
-          <span className="text-text-sub">/</span>
+          <span className="text-c-text-sub">/</span>
           <input
             ref={dayRef}
             inputMode="numeric"
@@ -348,9 +351,9 @@ export default function BirthInputForm({
             onKeyDown={(e) => handleBackspace(e, day, monthRef, month, setMonth)}
             className={`${dateSeg} w-[28px] flex-1`}
           />
-          <span className="px-0.5 text-border-soft">·</span>
+          <span className="px-0.5 text-c-text-sub">·</span>
           {timeUnknown ? (
-            <span className="flex-[2] text-center text-[13px] text-text-sub">
+            <span className="flex-[2] text-center text-[13px] text-c-text-sub">
               {t('timeUnknownDisplay')}
             </span>
           ) : (
@@ -365,7 +368,7 @@ export default function BirthInputForm({
                 onKeyDown={(e) => handleBackspace(e, hour, dayRef, day, setDay)}
                 className={`${dateSeg} w-[28px] flex-1`}
               />
-              <span className="text-text-sub">:</span>
+              <span className="text-c-text-sub">:</span>
               <input
                 ref={minuteRef}
                 inputMode="numeric"
@@ -381,7 +384,7 @@ export default function BirthInputForm({
         </div>
 
         {/* 양력·음력·윤달 세그먼트 */}
-        <div className="mt-2 flex overflow-hidden rounded-full border-2 border-ink">
+        <div className="mt-2 flex overflow-hidden rounded-full border border-c-line">
           <button
             type="button"
             className={seg(calendar === 'solar')}
@@ -394,7 +397,7 @@ export default function BirthInputForm({
           </button>
           <button
             type="button"
-            className={`${seg(calendar === 'lunar' && !isLeap)} border-l-2 border-ink`}
+            className={`${seg(calendar === 'lunar' && !isLeap)} border-l border-c-line`}
             onClick={() => {
               setCalendar('lunar')
               setIsLeap(false)
@@ -405,7 +408,7 @@ export default function BirthInputForm({
           <button
             type="button"
             disabled={calendar !== 'lunar'}
-            className={`${seg(calendar === 'lunar' && isLeap)} border-l-2 border-ink disabled:opacity-35`}
+            className={`${seg(calendar === 'lunar' && isLeap)} border-l border-c-line disabled:opacity-35`}
             onClick={() => setIsLeap(true)}
           >
             {t('leap')}
@@ -414,12 +417,12 @@ export default function BirthInputForm({
 
         {/* 진태양시 보정 미리보기 */}
         {!timeUnknown && preview && (hour || minute) && (
-          <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-text-sub">
+          <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-c-text-sub">
             <span>{t('correctionLabel', { minutes: formatCorrection(preview.correction) })}</span>
             <span>→</span>
-            <span className="tabular-nums text-ink">{preview.applied}</span>
+            <span className="tabular-nums text-c-text">{preview.applied}</span>
             {preview.sisi && (
-              <span className="rounded bg-bg-base px-1.5 py-0.5 font-bold text-ink">
+              <span className="rounded bg-c-surface-soft px-1.5 py-0.5 font-bold text-c-text">
                 {t(`sisi.${preview.sisi.key}`)}({preview.sisi.hanja})
               </span>
             )}
@@ -429,22 +432,22 @@ export default function BirthInputForm({
 
         {/* 날짜 에러 */}
         {birthDateError && (
-          <p className="mt-1 text-[11px] font-bold text-orange">{birthDateError}</p>
+          <p className="mt-1 text-[11px] font-bold text-c-danger">{birthDateError}</p>
         )}
         {/* 시각 에러 */}
         {submitAttempted && timeErrorMessage && (
-          <p className="mt-1 text-[11px] font-bold text-orange">{timeErrorMessage}</p>
+          <p className="mt-1 text-[11px] font-bold text-c-danger">{timeErrorMessage}</p>
         )}
         {/* 시간 모름 안내 */}
         {timeUnknown && (
-          <p className="mt-1 text-[11px] text-text-sub">{t('timeUnknownNote')}</p>
+          <p className="mt-1 text-[11px] text-c-text-sub">{t('timeUnknownNote')}</p>
         )}
       </div>
 
       {/* 성별 */}
       <div>
         <span className="mb-1.5 block text-xs font-extrabold">{t('gender')}</span>
-        <div className="flex overflow-hidden rounded-full border-2 border-ink">
+        <div className="flex overflow-hidden rounded-full border border-c-line">
           <button
             type="button"
             className={seg(gender === 'male')}
@@ -454,7 +457,7 @@ export default function BirthInputForm({
           </button>
           <button
             type="button"
-            className={`${seg(gender === 'female')} border-l-2 border-ink`}
+            className={`${seg(gender === 'female')} border-l border-c-line`}
             onClick={() => setGender('female')}
           >
             {t('female')}
@@ -462,14 +465,14 @@ export default function BirthInputForm({
         </div>
       </div>
 
-      <button
+      <Button
         type="button"
         onClick={submit}
         disabled={hasBlockingError || busy}
-        className="rounded-lg border-2 border-ink bg-orange py-3 text-[15px] font-extrabold text-white shadow-brutal disabled:opacity-40"
+        className="w-full disabled:opacity-40"
       >
         {busy ? <span className="inline-block animate-pulse">…</span> : (submitLabel ?? t('submit'))}
-      </button>
+      </Button>
     </div>
   )
 }

@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { ApiClient, createProfile } from '@sajuguri/api-client'
 import type { SajuCalcRequest } from '@sajuguri/api-client'
+import Card from '@/components/ui/Card'
+import Button, { buttonClass } from '@/components/ui/Button'
 
 interface Props {
   birthInput: SajuCalcRequest
@@ -38,37 +40,28 @@ export default function SaveToMyButton({ birthInput, isLoggedIn, googleLoginUrl 
 
   if (!isLoggedIn) {
     return (
-      <div className="mt-2 flex flex-col gap-2 rounded-lg border-2 border-ink bg-surface p-4 shadow-brutal">
-        <p className="text-[13px] text-text-sub">{t('saveToMyLoginHint')}</p>
-        <a
-          href={googleLoginUrl}
-          className="block w-full rounded-lg border-2 border-ink bg-surface py-3 text-center text-sm font-extrabold shadow-brutal-sm transition-opacity hover:opacity-80"
-        >
+      <Card className="mt-2 flex flex-col gap-3 p-4">
+        <p className="text-[13px] text-c-text-sub">{t('saveToMyLoginHint')}</p>
+        <a href={googleLoginUrl} className={`${buttonClass('secondary', 'md')} w-full`}>
           {t('saveToMyLoginLink')}
         </a>
-      </div>
+      </Card>
     )
   }
 
   return (
-    <button
+    <Button
       type="button"
+      variant={state === 'done' ? 'primary' : 'secondary'}
       onClick={handleSave}
       disabled={state === 'busy' || state === 'done'}
-      className={
-        'mt-2 block w-full rounded-lg border-2 border-ink py-3 text-center text-sm font-extrabold shadow-brutal-sm transition-opacity disabled:opacity-60 ' +
-        (state === 'done'
-          ? 'bg-teal text-surface'
-          : state === 'error'
-            ? 'bg-surface text-orange'
-            : 'bg-surface text-ink hover:opacity-80')
-      }
+      className={`mt-2 w-full disabled:opacity-60 ${state === 'error' ? 'text-c-danger' : ''}`}
     >
       {state === 'done'
         ? t('saveToMySuccess')
         : state === 'error'
           ? t('saveToMyError')
           : t('saveToMyTitle')}
-    </button>
+    </Button>
   )
 }

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { createProfile, type ProfileCreateRequest } from '@sajuguri/api-client'
 import { api } from '@/lib/api'
+import Button from '@/components/ui/Button'
 
 /** 분석 화면 하단 저장 버튼 — 로그인 상태에서만 렌더. 성공 시 "저장됨"으로 전환. */
 export default function SaveButton({ input }: { input: ProfileCreateRequest }) {
@@ -25,13 +26,13 @@ export default function SaveButton({ input }: { input: ProfileCreateRequest }) {
     state === 'done' ? t('saved') : state === 'error' ? t('saveError') : t('save')
 
   return (
-    <button
+    <Button
       type="button"
       onClick={onClick}
       disabled={state === 'busy' || state === 'done'}
-      className="mt-1 w-full rounded-lg border-2 border-ink bg-yellow py-3 text-center text-sm font-extrabold shadow-brutal disabled:opacity-60"
+      className="mt-1 w-full disabled:opacity-60"
     >
       {label}
-    </button>
+    </Button>
   )
 }

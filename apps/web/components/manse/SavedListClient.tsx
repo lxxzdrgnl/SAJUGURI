@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 import { ApiClient, setRepresentative, deleteProfile } from '@sajuguri/api-client'
 import type { ProfileResponse } from '@sajuguri/api-client'
 import { Link } from '@/i18n/navigation'
-import BrutalCard from '@/components/ui/BrutalCard'
+import Card from '@/components/ui/Card'
 import { manseNavQuery, profileToManseSource } from '@/lib/manse/query'
 import MascotTinted from '@/components/ui/MascotTinted'
 
@@ -72,7 +72,7 @@ export default function SavedListClient({
   }, [initialProfiles])
 
   if (profiles.length === 0)
-    return <p className="py-6 text-center text-sm text-text-sub">{t('empty')}</p>
+    return <p className="py-6 text-center text-sm text-c-text-sub">{t('empty')}</p>
 
   async function handleSetRepresentative(e: React.MouseEvent, id: number) {
     e.preventDefault()
@@ -108,35 +108,35 @@ export default function SavedListClient({
       {profiles.map((p) => (
         <div key={p.id} className="relative">
           <Link href={`/manse/result?${manseNavQuery(profileToManseSource(p))}`}>
-            <BrutalCard className="flex items-center gap-3 pr-24">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border-2 border-ink bg-surface overflow-hidden">
+            <Card className="flex items-center gap-3 p-4 pr-28">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-c-line bg-c-surface-soft overflow-hidden">
                 <MascotTinted stem={p.day_stem} width={40} height={40} />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="flex items-center gap-1.5">
                   <span className="truncate text-[15px] font-extrabold">{p.name}</span>
                   {p.is_representative && (
-                    <span className="shrink-0 rounded-full border-[1.5px] border-ink bg-orange px-2 py-0.5 text-[10px] font-extrabold text-white">
+                    <span className="shrink-0 rounded-full bg-c-accent px-2 py-0.5 text-[10px] font-extrabold text-c-on-accent">
                       {t('representative')}
                     </span>
                   )}
                 </span>
-                <span className="block text-xs text-text-sub">
+                <span className="block text-xs text-c-text-sub">
                   {p.birth_date} · {p.birth_time ?? tf('timeUnknown')} ·{' '}
                   {p.gender === 'male' ? tf('male') : tf('female')}
                 </span>
               </span>
-            </BrutalCard>
+            </Card>
           </Link>
 
           {/* 액션 버튼 — 카드 우측 */}
           {confirmDeleteId === p.id ? (
             // 삭제 확인 — 카드 전체를 덮는 오버레이 (이름·생일과 겹치지 않게)
             <div
-              className="absolute inset-0 flex items-center justify-between gap-2 rounded-lg border-2 border-ink bg-surface px-4"
+              className="absolute inset-0 flex items-center justify-between gap-2 rounded-card border border-c-line bg-c-surface px-4"
               onClick={(e) => e.preventDefault()}
             >
-              <span className="min-w-0 truncate text-[13px] font-extrabold text-ink">
+              <span className="min-w-0 truncate text-[13px] font-extrabold text-c-text">
                 {t('deleteConfirm')}
               </span>
               <div className="flex shrink-0 items-center gap-1.5">
@@ -144,7 +144,7 @@ export default function SavedListClient({
                   type="button"
                   disabled={loadingId === p.id || isPending}
                   onClick={(e) => handleDeleteConfirm(e, p.id)}
-                  className="rounded-lg border-2 border-ink bg-orange px-3 py-1 text-[12px] font-extrabold text-white shadow-brutal-sm disabled:opacity-50"
+                  className="rounded-pill bg-c-danger px-3 py-1 text-[12px] font-extrabold text-c-bg disabled:opacity-50"
                 >
                   {t('deleteConfirmYes')}
                 </button>
@@ -152,7 +152,7 @@ export default function SavedListClient({
                   type="button"
                   disabled={loadingId === p.id}
                   onClick={(e) => { e.preventDefault(); setConfirmDeleteId(null) }}
-                  className="rounded-lg border-2 border-ink bg-surface px-3 py-1 text-[12px] font-extrabold text-ink shadow-brutal-sm disabled:opacity-50"
+                  className="rounded-pill border border-c-line bg-c-surface px-3 py-1 text-[12px] font-extrabold text-c-text disabled:opacity-50"
                 >
                   {t('deleteConfirmCancel')}
                 </button>
@@ -169,7 +169,7 @@ export default function SavedListClient({
                   disabled={loadingId !== null || isPending}
                   onClick={(e) => handleSetRepresentative(e, p.id)}
                   title={t('setRepresentative')}
-                  className="flex items-center gap-1 rounded-lg border-2 border-ink bg-yellow px-2 py-1 text-[11px] font-extrabold text-ink shadow-brutal-sm disabled:opacity-50"
+                  className="flex items-center gap-1 rounded-pill bg-c-accent px-2.5 py-1 text-[11px] font-extrabold text-c-on-accent disabled:opacity-50"
                 >
                   <StarIcon className="h-3 w-3 shrink-0" />
                   <span>{t('setRepresentative')}</span>
@@ -180,9 +180,9 @@ export default function SavedListClient({
                 disabled={loadingId !== null || isPending}
                 onClick={(e) => { e.preventDefault(); setConfirmDeleteId(p.id) }}
                 title={t('delete')}
-                className="flex items-center justify-center rounded-lg border-2 border-ink bg-surface p-1.5 shadow-brutal-sm disabled:opacity-50"
+                className="flex items-center justify-center rounded-pill border border-c-line bg-c-surface p-1.5 disabled:opacity-50"
               >
-                <TrashIcon className="h-4 w-4 text-ink" />
+                <TrashIcon className="h-4 w-4 text-c-text" />
               </button>
             </div>
           )}
