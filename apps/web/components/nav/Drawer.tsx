@@ -6,6 +6,7 @@ import type { MeResponse } from '@sajuguri/api-client'
 import { Link, usePathname } from '@/i18n/navigation'
 import LanguageToggleInline from '@/components/my/LanguageToggleInline'
 import LogoutButton from '@/components/my/LogoutButton'
+import ThemeToggle from '@/components/nav/ThemeToggle'
 import { useSheetTransition } from '@/lib/hooks/useSheetTransition'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
@@ -121,6 +122,7 @@ export default function Drawer({
         <Link href="/manse" className={itemClass}>{t('manse')}</Link>
         <Link href="/my/history" className={itemClass}>{t('archive')}</Link>
         <div className="mt-4 px-1">
+          <ThemeToggle />
           <LanguageToggleInline />
         </div>
         {user && (
