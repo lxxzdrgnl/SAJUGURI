@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server'
+import { sinSalLabel } from '@/lib/manse/termLabel'
 import type { SajuCalcResponse } from '@sajuguri/api-client'
 import { ohaengVar } from '@/lib/ohaeng'
 import { pillarSlots, sinSalsForPillar, jiJangGanText } from '@/lib/manse/pillars'
@@ -7,6 +8,7 @@ import Accordion from '@/components/ui/Accordion'
 /** 12운성·신살·지장간 상세 — 기둥별 (Table.vue 하단부 이식). 길신=초록·흉살=주황 부호 */
 export default async function DetailAccordion({ data }: { data: SajuCalcResponse }) {
   const t = await getTranslations('manse.charts.detail')
+  const tt = await getTranslations('manse.terms')
   const slots = pillarSlots(data)
 
   return (
@@ -72,7 +74,7 @@ export default async function DetailAccordion({ data }: { data: SajuCalcResponse
                                     : 'border-c-line bg-c-surface text-c-text-sub'
                               }`}
                             >
-                              {isLucky ? '+' : isUnlucky ? '-' : '·'}{sal.name}
+                              {isLucky ? '+' : isUnlucky ? '-' : '·'}{sinSalLabel(tt, sal.name)}
                             </span>
                           )
                         })}

@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server'
 import type { SajuCalcResponse } from '@sajuguri/api-client'
 import { ohaengVar, ohaengTintVar } from '@/lib/ohaeng'
+import { termLabel } from '@/lib/manse/termLabel'
 import Accordion from '@/components/ui/Accordion'
 
 /** 오행 특성 참고표 (정적) — WuxingFeatureTable.vue 데이터 보존, 문구는 messages, 과다/부족 오행 강조 */
@@ -14,6 +15,7 @@ const FEATURES = [
 
 export default async function WuxingFeatureTable({ data }: { data: SajuCalcResponse }) {
   const t = await getTranslations('manse.charts.feature')
+  const tt = await getTranslations('manse.terms')
   const dominant = data.dominant_elements ?? []
   const weak = data.weak_elements ?? []
 
@@ -46,10 +48,10 @@ export default async function WuxingFeatureTable({ data }: { data: SajuCalcRespo
                   <td className="py-2.5 pr-2">
                     <span className="flex items-center gap-1 whitespace-nowrap">
                       <span
-                        className="inline-flex h-6 w-6 items-center justify-center rounded-lg border border-c-line bg-c-surface text-sm font-black"
+                        className="inline-flex h-6 min-w-6 items-center px-1 justify-center rounded-lg border border-c-line bg-c-surface text-sm font-black"
                         style={{ color }}
                       >
-                        {f.el}
+                        {termLabel(tt, f.el)}
                       </span>
                       {isOver && (
                         <span className="rounded-pill bg-c-unlucky-bg px-1.5 py-px text-[9px] font-extrabold text-c-unlucky-fg">

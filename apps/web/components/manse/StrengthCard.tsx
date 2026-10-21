@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server'
 import type { SajuCalcResponse } from '@sajuguri/api-client'
 import { ohaengVar, ohaengTintVar } from '@/lib/ohaeng'
+import { gyeokgukLabel, termLabel } from '@/lib/manse/termLabel'
 import { LEVELS_8, STRENGTH_DIST, levelIndex, levelPercentile, clampScore } from '@/lib/manse/strength'
 
 const ACCENT = 'var(--c-chart-accent)'
@@ -8,6 +9,7 @@ const ACCENT = 'var(--c-chart-accent)'
 /** 일간 강약·용신 카드 — 8단계 레벨 바 + 분포 그래프 + 강약 게이지 + 득령/득지/득시/득세 + 용신/희신/기신 */
 export default async function StrengthCard({ data }: { data: SajuCalcResponse }) {
   const t = await getTranslations('manse.charts.strength')
+  const tt = await getTranslations('manse.terms')
   const s = data.day_master_strength
   const y = data.yong_sin
   const score = clampScore(s.score)
@@ -28,7 +30,7 @@ export default async function StrengthCard({ data }: { data: SajuCalcResponse })
         style={dim ? undefined : { background: ohaengTintVar(el) }}
       >
         <span className="h-2.5 w-2.5 rounded-full" style={{ background: color }} />
-        <span style={{ color }}>{el}</span>
+        <span style={{ color }}>{termLabel(tt, el)}</span>
       </span>
     )
   }
@@ -96,7 +98,7 @@ export default async function StrengthCard({ data }: { data: SajuCalcResponse })
       {/* 격국 */}
       <div className="mb-3 flex flex-wrap items-center gap-1.5">
         <span className="text-[11px] font-bold text-c-text-sub">{t('gyeokGuk')}</span>
-        <span className="rounded-pill border border-c-line bg-c-surface-soft px-2.5 py-1 text-xs font-extrabold">{data.gyeok_guk.name}</span>
+        <span className="rounded-pill border border-c-line bg-c-surface-soft px-2.5 py-1 text-xs font-extrabold">{gyeokgukLabel(tt, data.gyeok_guk.name)}</span>
         {data.gyeok_guk.basis && <span className="text-[11px] text-c-text-sub">{data.gyeok_guk.basis}</span>}
       </div>
 

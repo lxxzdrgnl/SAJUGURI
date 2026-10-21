@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { SajuCalcResponse } from '@sajuguri/api-client'
 import { ohaengVar } from '@/lib/ohaeng'
+import { termLabel, type TermT } from '@/lib/manse/termLabel'
 import {
   selectWuxingPercent, judge, balanceScore, balanceLabel, balanceSummary,
   pentagramVertices, nodeRadius, pctLabelPos, arrowPath, linePath,
@@ -36,11 +37,11 @@ function verdictChip(v: Verdict): string {
   return 'bg-c-surface-soft text-c-text-sub'
 }
 
-function ElementBar({ name, pct, verdict, vLabel }: { name: string; pct: number; verdict: Verdict; vLabel: string }) {
+function ElementBar({ name, label, pct, verdict, vLabel }: { name: string; label: string; pct: number; verdict: Verdict; vLabel: string }) {
   const color = ohaengVar(name)
   return (
     <div className="mt-2 flex items-center gap-2 text-sm">
-      <span className="w-5 font-black" style={{ color }}>{name}</span>
+      <span className="w-11 shrink-0 font-black" style={{ color }}>{label}</span>
       <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-c-line">
         <i className="block h-full rounded-full" style={{ width: `${Math.min(pct, 100)}%`, background: color }} />
       </div>
@@ -50,7 +51,7 @@ function ElementBar({ name, pct, verdict, vLabel }: { name: string; pct: number;
   )
 }
 
-function Pentagram({ pct, dayElement, t }: { pct: Record<string, number>; dayElement: string; t: ReturnType<typeof useTranslations> }) {
+function Pentagram({ pct, dayElement, t, tt }: { pct: Record<string, number>; dayElement: string; t: ReturnType<typeof useTranslations>; tt: TermT }) {
   const v = pentagramVertices()
   const polygon = v.map((p) => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ')
   return (
@@ -70,14 +71,14 @@ function Pentagram({ pct, dayElement, t }: { pct: Record<string, number>; dayEle
         ))}
         <circle cx="150" cy="150" r="24" fill="var(--c-surface-soft)" stroke="var(--c-line)" strokeWidth="1.5" />
         <text x="150" y="145" textAnchor="middle" fontSize="9" fill="var(--c-text-sub)">{t('dayLabel')}</text>
-        <text x="150" y="162" textAnchor="middle" fontSize="15" fontWeight="bold" fill={ohaengVar(dayElement)}>{dayElement}</text>
+        <text x="150" y="162" textAnchor="middle" fontSize="15" fontWeight="bold" fill={ohaengVar(dayElement)}>{termLabel(tt, dayElement)}</text>
         {WUXING_ORDER.map((el, i) => {
           const color = ohaengVar(el)
           const lp = pctLabelPos(v, pct, i)
           return (
             <g key={el}>
               <circle cx={v[i].x} cy={v[i].y} r={nodeRadius(pct[el] ?? 0)} fill={color} fillOpacity="0.14" stroke={color} strokeWidth="2" />
-              <text x={v[i].x} y={v[i].y + 6} textAnchor="middle" fontSize="16" fontWeight="bold" fill={color}>{el}</text>
+              <text x={v[i].x} y={v[i].y + 6} textAnchor="middle" fontSize={termLabel(tt, el).length > 1 ? 10 : 16} fontWeight="bold" fill={color}>{termLabel(tt, el)}</text>
               <text x={lp.x} y={lp.y} textAnchor="middle" fontSize="12" fontWeight="700" fill={color}>{pct[el] ?? 0}%</text>
             </g>
           )
@@ -94,6 +95,7 @@ function Pentagram({ pct, dayElement, t }: { pct: Record<string, number>; dayEle
 /** 오행 밸런스 카드 — 균형도 블랙 뱃지 + 5색 가로 바 / 펜타그램 탭 전환 (design.md §5.3) */
 export default function WuxingBalanceCard({ data }: { data: SajuCalcResponse }) {
   const t = useTranslations('manse.charts.wuxing')
+  const tt = useTranslations('manse.terms') as unknown as TermT
   const [tab, setTab] = useState<'bar' | 'penta'>('bar')
   const [applyHap, setApplyHap] = useState(true)
   const [applyJohu, setApplyJohu] = useState(false)
@@ -105,7 +107,7 @@ export default function WuxingBalanceCard({ data }: { data: SajuCalcResponse }) 
 
   const summaryText =
     over.length || lack.length
-      ? [over.length ? `${over.join('·')} ${t('over')}` : '', lack.length ? `${lack.join('·')} ${t('lack')}` : '']
+      ? [over.length ? `${over.map((e) => termLabel(tt, e)).join('·')} ${t('over')}` : '', lack.length ? `${lack.map((e) => termLabel(tt, e)).join('·')} ${t('lack')}` : '']
           .filter(Boolean)
           .join(' + ')
       : t('balanced')
@@ -126,7 +128,7 @@ export default function WuxingBalanceCard({ data }: { data: SajuCalcResponse }) 
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <span className="rounded-pill bg-c-text px-2.5 py-1 text-xs font-black text-c-bg">{score}/100</span>
         <span className={`rounded-pill px-2.5 py-1 text-[11px] font-extrabold ${label.tone === 'good' ? 'bg-c-lucky-bg text-c-lucky-fg' : label.tone === 'mid' ? 'bg-c-oh-to-tint text-c-text' : 'bg-c-unlucky-bg text-c-unlucky-fg'}`}>
-          {label.text}
+          {termLabel(tt, label.text)}
         </span>
         <span className="text-[11px] text-c-text-sub">{summaryText}</span>
       </div>
@@ -142,11 +144,11 @@ export default function WuxingBalanceCard({ data }: { data: SajuCalcResponse }) 
           {WUXING_ORDER.map((el) => {
             const v = judge(pct[el])
             const vLabel = v === '과다' ? t('verdictOver') : v === '부족' ? t('verdictLack') : t('verdictOk')
-            return <ElementBar key={el} name={el} pct={pct[el]} verdict={v} vLabel={vLabel} />
+            return <ElementBar key={el} name={el} label={termLabel(tt, el)} pct={pct[el]} verdict={v} vLabel={vLabel} />
           })}
         </div>
       ) : (
-        <Pentagram pct={pct} dayElement={dayElement} t={t} />
+        <Pentagram pct={pct} dayElement={dayElement} t={t} tt={tt} />
       )}
     </section>
   )
