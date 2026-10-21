@@ -15,8 +15,8 @@ export default function AuthDone() {
     router.replace('/')
   }, [router])
   return (
-    <main className="flex min-h-[60vh] items-center justify-center">
-      <p className="text-sm font-extrabold text-text-sub">{t('signingIn')}</p>
+    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100vh-56px)] items-center justify-center bg-c-bg px-4">
+      <p className="text-sm font-extrabold text-c-text-sub">{t('signingIn')}</p>
     </main>
   )
 }
