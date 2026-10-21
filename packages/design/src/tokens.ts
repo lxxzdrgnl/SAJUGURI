@@ -52,6 +52,7 @@ export const radius = {
   sheet: '16px',
 } as const
 
+/** @deprecated 웹에서는 브루탈 그림자를 제거했다(--ink/--orange 변수도 없음). apps/mobile 이관 때 정리. */
 export const shadow = {
   brutal: '4px 4px 0 var(--ink)',
   brutalSm: '2px 2px 0 var(--ink)',
@@ -59,6 +60,7 @@ export const shadow = {
 } as const
 
 /** Y2K 재료 — 크롬(금속 다단)·홀로그램(무지개 conic)·글로스(광택 inset) */
+/** @deprecated 웹의 Y2K 크롬 변수는 제거했다. apps/mobile 이관 때 정리. */
 export const y2k = {
   chrome:
     'linear-gradient(158deg,#FDFEFF 0%,#CBD4E2 16%,#8E9BB0 32%,#EAEFF7 46%,' +

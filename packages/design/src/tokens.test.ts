@@ -37,17 +37,13 @@ describe('design tokens', () => {
     expect(css).toContain('--border-soft: #C8D0DE;')
   })
 
-  it('apps/web globals.css가 토큰 값과 드리프트하지 않는다', async () => {
+  it('apps/web globals.css가 남아 있는 레거시 변수(--bg-base, 운세 스토리 전용)와 드리프트하지 않는다', async () => {
     const { readFile } = await import('node:fs/promises')
     const css = await readFile(
       new URL('../../../apps/web/app/globals.css', import.meta.url),
       'utf8',
     )
-    for (const [name, value] of Object.entries(colors)) {
-      const kebab = name.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase())
-      expect(css, `globals.css에 --${kebab} 선언 누락/불일치`).toContain(`--${kebab}: ${value};`)
-      expect(css, `globals.css @theme에 --color-${kebab} 매핑 누락`).toContain(`--color-${kebab}: var(--${kebab});`)
-    }
+    expect(css).toContain(`--bg-base: ${colors.bgBase};`)
   })
 })
 
