@@ -47,6 +47,52 @@
   --motion-duration-fade: 200ms;    /* 투명도 전용 — reduced-motion에서도 살아남는다 */
 }
 
+:root {
+  /* 시맨틱 토큰 — 원천: packages/design semantic (light) */
+  --c-bg: #FFFFFF;
+  --c-surface: #FFFFFF;
+  --c-surface-soft: #FAF6EC;
+  --c-line: #E7E2D6;
+  --c-text: #14161C;
+  --c-text-sub: #5B606B;
+  --c-accent: #FFD900;
+  --c-on-accent: #14161C;
+  --c-danger: #D92D20;
+  --c-counsel-bg: #04332F;
+  --c-counsel-fg: #E9F4F1;
+}
+
+:root[data-theme="dark"] {
+  --c-bg: #121212;
+  --c-surface: #1A1A1A;
+  --c-surface-soft: #232323;
+  --c-line: #333333;
+  --c-text: #F5F5F5;
+  --c-text-sub: #A8ADB7;
+  --c-accent: #FFD900;
+  --c-on-accent: #14161C;
+  --c-danger: #FF6B5E;
+  --c-counsel-bg: #04332F;
+  --c-counsel-fg: #E9F4F1;
+}
+
+@theme inline {
+  --color-c-bg: var(--c-bg);
+  --color-c-surface: var(--c-surface);
+  --color-c-surface-soft: var(--c-surface-soft);
+  --color-c-line: var(--c-line);
+  --color-c-text: var(--c-text);
+  --color-c-text-sub: var(--c-text-sub);
+  --color-c-accent: var(--c-accent);
+  --color-c-on-accent: var(--c-on-accent);
+  --color-c-danger: var(--c-danger);
+  --color-c-counsel-bg: var(--c-counsel-bg);
+  --color-c-counsel-fg: var(--c-counsel-fg);
+  --font-display: var(--font-sans);
+  --radius-card: 20px;
+  --radius-pill: 999px;
+}
+
 @theme inline {
   /* 간지 폰트 — 주변 UI(고딕)와 동일하게 통일. 간지만 명조체로 튀어 보이던 문제 해결.
      font-serif 유틸을 쓰는 간지(원국·대운·연운·합충·일진·툴카드)가 전부 본문과 같은 고딕으로 렌더된다. */
