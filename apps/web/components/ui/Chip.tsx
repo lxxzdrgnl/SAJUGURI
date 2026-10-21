@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react'
 
 const VARIANT = {
-  default: 'bg-surface text-ink',
-  lucky: 'bg-teal-tint text-[#00665F]',     // 길신
-  unlucky: 'bg-orange-tint text-[#B34800]', // 흉살
-  yellow: 'bg-yellow text-ink',
+  default: 'border-c-line bg-c-surface text-c-text',
+  lucky: 'border-transparent bg-c-lucky-bg text-c-lucky-fg',       // 길신
+  unlucky: 'border-transparent bg-c-unlucky-bg text-c-unlucky-fg', // 흉살
+  yellow: 'border-transparent bg-c-accent text-c-on-accent',
 } as const
 
-/** 통일 칩 — 잉크 보더 + 미니 오프셋 섀도 고정, 의미는 variant 틴트 (design.md §4.1) */
+/** 통일 칩 — 알약 + 1px 라인, 의미는 variant 틴트 */
 export default function Chip({
   variant = 'default',
   children,
@@ -17,8 +17,8 @@ export default function Chip({
 }) {
   return (
     <span
-      className={`mb-2 mr-1.5 inline-block rounded-lg border-2 border-ink px-2.5 py-1
-        text-xs font-extrabold shadow-brutal-sm ${VARIANT[variant]}`}
+      className={`mb-2 mr-1.5 inline-block rounded-pill border px-2.5 py-1
+        text-xs font-extrabold ${VARIANT[variant]}`}
     >
       {children}
     </span>

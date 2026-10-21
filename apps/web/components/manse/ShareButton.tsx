@@ -6,6 +6,7 @@ import { api } from '@/lib/api'
 import { createShare } from '@sajuguri/api-client'
 import type { SajuCalcResponse, SajuCalcRequest } from '@sajuguri/api-client'
 import ShareModal from '@/components/ui/ShareModal'
+import { buttonClass } from '@/components/ui/Button'
 import { useShareModal } from '@/lib/hooks/useShareModal'
 
 /**
@@ -45,11 +46,11 @@ export default function ShareButton({
         type="button"
         onClick={handleShare}
         disabled={sharing}
-        className="w-full rounded-lg border-2 border-ink bg-teal py-3 text-center text-sm font-extrabold text-white shadow-brutal disabled:opacity-60"
+        className={`${buttonClass('secondary')} w-full disabled:opacity-60`}
       >
         {sharing ? t('loading') : t('label')}
       </button>
-      {error && <p className="text-[12px] font-bold text-orange">{error}</p>}
+      {error && <p className="text-[12px] font-bold text-c-danger">{error}</p>}
 
       <ShareModal
         open={shareUrl !== null}

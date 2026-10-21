@@ -33,25 +33,25 @@ export default function YeonWolUn({ dayStem }: { dayStem: string }) {
   }, [tab, dayStem, currentYear, wol])
 
   const tabBtn = (key: 'yeon' | 'wol') =>
-    `rounded-lg border-2 border-ink px-3 py-1 text-xs font-extrabold ${tab === key ? 'bg-yellow text-ink shadow-brutal-sm' : 'bg-surface text-text-sub'}`
+    `rounded-pill border px-3 py-1 text-xs font-extrabold ${tab === key ? 'border-transparent bg-c-accent text-c-on-accent' : 'border-c-line bg-c-surface text-c-text-sub'}`
 
   const list = tab === 'yeon' ? yeon : wol
   const loading = list === null && !error
 
   return (
-    <section className="rounded-lg border-2 border-ink bg-surface p-4 shadow-brutal">
+    <section className="rounded-card border border-c-line bg-c-surface p-5 text-c-text">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-[15px] font-extrabold">{t('title')}</h3>
         <div className="flex gap-1.5">
-          <button type="button" onClick={() => setTab('yeon')} className={tabBtn('yeon')}>{t('tabYeon')}</button>
-          <button type="button" onClick={() => setTab('wol')} className={tabBtn('wol')}>{t('tabWol')}</button>
+          <button type="button" aria-pressed={tab === 'yeon'} onClick={() => setTab('yeon')} className={tabBtn('yeon')}>{t('tabYeon')}</button>
+          <button type="button" aria-pressed={tab === 'wol'} onClick={() => setTab('wol')} className={tabBtn('wol')}>{t('tabWol')}</button>
         </div>
       </div>
 
       {error ? (
-        <p className="py-3 text-sm text-text-sub">{t('error')}</p>
+        <p className="py-3 text-sm text-c-text-sub">{t('error')}</p>
       ) : loading ? (
-        <p className="py-3 text-sm text-text-sub">{t('loading')}</p>
+        <p className="py-3 text-sm text-c-text-sub">{t('loading')}</p>
       ) : (
         <div className="flex gap-3 overflow-x-auto pb-1">
           {tab === 'yeon'
