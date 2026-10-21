@@ -48,7 +48,7 @@ export interface RecordType<P = unknown> {
   /** 상세 경로 */
   href: (item: RecordItem<P>) => string
   /** 카드 표현 */
-  renderCard: (item: RecordItem<P>, t: Translate) => ReactNode
+  renderCard: (item: RecordItem<P>, t: Translate, locale: string) => ReactNode
   /** 옵션: 프로필별 그룹 키 (없으면 단순 목록) */
   groupBy?: (item: RecordItem<P>) => string
   /** 빈 상태 안내 + CTA */
@@ -57,8 +57,8 @@ export interface RecordType<P = unknown> {
   remove?: { fn: (api: ApiClient, id: number) => Promise<void>; label: (item: RecordItem<P>) => string }
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })
+function formatDate(iso: string, locale: string): string {
+  return new Date(iso).toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
 // ── 카드 빌더 (registry.cards.tsx에서 주입) ───────────────────────────────────
@@ -82,7 +82,7 @@ const sajuType: RecordType<ReportSummary> = {
     return rows.map((r) => ({ id: r.id, createdAt: r.created_at, payload: r }))
   },
   href: (item) => `/report/${item.id}`,
-  renderCard: (item, t) => <SajuCard r={item.payload} t={t} />,
+  renderCard: (item, t, locale) => <SajuCard r={item.payload} t={t} locale={locale} />,
   groupBy: (item) => item.payload.profile_name || '',
   empty: { message: (t) => t('emptyReports'), ctaHref: '/manse', ctaLabel: (t) => t('goReport') },
   remove: { fn: deleteReport, label: (item) => item.payload.first_headline },
@@ -97,7 +97,7 @@ const fortuneType: RecordType<DailyRecordSummary> = {
     return rows.map((f) => ({ id: f.id, createdAt: f.date, payload: f }))
   },
   href: (item) => `/fortune?record=${item.id}`,
-  renderCard: (item, t) => <FortuneCard f={item.payload} t={t} />,
+  renderCard: (item, t, locale) => <FortuneCard f={item.payload} t={t} locale={locale} />,
   groupBy: (item) => item.payload.profile_name || '',
   empty: { message: (t) => t('emptyFortune'), ctaHref: '/', ctaLabel: (t) => t('goFortune') },
   remove: { fn: deleteDailyRecord, label: (item) => item.payload.keyword },
@@ -114,7 +114,7 @@ const consultationType: RecordType<ConsultationHistoryItem> = {
   href: (item) =>
     item.payload.share_token ? `/share/question/${item.payload.share_token}` : `/question`,
   // ConsultationCard uses useState/useRouter hooks — must render as JSX element, never as a direct function call.
-  renderCard: (item, t) => <ConsultationCard c={item.payload} t={t} />,
+  renderCard: (item, t, locale) => <ConsultationCard c={item.payload} t={t} locale={locale} />,
   groupBy: (item) => item.payload.profile_name || '',
   empty: { message: (t) => t('emptyQuestion'), ctaHref: '/question', ctaLabel: (t) => t('goQuestion') },
   remove: { fn: deleteConsultation, label: (item) => item.payload.headline },
@@ -128,7 +128,7 @@ const compatibilityType: RecordType<CompatibilityReportSummary> = {
     return rows.map((r) => ({ id: r.id, createdAt: r.created_at, payload: r }))
   },
   href: (item) => `/compatibility/${item.id}`,
-  renderCard: (item, t) => <CompatibilityCard r={item.payload} t={t} />,
+  renderCard: (item, t, locale) => <CompatibilityCard r={item.payload} t={t} locale={locale} />,
   // 두 사람이라 프로필 그룹핑 부적합 — 단순 목록.
   empty: { message: (t) => t('emptyCompatibility'), ctaHref: '/compatibility/new', ctaLabel: (t) => t('goCompatibility') },
   remove: {

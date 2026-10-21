@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { ApiClient } from '@sajuguri/api-client'
 import Card from '@/components/ui/Card'
@@ -141,16 +141,18 @@ function CardRow({
   editMode,
   onDelete,
   t,
+  locale,
 }: {
   type: RecordType
   item: RecordItem
   editMode: boolean
   onDelete: () => void
   t: Translate
+  locale: string
 }) {
   return (
     <div className="flex items-center gap-2">
-      <div className="min-w-0 flex-1">{type.renderCard(item, t)}</div>
+      <div className="min-w-0 flex-1">{type.renderCard(item, t, locale)}</div>
       {editMode && type.remove && <DeleteIconButton label={t('delete.confirm')} onClick={onDelete} />}
     </div>
   )
@@ -166,6 +168,7 @@ interface Pending {
 
 export default function MyRecordsClient({ records: initial, previewCount = PREVIEW_COUNT }: Props) {
   const t = useTranslations('my.records') as unknown as Translate
+  const locale = useLocale()
   const [records, setRecords] = useState(initial)
   const [editMode, setEditMode] = useState(false)
   const [filter, setFilter] = useState<string>('all')
@@ -242,7 +245,7 @@ export default function MyRecordsClient({ records: initial, previewCount = PREVI
                 const type = typeByKey.get(e.typeKey)!
                 return (
                   <li key={`${e.typeKey}-${e.item.id}`}>
-                    <CardRow type={type} item={e.item} editMode={editMode} onDelete={() => requestDelete(type, e.item)} t={t} />
+                    <CardRow type={type} item={e.item} editMode={editMode} onDelete={() => requestDelete(type, e.item)} t={t} locale={locale} />
                   </li>
                 )
               })}

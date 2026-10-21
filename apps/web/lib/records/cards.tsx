@@ -33,13 +33,13 @@ function CardShell({ badge, children }: { badge: ReactNode; children: ReactNode 
   )
 }
 
-export function SajuCard({ r, t }: { r: ReportSummary; t: Translate }) {
+export function SajuCard({ r, t, locale }: { r: ReportSummary; t: Translate; locale: string }) {
   return (
     <Link href={`/report/${r.id}`} className="block min-w-0">
       <CardShell badge={<TypeBadge label={t('tabReports')} tone="bg-c-poster-peach" />}>
         <p className="truncate text-[14px] font-extrabold leading-snug text-c-text">{r.first_headline}</p>
         <p className="text-[12px] text-c-text-sub">
-          {new Date(r.created_at).toLocaleDateString('ko-KR')}
+          {new Date(r.created_at).toLocaleDateString(locale)}
           {r.request_topics && <span className="ml-1">· {r.request_topics}</span>}
         </p>
       </CardShell>
@@ -47,7 +47,7 @@ export function SajuCard({ r, t }: { r: ReportSummary; t: Translate }) {
   )
 }
 
-export function FortuneCard({ f, t }: { f: DailyRecordSummary; t: Translate }) {
+export function FortuneCard({ f, t, locale }: { f: DailyRecordSummary; t: Translate; locale: string }) {
   // "이용재 오늘의 운세" 형태로 표시 (키워드만 단독 표시는 무엇인지 알기 어려움)
   const title = f.profile_name ? `${f.profile_name} ${t('fortuneCardTitle')}` : t('fortuneCardTitle')
   return (
@@ -55,7 +55,7 @@ export function FortuneCard({ f, t }: { f: DailyRecordSummary; t: Translate }) {
       <CardShell badge={<TypeBadge label={t('tabFortune')} tone="bg-c-poster-butter" />}>
         <p className="truncate text-[14px] font-extrabold leading-snug text-c-text">{title}</p>
         <p className="text-[12px] text-c-text-sub">
-          {new Date(f.date).toLocaleDateString('ko-KR')}
+          {new Date(f.date).toLocaleDateString(locale)}
           {f.keyword && <span className="ml-1">· {f.keyword}</span>}
         </p>
       </CardShell>
@@ -63,7 +63,7 @@ export function FortuneCard({ f, t }: { f: DailyRecordSummary; t: Translate }) {
   )
 }
 
-export function ConsultationCard({ c, t }: { c: ConsultationHistoryItem; t: Translate }) {
+export function ConsultationCard({ c, t, locale }: { c: ConsultationHistoryItem; t: Translate; locale: string }) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
 
@@ -90,13 +90,13 @@ export function ConsultationCard({ c, t }: { c: ConsultationHistoryItem; t: Tran
       <CardShell badge={<TypeBadge label={t('tabQuestion')} tone="bg-c-poster-mint" />}>
         <p className="truncate text-[14px] font-extrabold leading-snug text-c-text">{c.headline}</p>
         <p className="truncate text-[12px] text-c-text-sub">{c.question}</p>
-        <p className="text-[12px] text-c-text-sub">{new Date(c.created_at).toLocaleDateString('ko-KR')}</p>
+        <p className="text-[12px] text-c-text-sub">{new Date(c.created_at).toLocaleDateString(locale)}</p>
       </CardShell>
     </button>
   )
 }
 
-export function CompatibilityCard({ r, t }: { r: CompatibilityReportSummary; t: Translate }) {
+export function CompatibilityCard({ r, t, locale }: { r: CompatibilityReportSummary; t: Translate; locale: string }) {
   const nameA = r.person_a_name || t('compatAnon')
   const nameB = r.person_b_name || t('compatAnon')
   return (
@@ -107,7 +107,7 @@ export function CompatibilityCard({ r, t }: { r: CompatibilityReportSummary; t: 
           <span className="ml-1 text-c-text-sub">· {r.total_score}</span>
         </p>
         <p className="text-[12px] text-c-text-sub">
-          {new Date(r.created_at).toLocaleDateString('ko-KR')}
+          {new Date(r.created_at).toLocaleDateString(locale)}
           {r.request_topics && <span className="ml-1">· {r.request_topics}</span>}
         </p>
       </CardShell>

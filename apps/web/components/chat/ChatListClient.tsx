@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { ApiClient, deleteSession } from '@sajuguri/api-client'
 import type { ChatSession, ProfileResponse } from '@sajuguri/api-client'
@@ -27,8 +27,8 @@ function sessionColor(id: string): string {
   return SESSION_COLORS[hash % SESSION_COLORS.length]
 }
 
-function formatDate(dt: string) {
-  return new Intl.DateTimeFormat('ko-KR', { month: 'short', day: 'numeric' }).format(new Date(dt))
+function formatDate(dt: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' }).format(new Date(dt))
 }
 
 interface DeleteModalProps {
@@ -91,6 +91,7 @@ function DeleteModal({ sessionTitle, onConfirm, onClose, t }: DeleteModalProps) 
 
 export default function ChatListClient({ sessions: initialSessions, profiles, prefill = null }: Props) {
   const t = useTranslations('chat')
+  const locale = useLocale()
   const [sheetOpen, setSheetOpen] = useState(!!prefill)
   // 첫 입력 힌트는 한 번만 쓴다 — 시트를 닫으면 비워서 이후 "새 상담"에 남지 않게 한다
   const [activePrefill, setActivePrefill] = useState(prefill)
@@ -169,7 +170,7 @@ export default function ChatListClient({ sessions: initialSessions, profiles, pr
                       {s.title || t('sessionFallback')}
                     </span>
                     <span className="ml-2 shrink-0 text-xs font-semibold text-c-text-sub">
-                      {formatDate(s.last_message_at)}
+                      {formatDate(s.last_message_at, locale)}
                     </span>
                   </Card>
                 </Link>

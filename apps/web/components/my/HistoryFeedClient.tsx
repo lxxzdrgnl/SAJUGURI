@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import Card from '@/components/ui/Card'
 import { RECORD_TYPES, type RecordItem, type Translate } from '@/lib/records/registry'
 import { mergeFeed, filterFeed } from '@/lib/records/feed'
@@ -30,6 +30,7 @@ function ChipButton({ active, onClick, children }: { active: boolean; onClick: (
 
 export default function HistoryFeedClient({ records, initialType }: Props) {
   const t = useTranslations('my.records') as unknown as Translate
+  const locale = useLocale()
   const validInitial = initialType && RECORD_TYPES.some((x) => x.key === initialType) ? initialType : 'all'
   const [filter, setFilter] = useState<string>(validInitial)
 
@@ -65,7 +66,7 @@ export default function HistoryFeedClient({ records, initialType }: Props) {
         <ul className="flex flex-col gap-2">
           {visible.map((e) => {
             const type = typeByKey.get(e.typeKey)!
-            return <li key={`${e.typeKey}-${e.item.id}`}>{type.renderCard(e.item, t)}</li>
+            return <li key={`${e.typeKey}-${e.item.id}`}>{type.renderCard(e.item, t, locale)}</li>
           })}
         </ul>
       )}
