@@ -90,3 +90,61 @@ export function toCssVariables(): string {
   }
   return `:root {\n  ${entries.join('\n  ')}\n}`
 }
+
+// ── 의미 기반 색 토큰 (라이트·다크) ────────────────────────────
+export type ThemeName = 'light' | 'dark'
+
+export interface SemanticColors {
+  bg: string
+  surface: string
+  surfaceSoft: string
+  line: string
+  text: string
+  textSub: string
+  accent: string
+  onAccent: string
+  danger: string
+  counselBg: string
+  counselFg: string
+}
+
+export const semantic: Record<ThemeName, SemanticColors> = {
+  light: {
+    bg: '#FFFFFF',
+    surface: '#FFFFFF',
+    surfaceSoft: '#FAF6EC',
+    line: '#E7E2D6',
+    text: '#14161C',
+    textSub: '#5B606B',
+    accent: '#FFD900',
+    onAccent: '#14161C',
+    danger: '#D92D20',
+    counselBg: '#04332F',
+    counselFg: '#E9F4F1',
+  },
+  dark: {
+    bg: '#121212',
+    surface: '#1A1A1A',
+    surfaceSoft: '#232323',
+    line: '#333333',
+    text: '#F5F5F5',
+    textSub: '#A8ADB7',
+    accent: '#FFD900',
+    onAccent: '#14161C',
+    danger: '#FF6B5E',
+    counselBg: '#04332F',
+    counselFg: '#E9F4F1',
+  },
+}
+
+type OhaengKey = '목' | '화' | '토' | '금' | '수'
+
+export const ohaengByTheme: Record<ThemeName, Record<OhaengKey, string>> = {
+  light: { 목: '#008A57', 화: '#E05A00', 토: '#A67C00', 금: '#6B7280', 수: '#2B7FD1' },
+  dark: { 목: '#2FD28F', 화: '#FF8A3D', 토: '#E5B820', 금: '#B6BCC8', 수: '#5BB0F2' },
+}
+
+export const ohaengTintByTheme: Record<ThemeName, Record<OhaengKey, string>> = {
+  light: { 목: '#E9FAF1', 화: '#FFEEDD', 토: '#FFF6D1', 금: '#EEF0F3', 수: '#DCEFFB' },
+  dark: { 목: '#12261D', 화: '#2B1B10', 토: '#2A2410', 금: '#222428', 수: '#12212E' },
+}

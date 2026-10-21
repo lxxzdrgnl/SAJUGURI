@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { colors, ohaeng, ohaengTint, radius, shadow, toCssVariables } from './tokens'
+import { colors, ohaeng, ohaengTint, radius, shadow, toCssVariables, semantic, ohaengByTheme, ohaengTintByTheme } from './tokens'
 
 describe('design tokens', () => {
   it('비비드 캔디 핵심 팔레트 값 (docs/design.md §2.1)', () => {
@@ -48,5 +48,50 @@ describe('design tokens', () => {
       expect(css, `globals.css에 --${kebab} 선언 누락/불일치`).toContain(`--${kebab}: ${value};`)
       expect(css, `globals.css @theme에 --color-${kebab} 매핑 누락`).toContain(`--color-${kebab}: var(--${kebab});`)
     }
+  })
+})
+
+function lum(hex: string): number {
+  const c = [1, 3, 5].map((i) => {
+    const v = parseInt(hex.slice(i, i + 2), 16) / 255
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4
+  })
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+}
+function contrast(a: string, b: string): number {
+  const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x)
+  return (hi + 0.05) / (lo + 0.05)
+}
+
+describe('semantic tokens', () => {
+  const themes = ['light', 'dark'] as const
+  it('라이트·다크는 같은 키 집합', () => {
+    expect(Object.keys(semantic.dark).sort()).toEqual(Object.keys(semantic.light).sort())
+  })
+  it('accent는 양 테마 #FFD900', () => {
+    expect(semantic.light.accent).toBe('#FFD900')
+    expect(semantic.dark.accent).toBe('#FFD900')
+  })
+  it('모든 값이 6자리 HEX', () => {
+    const all = [
+      ...themes.flatMap((t) => Object.values(semantic[t])),
+      ...themes.flatMap((t) => Object.values(ohaengByTheme[t])),
+      ...themes.flatMap((t) => Object.values(ohaengTintByTheme[t])),
+    ]
+    for (const v of all) expect(v).toMatch(/^#[0-9A-F]{6}$/i)
+  })
+  for (const t of themes) {
+    it(`${t}: 대비비`, () => {
+      const { bg, text, textSub } = semantic[t]
+      expect(contrast(text, bg)).toBeGreaterThanOrEqual(7)
+      expect(contrast(textSub, bg)).toBeGreaterThanOrEqual(4.5)
+      for (const c of Object.values(ohaengByTheme[t])) {
+        expect(contrast(c, bg)).toBeGreaterThanOrEqual(3)
+      }
+    })
+  }
+  it('기존 export 보존 (모바일 보호)', () => {
+    expect(colors.bgBase).toBeDefined()
+    expect(shadow).toBeDefined()
   })
 })
