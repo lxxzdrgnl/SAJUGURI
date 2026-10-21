@@ -78,6 +78,64 @@
   --c-scrim: rgba(0, 0, 0, 0.45);
 }
 
+/* ── 만세력 분석 토큰 (Task 13) ─────────────────────────────────────────────
+   오행 5색·기둥 틴트 — 원천: packages/design ohaengByTheme / ohaengTintByTheme.
+   길흉 칩·차트 색은 오행 변수의 별칭이라 모드가 바뀌면 함께 따라간다. */
+:root {
+  --c-oh-mok: #008A57;
+  --c-oh-hwa: #E05A00;
+  --c-oh-to: #A67C00;
+  --c-oh-geum: #6B7280;
+  --c-oh-su: #2B7FD1;
+  --c-oh-mok-tint: #E9FAF1;
+  --c-oh-hwa-tint: #FFEEDD;
+  --c-oh-to-tint: #FFF6D1;
+  --c-oh-geum-tint: #EEF0F3;
+  --c-oh-su-tint: #DCEFFB;
+}
+
+:root[data-theme="dark"] {
+  --c-oh-mok: #2FD28F;
+  --c-oh-hwa: #FF8A3D;
+  --c-oh-to: #E5B820;
+  --c-oh-geum: #B6BCC8;
+  --c-oh-su: #5BB0F2;
+  --c-oh-mok-tint: #12261D;
+  --c-oh-hwa-tint: #2B1B10;
+  --c-oh-to-tint: #2A2410;
+  --c-oh-geum-tint: #222428;
+  --c-oh-su-tint: #12212E;
+}
+
+:root {
+  --c-lucky-bg: var(--c-oh-mok-tint);
+  --c-lucky-fg: var(--c-oh-mok);
+  --c-unlucky-bg: var(--c-oh-hwa-tint);
+  --c-unlucky-fg: var(--c-oh-hwa);
+  --c-chart-accent: var(--c-oh-hwa);
+  --c-chart-saeng: var(--c-oh-mok);
+}
+
+@theme inline {
+  --color-c-oh-mok: var(--c-oh-mok);
+  --color-c-oh-hwa: var(--c-oh-hwa);
+  --color-c-oh-to: var(--c-oh-to);
+  --color-c-oh-geum: var(--c-oh-geum);
+  --color-c-oh-su: var(--c-oh-su);
+  --color-c-oh-mok-tint: var(--c-oh-mok-tint);
+  --color-c-oh-hwa-tint: var(--c-oh-hwa-tint);
+  --color-c-oh-to-tint: var(--c-oh-to-tint);
+  --color-c-oh-geum-tint: var(--c-oh-geum-tint);
+  --color-c-oh-su-tint: var(--c-oh-su-tint);
+  --color-c-lucky-bg: var(--c-lucky-bg);
+  --color-c-lucky-fg: var(--c-lucky-fg);
+  --color-c-unlucky-bg: var(--c-unlucky-bg);
+  --color-c-unlucky-fg: var(--c-unlucky-fg);
+  --color-c-chart-accent: var(--c-chart-accent);
+  --color-c-chart-saeng: var(--c-chart-saeng);
+}
+/* ── /만세력 분석 토큰 ─────────────────────────────────────────────────────── */
+
 @theme inline {
   --color-c-bg: var(--c-bg);
   --color-c-surface: var(--c-surface);
