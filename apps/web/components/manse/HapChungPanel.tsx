@@ -4,9 +4,10 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { SajuCalcResponse, Pillar } from '@sajuguri/api-client'
 import { ohaengVar, ohaengTintVar } from '@/lib/ohaeng'
-import { ALL_TABS, buildEntries, hasData, activePillars, type TabKey, type PillarKey } from '@/lib/manse/hapChung'
+import { ALL_TABS, buildEntries, hasData, activePillars, type Entry, type TabKey, type PillarKey } from '@/lib/manse/hapChung'
 
 const PILLAR_KEY = { year: 'pillarYear', month: 'pillarMonth', day: 'pillarDay', hour: 'pillarHour' } as const
+const SHORT_KEY = { year: 'shortYear', month: 'shortMonth', day: 'shortDay', hour: 'shortHour' } as const
 const EL_KEY: Record<string, string> = { 목: 'elMok', 화: 'elHwa', 토: 'elTo', 금: 'elGeum', 수: 'elSu' }
 
 const PALACE_WEIGHTS: Record<PillarKey, { stem: string; branch: string }> = {
@@ -27,6 +28,21 @@ export default function HapChungPanel({ data }: { data: SajuCalcResponse }) {
   const active = activePillars(data)
   const entries = buildEntries(data, tab)
   const showWeight = tab === 'gung_seong'
+
+  function sentence(e: Entry) {
+    const desc = e.descPillars.length ? `(${e.descPillars.map((p) => t(SHORT_KEY[p])).join('-')}) ` : ''
+    const [a = '', b = ''] = e.chars
+    return t.rich(`rel.${e.kind}`, {
+      b: (c) => <b className="font-black text-c-chart-accent">{c}</b>,
+      desc,
+      name: a,
+      a,
+      b2: b,
+      pillar: e.pillar ? t(SHORT_KEY[e.pillar]) : '',
+      branch: a,
+      vacant: (e.vacant ?? []).join(', '),
+    })
+  }
 
   function Box({ ch, on, weight }: { ch?: string; on: boolean; weight?: string }) {
     return (
@@ -68,14 +84,14 @@ export default function HapChungPanel({ data }: { data: SajuCalcResponse }) {
       <h3 className="px-5 pt-5 text-[15px] font-extrabold">{t('title')}</h3>
 
       <div className="flex flex-wrap gap-1.5 px-5 py-3">
-        {ALL_TABS.map((tabDef) => {
-          const has = hasData(data, tabDef.key)
-          const isActive = tab === tabDef.key
+        {ALL_TABS.map((tabKey) => {
+          const has = hasData(data, tabKey)
+          const isActive = tab === tabKey
           return (
             <button
-              key={tabDef.key}
+              key={tabKey}
               type="button"
-              onClick={() => setTab(tabDef.key)}
+              onClick={() => setTab(tabKey)}
               className={`rounded-pill border px-2.5 py-1 text-[11px] font-extrabold ${
                 isActive
                   ? 'border-transparent bg-c-accent text-c-on-accent'
@@ -84,7 +100,7 @@ export default function HapChungPanel({ data }: { data: SajuCalcResponse }) {
                     : 'border-c-line bg-c-surface text-c-text-sub'
               }`}
             >
-              {tabDef.label}
+              {t(`tab.${tabKey}`)}
             </button>
           )
         })}
@@ -102,7 +118,7 @@ export default function HapChungPanel({ data }: { data: SajuCalcResponse }) {
           <div className="flex flex-col gap-5">
             {entries.map((e, i) => (
               <div key={i} className="flex flex-col gap-1.5">
-                <p className="text-sm leading-snug text-c-text [&_b]:font-black [&_b]:text-c-chart-accent" dangerouslySetInnerHTML={{ __html: e.text }} />
+                <p className="text-sm leading-snug text-c-text">{sentence(e)}</p>
                 {e.broken && <span className="w-fit rounded-pill bg-c-unlucky-bg px-2.5 py-0.5 text-[11px] font-extrabold text-c-unlucky-fg">{t('broken')}</span>}
                 {e.resultEl && !e.broken && (
                   <span className="w-fit rounded-pill px-2.5 py-0.5 text-[11px] font-extrabold" style={{ color: ohaengVar(e.resultEl), background: ohaengTintVar(e.resultEl) }}>

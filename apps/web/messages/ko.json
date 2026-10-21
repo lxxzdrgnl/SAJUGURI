@@ -320,7 +320,38 @@
         "elHwa": "화",
         "elTo": "토",
         "elGeum": "금",
-        "elSu": "수"
+        "elSu": "수",
+        "shortYear": "연주",
+        "shortMonth": "월주",
+        "shortDay": "일주",
+        "shortHour": "시주",
+        "tab": {
+          "gung_seong": "궁성",
+          "cheon_gan_hap": "천간합",
+          "yuk_hap": "지지육합",
+          "sam_hap": "지지삼합",
+          "bang_hap": "지지방합",
+          "cheon_gan_chung": "천간충",
+          "chung": "지지충",
+          "gong_mang": "공망",
+          "sam_hyeong": "형",
+          "pa": "파",
+          "yuk_hae": "해",
+          "won_jin": "원진"
+        },
+        "rel": {
+          "stemHap": "천간에 <b>{name}</b>이 있어요.",
+          "stemChung": "천간에 <b>{name}</b>이 있어요.",
+          "yukHap": "{desc}지지에 <b>{a}{b2}육합</b>이 있어요.",
+          "samHap": "지지에 <b>{name}</b>이 있어요.",
+          "bangHap": "지지에 <b>{name}</b>이 있어요.",
+          "samHyeong": "지지에 <b>{name}</b>이 있어요.",
+          "chung": "{desc}지지에 <b>{a}충{b2}</b>이 있어요.",
+          "yukHae": "{desc}지지에 <b>{a}·{b2}해</b>가 있어요.",
+          "pa": "{desc}지지에 <b>{a}·{b2}파</b>가 있어요.",
+          "wonJin": "{desc}지지에 <b>{a}·{b2}원진</b>이 있어요.",
+          "gongMang": "<b>{pillar} 지지 {branch}</b>가 공망이에요. (공망 지지: {vacant})"
+        }
       },
       "feature": {
         "title": "오행 특성 참고표",

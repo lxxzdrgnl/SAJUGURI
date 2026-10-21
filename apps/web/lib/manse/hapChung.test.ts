@@ -38,17 +38,19 @@ describe('buildEntries', () => {
   it('지지충 — 자오충 엔트리, 해당 기둥 하이라이트', () => {
     const e = buildEntries(saju, 'chung')
     expect(e).toHaveLength(1)
-    expect(e[0].text).toContain('자충오')
+    expect(e[0]).toMatchObject({ kind: 'chung', chars: ['자', '오'], descPillars: [] })
     expect(e[0].branches).toEqual(['year', 'month']) // 자=연지, 오=월지
   })
   it('육합 broken 플래그 (is_effective=false)', () => {
     const e = buildEntries(saju, 'yuk_hap')
+    expect(e[0].kind).toBe('yukHap')
+    expect(e[0].chars).toEqual(['자', '축'])
     expect(e[0].broken).toBe(true)
     expect(e[0].resultEl).toBe('토')
   })
   it('공망 — affected_pillars 기반', () => {
     const e = buildEntries(saju, 'gong_mang')
-    expect(e[0].text).toContain('일주 지지 신')
+    expect(e[0]).toMatchObject({ kind: 'gongMang', pillar: 'day', chars: ['신'], vacant: ['술', '해'] })
     expect(e[0].branches).toEqual(['day'])
   })
   it('궁성은 빈 엔트리(특수 탭)', () => {
