@@ -510,7 +510,7 @@ function DayRelationCard({ payload }: { payload: Record<string, unknown> }) {
         <span className="text-[12px] font-bold text-c-text-sub">{nameB}</span>
       </div>
       {stemHap && (
-        <span className="self-center rounded-pill bg-c-accent px-2.5 py-0.5 text-[11px] font-extrabold">천간합 → {stemHap}</span>
+        <span className="self-center rounded-pill bg-c-accent px-2.5 py-0.5 text-[11px] font-extrabold text-c-on-accent">천간합 → {stemHap}</span>
       )}
       {synergy && <p className="text-center text-[13px] font-bold text-c-text">{synergyText[synergy] ?? synergy}</p>}
       <div className="mt-1 flex flex-col gap-1 text-[12px] text-c-text">
