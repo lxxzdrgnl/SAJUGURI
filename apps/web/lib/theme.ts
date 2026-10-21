@@ -13,3 +13,10 @@ export function parseThemePref(raw: string | undefined): ThemePref {
 
 /** 브라우저 크롬(theme-color) — 앱 배경 --c-bg와 같은 값 */
 export const THEME_COLOR = { light: '#FFFFFF', dark: '#121212' } as const
+
+/** 라디오 그룹 화살표 키 이동 (WAI-ARIA) — 처리 대상 키가 아니면 null. 끝에서 순환한다. */
+export function nextRadioIndex(key: string, index: number, count: number): number | null {
+  if (key === 'ArrowRight' || key === 'ArrowDown') return (index + 1) % count
+  if (key === 'ArrowLeft' || key === 'ArrowUp') return (index - 1 + count) % count
+  return null
+}

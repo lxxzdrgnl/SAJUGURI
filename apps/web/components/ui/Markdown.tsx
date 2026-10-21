@@ -62,7 +62,7 @@ function parseInline(text: string, keyPrefix: string): ReactNode[] {
       nodes.push(
         <code
           key={key}
-          className="rounded bg-c-surface-soft px-1 py-0.5 font-mono text-[0.9em]"
+          className="rounded border border-c-line bg-c-surface px-1 py-0.5 font-mono text-[0.9em] text-c-text"
         >
           {m[1]}
         </code>,
@@ -76,7 +76,7 @@ function parseInline(text: string, keyPrefix: string): ReactNode[] {
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-semibold underline underline-offset-2"
+            className="font-semibold text-c-text underline decoration-c-accent decoration-2 underline-offset-2"
           >
             {parseInline(m[1], key)}
           </a>,

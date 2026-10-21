@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { parseThemePref, THEME_COLOR, THEME_COOKIE, THEME_COOKIE_MAX_AGE } from '@/lib/theme'
+import { nextRadioIndex, parseThemePref, THEME_COLOR, THEME_COOKIE, THEME_COOKIE_MAX_AGE } from '@/lib/theme'
 import type { ThemePref } from '@/lib/theme'
 
 const OPTIONS: { value: ThemePref; key: 'themeLight' | 'themeDark' | 'themeSystem' }[] = [
@@ -45,6 +45,16 @@ export default function ThemeToggle() {
   const t = useTranslations('drawer')
   const [pref, setPref] = useState<ThemePref>(readPref)
 
+  const refs = useRef<(HTMLButtonElement | null)[]>([])
+
+  function onKeyDown(e: React.KeyboardEvent, index: number) {
+    const next = nextRadioIndex(e.key, index, OPTIONS.length)
+    if (next === null) return
+    e.preventDefault()
+    choose(OPTIONS[next].value)
+    refs.current[next]?.focus()
+  }
+
   function choose(next: ThemePref) {
     setPref(next)
     applyPref(next)
@@ -56,11 +66,16 @@ export default function ThemeToggle() {
         {t('theme')}
       </p>
       <div role="radiogroup" aria-labelledby="theme-toggle-label" className="flex gap-2">
-        {OPTIONS.map((o) => {
+        {OPTIONS.map((o, idx) => {
           const active = pref === o.value
           return (
             <button
               key={o.value}
+              ref={(el) => {
+                refs.current[idx] = el
+              }}
+              tabIndex={active ? 0 : -1}
+              onKeyDown={(e) => onKeyDown(e, idx)}
               type="button"
               role="radio"
               aria-checked={active}

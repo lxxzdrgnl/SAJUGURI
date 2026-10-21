@@ -123,7 +123,7 @@
 | 대상 | 클래스 | 값 |
 |---|---|---|
 | 카드·포스터·히어로 | `rounded-card` | 20px |
-| 바텀시트 위쪽 | `rounded-t-[28px]` | 28px |
+| 바텀시트 위쪽 | `rounded-t-card` | 20px |
 | 버튼·칩·검색창·토글 | `rounded-pill` | 알약 |
 
 - 테두리는 **1px `border-c-line`** 하나. 강조(일주 기둥·현재 대운·오늘 일진)는 1.5px `c-text` 라인.
@@ -139,7 +139,7 @@
 항상 `rounded-card`, 그림자 없음.
 
 ### 6.2 Button — `components/ui/Button.tsx`
-`variant`: `primary`(옐로) · `secondary`(표면 + 1px 라인) · `ghost`(투명).
+`variant`: `primary`(옐로) · `secondary`(표면 + 1px 라인) · `ghost`(투명) · `danger`(파괴적 행동, `c-danger`). 기본 `type="button"`, disabled는 반투명 + 눌림 없음.
 `size`: `sm`(h-8) · `md`(h-11). 알약, `font-extrabold`.
 Link에 같은 모양이 필요하면 `buttonClass(variant, size)`를 쓴다.
 **옐로 primary는 화면의 주요 행동에만** 쓴다 — 배지·장식 칩에 옐로를 쓰지 않는다.
@@ -149,7 +149,7 @@ Link에 같은 모양이 필요하면 `buttonClass(variant, size)`를 쓴다.
 활성 탭 칩 = `bg-c-accent text-c-on-accent`.
 
 ### 6.4 시트·드로어
-뒤 화면 `bg-c-scrim`, 본체 `bg-c-surface` 또는 `bg-c-bg`, 바텀시트는 위쪽만 둥글게(`rounded-t-[28px]` 또는 `rounded-t-card` — 통일은 후속 과제),
+뒤 화면 `bg-c-scrim`, 본체 `bg-c-surface` 또는 `bg-c-bg`, 바텀시트는 위쪽만 둥글게(`rounded-t-card`로 통일),
 바깥 탭·Esc로 닫힘. 참고 구현: `components/home/ComingSoonSheet.tsx`, `components/nav/Drawer.tsx`.
 
 ### 6.5 아이콘
