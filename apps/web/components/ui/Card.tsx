@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { HTMLAttributes } from 'react'
 
 const TONE = {
   plain: 'bg-c-surface text-c-text border border-c-line',
@@ -11,10 +11,11 @@ export default function Card({
   tone = 'plain',
   className = '',
   children,
-}: {
-  tone?: keyof typeof TONE
-  className?: string
-  children: ReactNode
-}) {
-  return <div className={`rounded-card ${TONE[tone]} ${className}`.trim()}>{children}</div>
+  ...rest
+}: { tone?: keyof typeof TONE } & HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={`rounded-card ${TONE[tone]} ${className}`.trim()} {...rest}>
+      {children}
+    </div>
+  )
 }

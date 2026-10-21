@@ -99,13 +99,9 @@ function DeleteModal({ label, onConfirm, onClose, t }: DeleteModalProps) {
           <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
             {t('delete.cancel')}
           </Button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            className={`${buttonClass('primary', 'md')} flex-1 !bg-c-danger !text-c-surface`}
-          >
+          <Button variant="danger" onClick={onConfirm} className="flex-1">
             {t('delete.yes')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
