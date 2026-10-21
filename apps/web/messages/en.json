@@ -75,38 +75,6 @@
     "logout": "Sign out"
   },
   "home": {
-    "title": "SajuGuri",
-    "fortuneBanner": "Today's Fortune",
-    "fortuneBannerCta": "See today's fortune",
-    "fortuneSub": "How's your day?",
-    "sectionTitle": "What about these?",
-    "cards": {
-      "manse": {
-        "title": "View Saju Chart",
-        "desc": "Your full natal chart at a glance"
-      },
-      "report": {
-        "title": "My Full Saju Report",
-        "badge": "10 tabs",
-        "desc": "Dig deep into your saju"
-      },
-      "chat": {
-        "title": "Chat with SajuGuri",
-        "desc": "Explore your saju, question by question"
-      },
-      "question": {
-        "title": "One-Line Reading",
-        "desc": "One free question, no sign-in"
-      },
-      "soon": {
-        "title": "Naming · Dream reading",
-        "desc": "coming soon"
-      },
-      "compatibility": {
-        "title": "Compatibility",
-        "desc": "Chemistry of two charts"
-      }
-    },
     "hero": {
       "freeDaily": "Today's fortune is free",
       "unseen": "Not checked yet",
@@ -114,7 +82,9 @@
       "seenTitle": "You've checked today",
       "again": "View again",
       "toCounsel": "Talk to Guriguri",
-      "bubble": "What's on your plate today?"
+      "bubble": "What's on your plate today?",
+      "open": "See today's fortune",
+      "promoCta": "Take a look"
     },
     "counsel": {
       "title": "Talk to Guriguri right now",
@@ -159,6 +129,10 @@
       "placeholder": "What's on your mind?",
       "empty": "No results found",
       "toCounsel": "Ask Guriguri directly"
+    },
+    "tabsLabel": "Product categories",
+    "grid": {
+      "empty": "Nothing in this category yet"
     }
   },
   "manse": {

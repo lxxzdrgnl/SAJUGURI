@@ -61,6 +61,13 @@
   --c-counsel-bg: #04332F;
   --c-counsel-fg: #E9F4F1;
   --c-scrim: rgba(0, 0, 0, 0.45);
+  /* 포스터 카드 배경 — 원천: packages/design posterByTheme (light / dark 블록 각각) */
+  --c-poster-butter: #FFF3C4;
+  --c-poster-rose: #FDE4EA;
+  --c-poster-lilac: #ECE7FA;
+  --c-poster-peach: #FFE8D9;
+  --c-poster-sky: #E2EEFB;
+  --c-poster-mint: #DDF3EA;
 }
 
 :root[data-theme="dark"] {
@@ -76,6 +83,12 @@
   --c-counsel-bg: #04332F;
   --c-counsel-fg: #E9F4F1;
   --c-scrim: rgba(0, 0, 0, 0.45);
+  --c-poster-butter: #3A3217;
+  --c-poster-rose: #3A2129;
+  --c-poster-lilac: #2A2540;
+  --c-poster-peach: #3B281D;
+  --c-poster-sky: #182A3B;
+  --c-poster-mint: #17332A;
 }
 
 @theme inline {
@@ -91,6 +104,12 @@
   --color-c-counsel-bg: var(--c-counsel-bg);
   --color-c-counsel-fg: var(--c-counsel-fg);
   --color-c-scrim: var(--c-scrim);
+  --color-c-poster-butter: var(--c-poster-butter);
+  --color-c-poster-rose: var(--c-poster-rose);
+  --color-c-poster-lilac: var(--c-poster-lilac);
+  --color-c-poster-peach: var(--c-poster-peach);
+  --color-c-poster-sky: var(--c-poster-sky);
+  --color-c-poster-mint: var(--c-poster-mint);
   --font-display: var(--font-jua), var(--font-sans);
   --radius-card: 20px;
   --radius-pill: 999px;

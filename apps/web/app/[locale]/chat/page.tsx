@@ -5,13 +5,24 @@ import type { ChatSession, ProfileResponse } from '@sajuguri/api-client'
 import BrutalCard from '@/components/ui/BrutalCard'
 import ChatListClient from '@/components/chat/ChatListClient'
 import PageHeading from '@/components/ui/PageHeading'
+import { firstParam, resolvePrefill } from '@/lib/chat/prefill'
 
 // 백엔드 직결 URL — 서버 컴포넌트는 next.config rewrites를 안 탄다
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 const GOOGLE_LOGIN_URL = `${API_URL}/api/auth/google?client=web`
 
-export default async function ChatPage() {
+interface Props {
+  searchParams: Promise<{ topic?: string | string[]; q?: string | string[] }>
+}
+
+export default async function ChatPage({ searchParams }: Props) {
   const t = await getTranslations('chat')
+  const tp = await getTranslations('products')
+  const sp = await searchParams
+  // 새 상담 첫 입력창 힌트 (?topic= 상품 상담 문구 > ?q= 문구) — 자동 전송 안 함
+  const prefill = resolvePrefill(firstParam(sp.topic), firstParam(sp.q), (id) =>
+    tp.has(`${id}.counselPrompt`) ? tp(`${id}.counselPrompt`) : null,
+  )
   const user = await currentUser()
 
   if (!user) {
@@ -49,7 +60,7 @@ export default async function ChatPage() {
 
   return (
     <main>
-      <ChatListClient sessions={sessions} profiles={profiles} />
+      <ChatListClient sessions={sessions} profiles={profiles} prefill={prefill} />
     </main>
   )
 }

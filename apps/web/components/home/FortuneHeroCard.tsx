@@ -41,32 +41,33 @@ export default function FortuneHeroCard({
   }, [rep])
 
   return (
-    <Card tone="soft" className="p-5">
+    <Card tone="soft" className="h-full p-5">
       <FortuneBannerClient profiles={profiles} isLoggedIn={isLoggedIn}>
         {summary.seen ? (
           <div className="flex items-center gap-4">
             <div className="min-w-0 flex-1">
               <p className="text-xs font-bold text-c-text-sub">{t('seenTitle')}</p>
-              <p className="mt-1 font-display text-3xl font-extrabold">{summary.score}</p>
+              <p className="mt-1 font-display text-3xl font-normal">{summary.score}</p>
               <p className="mt-1 text-sm font-bold">{summary.headline}</p>
               <span className={`${buttonClass('secondary', 'sm')} mt-3`}>{t('again')}</span>
             </div>
             <img src="/mascot/fortune.png" alt="" width={88} height={88} className="h-22 w-22 shrink-0 object-contain" />
           </div>
         ) : (
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">
               <span className="inline-block rounded-pill bg-c-accent px-2.5 py-0.5 text-xs font-extrabold text-c-on-accent">
                 {t('freeDaily')}
               </span>
-              <p className="mt-2 font-display text-xl font-extrabold">{t('unseen')}</p>
+              <p className="mt-2 font-display text-xl font-normal">{t('unseen')}</p>
               <span className={`${buttonClass('primary', 'md')} mt-3`}>{t('cta')}</span>
             </div>
-            <div className="relative shrink-0">
-              <span className="absolute -top-3 right-full mr-1 whitespace-nowrap rounded-card border border-c-line bg-c-surface px-2.5 py-1 text-xs font-bold">
+            {/* 말풍선은 마스코트 위 같은 열에 둔다 — 영어 문구도 열 안에서 줄바꿈되어 왼쪽 글과 겹치지 않는다 */}
+            <div className="flex w-24 shrink-0 flex-col items-center gap-1">
+              <span className="max-w-full rounded-card border border-c-line bg-c-surface px-2 py-1 text-center text-[11px] font-bold leading-tight">
                 {t('bubble')}
               </span>
-              <img src="/mascot/fortune.png" alt="" width={88} height={88} className="h-22 w-22 object-contain" />
+              <img src="/mascot/fortune.png" alt="" width={80} height={80} className="h-20 w-20 object-contain" />
             </div>
           </div>
         )}

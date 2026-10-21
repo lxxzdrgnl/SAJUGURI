@@ -148,3 +148,25 @@ export const ohaengTintByTheme: Record<ThemeName, Record<OhaengKey, string>> = {
   light: { 목: '#E9FAF1', 화: '#FFEEDD', 토: '#FFF6D1', 금: '#EEF0F3', 수: '#DCEFFB' },
   dark: { 목: '#12261D', 화: '#2B1B10', 토: '#2A2410', 금: '#222428', 수: '#12212E' },
 }
+
+/** 포스터 카드 배경 톤 — 홈 진열대 카테고리별 파스텔. apps/web globals.css --c-poster-* 가 미러한다. */
+export type PosterTone = 'butter' | 'rose' | 'lilac' | 'peach' | 'sky' | 'mint'
+
+export const posterByTheme: Record<ThemeName, Record<PosterTone, string>> = {
+  light: {
+    butter: '#FFF3C4',
+    rose: '#FDE4EA',
+    lilac: '#ECE7FA',
+    peach: '#FFE8D9',
+    sky: '#E2EEFB',
+    mint: '#DDF3EA',
+  },
+  dark: {
+    butter: '#3A3217',
+    rose: '#3A2129',
+    lilac: '#2A2540',
+    peach: '#3B281D',
+    sky: '#182A3B',
+    mint: '#17332A',
+  },
+}
