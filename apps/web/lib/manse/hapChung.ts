@@ -4,25 +4,14 @@ import type { SajuCalcResponse } from '@sajuguri/api-client'
 
 export type PillarKey = 'year' | 'month' | 'day' | 'hour'
 export const PKEYS: PillarKey[] = ['year', 'month', 'day', 'hour']
-export const PLABEL: Record<PillarKey, string> = { year: '연', month: '월', day: '일', hour: '시' }
 
 export type TabKey =
   | 'gung_seong' | 'cheon_gan_hap' | 'yuk_hap' | 'sam_hap' | 'bang_hap'
   | 'cheon_gan_chung' | 'chung' | 'gong_mang' | 'sam_hyeong' | 'pa' | 'yuk_hae' | 'won_jin'
 
-export const ALL_TABS: { key: TabKey; label: string }[] = [
-  { key: 'gung_seong', label: '궁성' },
-  { key: 'cheon_gan_hap', label: '천간합' },
-  { key: 'yuk_hap', label: '지지육합' },
-  { key: 'sam_hap', label: '지지삼합' },
-  { key: 'bang_hap', label: '지지방합' },
-  { key: 'cheon_gan_chung', label: '천간충' },
-  { key: 'chung', label: '지지충' },
-  { key: 'gong_mang', label: '공망' },
-  { key: 'sam_hyeong', label: '형' },
-  { key: 'pa', label: '파' },
-  { key: 'yuk_hae', label: '해' },
-  { key: 'won_jin', label: '원진' },
+export const ALL_TABS: TabKey[] = [
+  'gung_seong', 'cheon_gan_hap', 'yuk_hap', 'sam_hap', 'bang_hap', 'cheon_gan_chung',
+  'chung', 'gong_mang', 'sam_hyeong', 'pa', 'yuk_hae', 'won_jin',
 ]
 
 const SAM_HYEONG: Record<string, string[]> = {
@@ -32,8 +21,20 @@ const SAM_HYEONG: Record<string, string[]> = {
   오형: ['오'],
 }
 
+/** 관계 종류 — 문장은 UI(next-intl)에서 kind별 메시지로 조립 */
+export type EntryKind =
+  | 'stemHap' | 'stemChung' | 'yukHap' | 'samHap' | 'bangHap'
+  | 'chung' | 'gongMang' | 'samHyeong' | 'pa' | 'yukHae' | 'wonJin'
+
 export interface Entry {
-  text: string
+  kind: EntryKind
+  /** 관계를 이루는 글자 (쌍이면 2개, 이름형이면 [name]) */
+  chars: string[]
+  /** 문장 앞 "(연주-월주)" 표기에 쓰는 기둥 (없으면 빈 배열) */
+  descPillars: PillarKey[]
+  /** 공망 엔트리 전용 */
+  pillar?: PillarKey
+  vacant?: string[]
   stems: PillarKey[]
   branches: PillarKey[]
   resultEl?: string
@@ -56,40 +57,50 @@ function findBranch(saju: SajuCalcResponse, b: string): PillarKey[] {
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-function buildPairEntries(saju: SajuCalcResponse, val: any[], textFn: (pair: string[], desc: string) => string): Entry[] {
+function pillarsOfPair(saju: SajuCalcResponse, v: any, pair: string[]): PillarKey[] {
+  return (v.pillars as string[] | undefined)?.map((p) => p as PillarKey) ?? pair.flatMap((b) => findBranch(saju, b))
+}
+
+function buildPairEntries(saju: SajuCalcResponse, val: any[], kind: EntryKind): Entry[] {
   return val.map((v) => {
     const pair: string[] = v.pair ?? v
-    const pillars: PillarKey[] = (v.pillars as string[] | undefined)?.map((p) => p as PillarKey) ?? pair.flatMap((b) => findBranch(saju, b))
-    const desc = v.pillars ? `(${pillars.map((p) => PLABEL[p] + '주').join('-')}) ` : ''
-    return { text: textFn(pair, desc), stems: [], branches: pillars }
+    const pillars = pillarsOfPair(saju, v, pair)
+    return { kind, chars: pair, descPillars: v.pillars ? pillars : [], stems: [], branches: pillars }
   })
 }
 
-function buildStemEntries(val: any[], textFn: (v: any) => string, extra: (v: any) => Partial<Entry> = () => ({})): Entry[] {
-  return val.map((v) => ({ text: textFn(v), stems: (v.pillars as string[]).map((p) => p as PillarKey), branches: [], ...extra(v) }))
+function buildStemEntries(val: any[], kind: EntryKind, nameOf: (v: any) => string, extra: (v: any) => Partial<Entry> = () => ({})): Entry[] {
+  return val.map((v) => ({
+    kind, chars: [nameOf(v)], descPillars: [], stems: (v.pillars as string[]).map((p) => p as PillarKey), branches: [], ...extra(v),
+  }))
 }
 
-function buildGroupHap(saju: SajuCalcResponse, val: any): Entry[] {
+function buildGroupHap(saju: SajuCalcResponse, val: any, kind: EntryKind): Entry[] {
   return (Array.isArray(val) ? val : [val]).map((item) => ({
-    text: `지지에 <b>${item.name ?? item.label ?? ''}</b>이 있어요.`,
+    kind,
+    chars: [item.name ?? item.label ?? ''],
+    descPillars: [],
     stems: [],
     branches: (item.branches ?? []).flatMap((b: string) => findBranch(saju, b)),
     resultEl: item.element,
   }))
 }
 
-/** 탭별 엔트리 빌드 (HapChungPanel.vue ENTRY_BUILDERS·entries 보존) */
+/** 탭별 엔트리 빌드 (HapChungPanel.vue ENTRY_BUILDERS·entries 보존) — 구조화 데이터만 반환 */
 export function buildEntries(saju: SajuCalcResponse, key: TabKey): Entry[] {
   if (key === 'gung_seong') return []
   const br = (saju.branch_relations ?? {}) as Record<string, any>
   const gm = saju.gong_mang ?? { vacant_branches: [], affected_pillars: [] }
 
   if (key === 'gong_mang') {
-    const vacant = gm.vacant_branches
     return gm.affected_pillars.map((p) => {
       const pk = p as PillarKey
       return {
-        text: `<b>${PLABEL[pk]}주 지지 ${pillarOf(saju, pk)?.branch}</b>가 공망이에요. (공망 지지: ${vacant.join(', ')})`,
+        kind: 'gongMang' as const,
+        chars: [pillarOf(saju, pk)?.branch ?? ''],
+        descPillars: [],
+        pillar: pk,
+        vacant: gm.vacant_branches,
         stems: [],
         branches: [pk],
       }
@@ -101,29 +112,29 @@ export function buildEntries(saju: SajuCalcResponse, key: TabKey): Entry[] {
 
   switch (key) {
     case 'cheon_gan_hap':
-      return buildStemEntries(val, (x) => `천간에 <b>${x.name ?? x.stems?.join('')}</b>이 있어요.`, (x) => ({ resultEl: x.result_element }))
+      return buildStemEntries(val, 'stemHap', (x) => x.name ?? x.stems?.join(''), (x) => ({ resultEl: x.result_element }))
     case 'cheon_gan_chung':
-      return buildStemEntries(val, (x) => `천간에 <b>${x.name}</b>이 있어요.`)
+      return buildStemEntries(val, 'stemChung', (x) => x.name)
     case 'yuk_hap':
       return (val as any[]).map((v) => {
         const pair: string[] = v.pair ?? []
-        const pillars: PillarKey[] = (v.pillars as string[] | undefined)?.map((p) => p as PillarKey) ?? pair.flatMap((b) => findBranch(saju, b))
-        const desc = pillars.length ? `(${pillars.map((p) => PLABEL[p] + '주').join('-')}) ` : ''
-        return { text: `${desc}지지에 <b>${pair.join('')}육합</b>이 있어요.`, stems: [], branches: pillars, resultEl: v.element, broken: v.is_effective === false }
+        const pillars = pillarsOfPair(saju, v, pair)
+        return { kind: 'yukHap' as const, chars: pair, descPillars: pillars, stems: [], branches: pillars, resultEl: v.element, broken: v.is_effective === false }
       })
     case 'sam_hap':
+      return buildGroupHap(saju, val, 'samHap')
     case 'bang_hap':
-      return buildGroupHap(saju, val)
+      return buildGroupHap(saju, val, 'bangHap')
     case 'sam_hyeong':
-      return (val as string[]).map((name) => ({ text: `지지에 <b>${name}</b>이 있어요.`, stems: [], branches: (SAM_HYEONG[name] ?? []).flatMap((b) => findBranch(saju, b)) }))
+      return (val as string[]).map((name) => ({ kind: 'samHyeong' as const, chars: [name], descPillars: [], stems: [], branches: (SAM_HYEONG[name] ?? []).flatMap((b) => findBranch(saju, b)) }))
     case 'chung':
-      return buildPairEntries(saju, val, (p, d) => `${d}지지에 <b>${p.join('충')}</b>이 있어요.`)
+      return buildPairEntries(saju, val, 'chung')
     case 'yuk_hae':
-      return buildPairEntries(saju, val, (p, d) => `${d}지지에 <b>${p.join('·')}해</b>가 있어요.`)
+      return buildPairEntries(saju, val, 'yukHae')
     case 'pa':
-      return buildPairEntries(saju, val, (p, d) => `${d}지지에 <b>${p.join('·')}파</b>가 있어요.`)
+      return buildPairEntries(saju, val, 'pa')
     case 'won_jin':
-      return buildPairEntries(saju, val, (p, d) => `${d}지지에 <b>${p.join('·')}원진</b>이 있어요.`)
+      return buildPairEntries(saju, val, 'wonJin')
     default:
       return []
   }

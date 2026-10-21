@@ -320,7 +320,38 @@
         "elHwa": "Fire",
         "elTo": "Earth",
         "elGeum": "Metal",
-        "elSu": "Water"
+        "elSu": "Water",
+        "shortYear": "Year",
+        "shortMonth": "Month",
+        "shortDay": "Day",
+        "shortHour": "Hour",
+        "tab": {
+          "gung_seong": "궁성 (Palaces)",
+          "cheon_gan_hap": "Heavenly Stem combination (천간합)",
+          "yuk_hap": "Earthly Branch 육합 (六合)",
+          "sam_hap": "Earthly Branch 삼합 (三合)",
+          "bang_hap": "Earthly Branch 방합 (方合)",
+          "cheon_gan_chung": "Heavenly Stem clash (천간충)",
+          "chung": "Earthly Branch clash (지지충)",
+          "gong_mang": "Gongmang (Empty Space / Void)",
+          "sam_hyeong": "Punishment (형)",
+          "pa": "Disruption (파)",
+          "yuk_hae": "Harm (해)",
+          "won_jin": "원진 (怨嗔)"
+        },
+        "rel": {
+          "stemHap": "Heavenly Stem combination (합) found: <b>{name}</b>.",
+          "stemChung": "Heavenly Stem clash (충) found: <b>{name}</b>.",
+          "yukHap": "{desc}Earthly Branch 육합 (六合) found: <b>{a}{b2}</b>.",
+          "samHap": "Earthly Branch 삼합 (三合) found: <b>{name}</b>.",
+          "bangHap": "Earthly Branch 방합 (方合) found: <b>{name}</b>.",
+          "samHyeong": "Punishment (형) found among the Earthly Branches: <b>{name}</b>.",
+          "chung": "{desc}Earthly Branch clash (충) found: <b>{a}-{b2}</b>.",
+          "yukHae": "{desc}Earthly Branch harm (해) found: <b>{a}-{b2}</b>.",
+          "pa": "{desc}Earthly Branch disruption (파) found: <b>{a}-{b2}</b>.",
+          "wonJin": "{desc}Earthly Branch 원진 (怨嗔) found: <b>{a}-{b2}</b>.",
+          "gongMang": "The <b>{pillar} pillar branch {branch}</b> falls in Gongmang (Empty Space / Void). (Gongmang branches: {vacant})"
+        }
       },
       "feature": {
         "title": "Five Elements Reference",

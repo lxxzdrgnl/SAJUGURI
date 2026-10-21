@@ -29,6 +29,9 @@ const ALLOWLIST = new Set([
   'manse.charts.ilJin.title',   // "Daily Almanac (일진)"
 ])
 
+// 접두사 allowlist — 글로서리에 없는 명리 용어(육합·삼합·방합·원진·궁성)는 한글+한자 병기 유지
+const ALLOW_PREFIXES = ['manse.charts.hapChung.tab.', 'manse.charts.hapChung.rel.']
+
 const HANGUL = /[가-힣]/
 
 function walk(obj, prefix = '') {
@@ -39,7 +42,7 @@ function walk(obj, prefix = '') {
     if (val && typeof val === 'object') {
       violations.push(...walk(val, path))
     } else if (typeof val === 'string') {
-      if (HANGUL.test(val) && !ALLOWLIST.has(path)) {
+      if (HANGUL.test(val) && !ALLOWLIST.has(path) && !ALLOW_PREFIXES.some((p) => path.startsWith(p))) {
         violations.push({ path, val })
       }
     }
