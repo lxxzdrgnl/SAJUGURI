@@ -53,9 +53,9 @@ function YearFlowSection({
 
   return (
     <div className="flex flex-col gap-3">
-      <h2 className="text-[17px] font-extrabold">
-        <span className="text-teal">{t('page.yearFlowTitle')}</span>{' '}
-        <span className="text-ink">{yearFlow.year}</span>
+      <h2 className="text-[17px] font-extrabold text-c-text">
+        <span>{t('page.yearFlowTitle')}</span>{' '}
+        <span className="text-c-text-sub">{yearFlow.year}</span>
       </h2>
 
       {/* 상/하반기 — 세로 스택.
@@ -65,11 +65,11 @@ function YearFlowSection({
           { label: t('page.firstHalf'), text: yearFlow.first_half },
           { label: t('page.secondHalf'), text: yearFlow.second_half },
         ].map(({ label, text }) => (
-          <div key={label} className="rounded-lg border-2 border-ink bg-surface p-3.5 shadow-brutal-sm">
-            <p className="mb-1.5 text-[11px] font-extrabold uppercase tracking-wider text-teal-deep">
+          <div key={label} className="rounded-card border border-c-line bg-c-surface p-4">
+            <p className="mb-1.5 text-[11px] font-extrabold uppercase tracking-wider text-c-text-sub">
               {label}
             </p>
-            <p className="text-[14px] leading-relaxed text-ink">{text}</p>
+            <p className="text-[14px] leading-relaxed text-c-text">{text}</p>
           </div>
         ))}
       </div>
@@ -77,16 +77,16 @@ function YearFlowSection({
       {/* 월별 흐름 — 표가 아니라 행 목록.
           표는 '월' 칼럼이 좁아 "2/월"로 쪼개지고 매 행 보더가 눈을 어지럽혔다.
           리포트 아코디언과 같은 언어(모노 칩 + 굵은 제목 + 보조 설명)로 맞춘다. */}
-      <div className="overflow-hidden rounded-lg border-2 border-ink bg-surface shadow-brutal">
-        <ul className="divide-y divide-border-soft">
+      <div className="overflow-hidden rounded-card border border-c-line bg-c-surface">
+        <ul className="divide-y divide-c-line">
           {visible.map(m => (
             <li key={m.month} className="flex items-start gap-2.5 px-3.5 py-2.5">
-              <span className="mt-px shrink-0 rounded-md border-2 border-ink bg-bg-base px-1.5 py-0.5 font-mono text-[11px] font-bold tabular-nums leading-none text-ink">
+              <span className="mt-px shrink-0 rounded-md bg-c-surface-soft px-1.5 py-0.5 font-mono text-[11px] font-bold tabular-nums leading-none text-c-text">
                 {m.month}월
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-[13.5px] font-extrabold leading-snug text-ink">{m.keyword}</p>
-                <p className="mt-0.5 text-[12.5px] leading-snug text-text-sub">{m.memo}</p>
+                <p className="text-[13.5px] font-extrabold leading-snug text-c-text">{m.keyword}</p>
+                <p className="mt-0.5 text-[12.5px] leading-snug text-c-text-sub">{m.memo}</p>
               </div>
             </li>
           ))}
@@ -95,7 +95,7 @@ function YearFlowSection({
           <button
             type="button"
             onClick={() => setExpanded(true)}
-            className="w-full border-t-2 border-ink bg-bg-base py-2.5 text-[13px] font-extrabold text-ink transition-colors hover:bg-yellow-tint"
+            className="w-full border-t border-c-line bg-c-surface-soft py-2.5 text-[13px] font-extrabold text-c-text"
           >
             {t('page.showMore')} ({months.length - 4})
           </button>
@@ -118,35 +118,35 @@ function DaeUnSection({
 }) {
   return (
     <div className="flex flex-col gap-3">
-      <h2 className="text-[17px] font-extrabold">
-        <span className="text-orange">{t('page.daeUnTitle')}</span>
+      <h2 className="text-[17px] font-extrabold text-c-text">
+        <span>{t('page.daeUnTitle')}</span>
       </h2>
 
       {/* 대운 전체 타임라인 — 현재 대운 강조 */}
       {daeUnChart && <ToolCard tool="get_dae_un" payload={daeUnChart} />}
 
       <div className="flex flex-col gap-2">
-        {/* 현재 대운 — 오렌지 강조 */}
-        <div className="rounded-lg border-2 border-orange bg-surface p-3 shadow-pop">
-          <p className="mb-1 text-[12px] font-extrabold text-orange">{t('page.currentDaeUn')}</p>
-          <p className="mb-0.5 font-serif text-xl font-extrabold text-ink">{daeUn.current.ganji}</p>
-          <p className="mb-2 text-[12px] font-semibold text-ink opacity-60">{daeUn.current.period}</p>
-          <p className="text-[14px] leading-relaxed text-ink">{daeUn.current.text}</p>
+        {/* 현재 대운 — 소프트 톤 강조 */}
+        <div className="rounded-card bg-c-surface-soft p-4">
+          <p className="mb-1 text-[12px] font-extrabold text-c-text">{t('page.currentDaeUn')}</p>
+          <p className="mb-0.5 font-serif text-xl font-extrabold text-c-text">{daeUn.current.ganji}</p>
+          <p className="mb-2 text-[12px] font-semibold text-c-text-sub">{daeUn.current.period}</p>
+          <p className="text-[14px] leading-relaxed text-c-text">{daeUn.current.text}</p>
         </div>
 
         {/* 다음 대운 — 일반 */}
-        <div className="rounded-lg border-2 border-ink bg-surface p-3 shadow-brutal">
-          <p className="mb-1 text-[12px] font-extrabold text-ink">{t('page.nextDaeUn')}</p>
-          <p className="mb-0.5 font-serif text-xl font-extrabold text-ink">{daeUn.next.ganji}</p>
-          <p className="mb-2 text-[12px] font-semibold text-ink opacity-60">{daeUn.next.period}</p>
-          <p className="text-[14px] leading-relaxed text-ink">{daeUn.next.text}</p>
+        <div className="rounded-card border border-c-line bg-c-surface p-4">
+          <p className="mb-1 text-[12px] font-extrabold text-c-text">{t('page.nextDaeUn')}</p>
+          <p className="mb-0.5 font-serif text-xl font-extrabold text-c-text">{daeUn.next.ganji}</p>
+          <p className="mb-2 text-[12px] font-semibold text-c-text-sub">{daeUn.next.period}</p>
+          <p className="text-[14px] leading-relaxed text-c-text">{daeUn.next.text}</p>
         </div>
       </div>
 
       {/* 주의점 */}
-      <div className="rounded-lg border-2 border-ink bg-surface px-4 py-3 shadow-brutal-sm">
-        <p className="mb-1 text-[12px] font-extrabold text-orange">{t('page.cautionLabel')}</p>
-        <p className="text-[14px] leading-relaxed text-ink">{daeUn.caution}</p>
+      <div className="rounded-card border border-c-line bg-c-surface px-4 py-3">
+        <p className="mb-1 text-[12px] font-extrabold text-c-text-sub">{t('page.cautionLabel')}</p>
+        <p className="text-[14px] leading-relaxed text-c-text">{daeUn.caution}</p>
       </div>
     </div>
   )
