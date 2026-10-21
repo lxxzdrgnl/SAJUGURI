@@ -3,19 +3,16 @@ import { currentUser, serverAuthApi } from '@/lib/serverAuth'
 import { listSessions, listProfiles } from '@sajuguri/api-client'
 import type { ChatSession, ProfileResponse } from '@sajuguri/api-client'
 import ChatView from '@/components/chat/ChatView'
+import { clampPrefill, firstParam } from '@/lib/chat/prefill'
 
 interface Props {
   params: Promise<{ id: string; locale: string }>
   searchParams: Promise<{ q?: string | string[] }>
 }
 
-/** 첫 입력 힌트 최대 길이 */
-const PREFILL_MAX = 500
-
 export default async function ChatSessionPage({ params, searchParams }: Props) {
   const { id } = await params
-  const rawQ = (await searchParams).q
-  const prefill = (Array.isArray(rawQ) ? rawQ[0] : rawQ)?.trim().slice(0, PREFILL_MAX) || null
+  const prefill = clampPrefill(firstParam((await searchParams).q))
 
   const user = await currentUser()
   // 비로그인 → 목록으로 리다이렉트 (SSR notFound 또는 로그인 유도)

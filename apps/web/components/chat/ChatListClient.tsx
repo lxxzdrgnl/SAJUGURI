@@ -99,6 +99,14 @@ function DeleteModal({ sessionTitle, onConfirm, onClose, t }: DeleteModalProps) 
 export default function ChatListClient({ sessions: initialSessions, profiles, prefill = null }: Props) {
   const t = useTranslations('chat')
   const [sheetOpen, setSheetOpen] = useState(!!prefill)
+  // 첫 입력 힌트는 한 번만 쓴다 — 시트를 닫으면 비워서 이후 "새 상담"에 남지 않게 한다
+  const [activePrefill, setActivePrefill] = useState(prefill)
+
+  // ?topic= / ?q= 를 읽었으면 주소에서 지운다 — 새로고침 때 시트가 다시 열리지 않게
+  useEffect(() => {
+    if (!prefill) return
+    window.history.replaceState(window.history.state, '', window.location.pathname)
+  }, [prefill])
   const [sessions, setSessions] = useState(initialSessions)
   const [deletingSession, setDeletingSession] = useState<ChatSession | null>(null)
   const [editMode, setEditMode] = useState(false)
@@ -214,9 +222,12 @@ export default function ChatListClient({ sessions: initialSessions, profiles, pr
 
       <ChatEntrySheet
         open={sheetOpen}
-        onClose={() => setSheetOpen(false)}
+        onClose={() => {
+          setSheetOpen(false)
+          setActivePrefill(null)
+        }}
         profiles={profiles}
-        prefill={prefill}
+        prefill={activePrefill}
       />
 
       {deletingSession && (

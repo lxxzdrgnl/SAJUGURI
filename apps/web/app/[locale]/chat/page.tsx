@@ -5,39 +5,24 @@ import type { ChatSession, ProfileResponse } from '@sajuguri/api-client'
 import BrutalCard from '@/components/ui/BrutalCard'
 import ChatListClient from '@/components/chat/ChatListClient'
 import PageHeading from '@/components/ui/PageHeading'
-import { PRODUCTS } from '@sajuguri/core'
+import { firstParam, resolvePrefill } from '@/lib/chat/prefill'
 
 // 백엔드 직결 URL — 서버 컴포넌트는 next.config rewrites를 안 탄다
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 const GOOGLE_LOGIN_URL = `${API_URL}/api/auth/google?client=web`
 
-/** 첫 입력 힌트 최대 길이 — URL로 들어온 임의 문자열을 제한한다 */
-const PREFILL_MAX = 500
-
-/**
- * 새 상담 첫 입력창 힌트 — ?topic=<ProductId>면 그 상품의 상담 문구, 아니면 ?q=<문구>.
- * 자동 전송은 하지 않는다.
- */
-async function resolvePrefill(topic?: string, q?: string): Promise<string | null> {
-  if (topic && PRODUCTS.some((p) => p.id === topic)) {
-    const tp = await getTranslations('products')
-    const key = `${topic}.counselPrompt`
-    if (tp.has(key)) return tp(key)
-  }
-  const text = q?.trim()
-  return text ? text.slice(0, PREFILL_MAX) : null
-}
-
 interface Props {
   searchParams: Promise<{ topic?: string | string[]; q?: string | string[] }>
 }
 
-const first = (v?: string | string[]) => (Array.isArray(v) ? v[0] : v)
-
 export default async function ChatPage({ searchParams }: Props) {
   const t = await getTranslations('chat')
+  const tp = await getTranslations('products')
   const sp = await searchParams
-  const prefill = await resolvePrefill(first(sp.topic), first(sp.q))
+  // 새 상담 첫 입력창 힌트 (?topic= 상품 상담 문구 > ?q= 문구) — 자동 전송 안 함
+  const prefill = resolvePrefill(firstParam(sp.topic), firstParam(sp.q), (id) =>
+    tp.has(`${id}.counselPrompt`) ? tp(`${id}.counselPrompt`) : null,
+  )
   const user = await currentUser()
 
   if (!user) {
