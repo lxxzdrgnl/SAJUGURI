@@ -8,6 +8,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import Card from '@/components/ui/Card'
 
 // ── 인터페이스 ─────────────────────────────────────────────────────────────────
 
@@ -73,14 +74,14 @@ interface SubScoreBarProps {
 function SubScoreBar({ label, value }: SubScoreBarProps) {
   return (
     <div className="flex items-center gap-2">
-      <span className="w-20 shrink-0 text-[13px] font-extrabold text-ink">{label}</span>
-      <div className="relative h-3 flex-1 overflow-hidden rounded-full bg-border-soft">
+      <span className="w-20 shrink-0 text-[13px] font-extrabold text-c-text">{label}</span>
+      <div className="relative h-3 flex-1 overflow-hidden rounded-pill bg-c-surface-soft">
         <div
-          className="absolute inset-y-0 left-0 rounded-full bg-teal transition-all duration-700"
+          className="absolute inset-y-0 left-0 rounded-full bg-c-text transition-all duration-700"
           style={{ width: `${value}%` }}
         />
       </div>
-      <span className="w-8 text-right text-[14px] font-extrabold tabular-nums text-ink">
+      <span className="w-8 text-right text-[14px] font-extrabold tabular-nums text-c-text">
         {value}
       </span>
     </div>
@@ -104,12 +105,12 @@ export default function ScoreOverview({ score, nameA, nameB }: ScoreOverviewProp
   ] as const
 
   return (
-    <div className="rounded-lg border-2 border-ink bg-surface p-5 shadow-brutal">
+    <Card className="p-5">
       {/* 이름 레이블 */}
       {(nameA || nameB) && (
-        <p className="mb-3 text-[13px] font-extrabold tracking-[0.14em] text-ink">
+        <p className="mb-3 text-[13px] font-extrabold tracking-[0.14em] text-c-text">
           {nameA ?? t('scoreOverview.personA')}{' '}
-          <span className="text-orange">&amp;</span>{' '}
+          <span className="text-c-text-sub">&amp;</span>{' '}
           {nameB ?? t('scoreOverview.personB')}
         </p>
       )}
@@ -117,29 +118,29 @@ export default function ScoreOverview({ score, nameA, nameB }: ScoreOverviewProp
       {/* 히어로 점수 */}
       <div className="mb-5 flex items-end gap-2">
         <span
-          className="font-black leading-[0.85] tabular-nums text-ink"
+          className="font-black leading-[0.85] tabular-nums text-c-text"
           style={{
             fontSize: 'clamp(88px, 28vw, 128px)',
             letterSpacing: '-0.04em',
             color: isHighScore
-              ? 'var(--teal)'
+              ? 'var(--c-text)'
               : isLowScore
-                ? 'var(--text-sub)'
-                : 'var(--ink)',
+                ? 'var(--c-text-sub)'
+                : 'var(--c-text)',
           }}
         >
           {displayScore}
         </span>
-        <span className="mb-4 text-[22px] font-black text-ink">/100</span>
+        <span className="mb-4 text-[22px] font-black text-c-text">/100</span>
 
         {/* 뱃지 */}
         {isHighScore && (
-          <span className="mb-4 rounded-full bg-teal px-3 py-1 text-[11px] font-black text-white">
+          <span className="mb-4 rounded-pill bg-c-text px-3 py-1 text-[11px] font-black text-c-bg">
             {t('scoreOverview.highBadge')}
           </span>
         )}
         {isLowScore && (
-          <span className="mb-4 rounded-full bg-border-soft px-3 py-1 text-[11px] font-black text-text-sub">
+          <span className="mb-4 rounded-pill bg-c-surface-soft px-3 py-1 text-[11px] font-black text-c-text-sub">
             {t('scoreOverview.lowBadge')}
           </span>
         )}
@@ -151,6 +152,6 @@ export default function ScoreOverview({ score, nameA, nameB }: ScoreOverviewProp
           <SubScoreBar key={key} label={t(`scoreOverview.${key}`)} value={value} />
         ))}
       </div>
-    </div>
+    </Card>
   )
 }

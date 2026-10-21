@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { ProfileResponse } from '@sajuguri/api-client'
 import MansePickerSheet, { type MansePick } from '@/components/manse/MansePickerSheet'
+import Button from '@/components/ui/Button'
 import MascotTinted from '@/components/ui/MascotTinted'
 
 // ── PersonPick 타입 ──────────────────────────────────────────────────────────
@@ -61,25 +62,25 @@ function SlotCard({ pick, onOpen, t }: SlotCardProps) {
     <button
       type="button"
       onClick={onOpen}
-      className="flex aspect-square w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-ink bg-surface p-3 text-center shadow-brutal transition-opacity hover:opacity-80"
+      className="flex aspect-square w-full flex-col items-center justify-center gap-2 rounded-card border border-c-line bg-c-surface p-3 text-center transition-colors hover:bg-c-surface-soft"
     >
       {pick ? (
         <>
-          <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border-2 border-ink bg-surface">
+          <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-card bg-c-surface-soft">
             <MascotTinted stem={pick.day_stem ?? null} width={58} height={58} />
           </span>
           <span className="w-full min-w-0">
             <span className="block truncate text-[14px] font-extrabold">{pick.name}</span>
-            <span className="block text-[11px] text-text-sub">{pick.birth_date}</span>
+            <span className="block text-[11px] text-c-text-sub">{pick.birth_date}</span>
           </span>
-          <span className="text-[11px] font-extrabold text-teal-deep">{t('slot.reselect')}</span>
+          <span className="text-[11px] font-extrabold text-c-text-sub">{t('slot.reselect')}</span>
         </>
       ) : (
         <>
-          <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-ink text-3xl font-black text-ink">
+          <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-card border border-dashed border-c-line text-3xl font-black text-c-text-sub">
             +
           </span>
-          <span className="text-[13px] font-extrabold text-text-sub">{t('slot.selectOrInput')}</span>
+          <span className="text-[13px] font-extrabold text-c-text-sub">{t('slot.selectOrInput')}</span>
         </>
       )}
     </button>
@@ -124,14 +125,14 @@ export default function PersonSlotPicker({ profiles, onComplete }: Props) {
       {/* 좌우 정사각형 슬롯 — 사람1 ♥ 사람2 */}
       <div className="flex items-center gap-2">
         <div className="flex flex-1 flex-col gap-2">
-          <p className="text-center text-[12px] font-extrabold uppercase tracking-widest text-ink">
+          <p className="text-center text-[12px] font-extrabold uppercase tracking-widest text-c-text">
             {t('slot.labelA')}
           </p>
           <SlotCard pick={slotA} onOpen={() => setOpenSheet('a')} t={t} />
         </div>
-        <span className="shrink-0 self-center pt-6 text-5xl text-orange">♥</span>
+        <span className="shrink-0 self-center pt-6 text-5xl text-c-text-sub">♥</span>
         <div className="flex flex-1 flex-col gap-2">
-          <p className="text-center text-[12px] font-extrabold uppercase tracking-widest text-ink">
+          <p className="text-center text-[12px] font-extrabold uppercase tracking-widest text-c-text">
             {t('slot.labelB')}
           </p>
           <SlotCard pick={slotB} onOpen={() => setOpenSheet('b')} t={t} />
@@ -139,14 +140,14 @@ export default function PersonSlotPicker({ profiles, onComplete }: Props) {
       </div>
 
       {/* 궁합 보기 버튼 */}
-      <button
+      <Button
         type="button"
         disabled={!bothFilled}
         onClick={handleComplete}
-        className="mt-2 w-full rounded-lg border-2 border-ink bg-orange py-3.5 text-[15px] font-extrabold text-white shadow-brutal transition-opacity disabled:opacity-40 active:translate-x-[2px] active:translate-y-[2px] active:shadow-brutal-sm"
+        className="mt-2 w-full disabled:opacity-40"
       >
         {t('viewCompatibility')}
-      </button>
+      </Button>
 
       {/* 슬롯 A 픽시트 */}
       <MansePickerSheet
