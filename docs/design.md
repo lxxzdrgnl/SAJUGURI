@@ -67,7 +67,7 @@
 
 `--c-oh-{mok,hwa,to,geum,su}`(글자·채움)과 `--c-oh-*-tint`(기둥 카드 배경).
 코드에서는 `apps/web/lib/ohaeng.ts`의 `ohaengVar()` / `ohaengTintVar()`로 얻는다.
-(`ohaengColor()` HEX 헬퍼는 `${c}1A` 같은 문자열 합성을 하는 곳 — 툴카드 — 에서만 남겨 둔다.)
+(옅은 배경이 필요하면 `color-mix(in srgb, var(--c-oh-x) 10%, transparent)`. HEX 헬퍼는 없다 — 항상 CSS 변수를 쓴다.)
 
 | 오행 | 라이트 | 라이트 틴트 | 다크 | 다크 틴트 |
 |---|---|---|---|---|
@@ -82,16 +82,16 @@
 ### 2.4 일간 고정색 (모드 무관)
 
 **일주 히어로 / 마스코트 / 아바타 배경 = 일간 천간 색** (사용자 확정, 두 모드 동일):
-갑·을 푸른 `#7FC7BE` / 병·정 붉은 `#F5623A` / 무·기 황금 `#FFD900` / 경·신 은빛 `#E8EAED` /
+갑·을 푸른 `#7FC7BE` / 병·정 붉은 `#EA6845` / 무·기 황금 `#FFD900` / 경·신 은빛 `#E8EAED` /
 임·계 웜그레이 `#8B8178`. 히어로에 **띠 닉네임**(천간 색 + 지지 동물 — "회색 쥐"/"Gray Rat")을
 표기한다. 단일 출처 `lib/manse/ganjiNickname.ts`. 히어로 위 글자는 `text-c-on-accent`.
 
 ### 2.5 그라데이션
 
-앱 본체의 카드·배너는 **단색**. 예외는 둘뿐이다.
+앱 본체의 카드·배너는 **단색**. 예외는 운세 스토리 하나뿐이다.
 - **오늘의 운세 스토리** — 모드와 무관하게 기존 비비드 룩(딥 틸 `#00857D → #04332F`,
   점수 `#FF8A2E`, 프로그레스 `#FFD900`). `FortuneStoryPage`·`StoryCard`·`SummaryCard`는 동결.
-- **다크 포스터 카드의 은은한 방사형 배경** (다크 모드 도입 시).
+- (허용만 된 예외) 다크 포스터 카드의 은은한 방사형 배경 — 아직 쓰는 곳 없음.
 
 ---
 
@@ -113,7 +113,7 @@
 | 역할 | 글꼴 | 사용 |
 |---|---|---|
 | 제목·상품명·히어로·로고 | **주아 (Jua)** — `next/font/google`, `--font-display`, 유틸 `font-display` | 400 한 굵기뿐이라 **반드시 `font-normal`과 함께** 쓴다 (가짜 볼드 금지) |
-| 본문·UI | Pretendard (`--font-sans`) | |
+| 본문·UI | 시스템 고딕 스택 (`--font-sans`, Tailwind 기본) | Pretendard는 아직 로드하지 않는다 |
 | 간지 한자·한글 | 본문과 같은 고딕 (`font-serif` 유틸이 고딕 스택을 가리킨다) | 명조로 튀지 않게 통일 |
 
 ---
@@ -127,8 +127,8 @@
 | 버튼·칩·검색창·토글 | `rounded-pill` | 알약 |
 
 - 테두리는 **1px `border-c-line`** 하나. 강조(일주 기둥·현재 대운·오늘 일진)는 1.5px `c-text` 라인.
-- 그림자 없음. 눌림은 `active:scale-[0.98]`.
-- 레거시 `rounded-lg/md/…` 축소 스케일(globals.css)은 Task 21 정리 때 걷어낸다. 새 코드는 위 두 개만.
+- 그림자 없음. 눌림은 `Button`이 `active:scale-[0.98]`, 그 밖의 버튼은 전역 규칙이 `translateY(1px)`.
+- 레거시 `rounded-sm/md/lg/xl/2xl/3xl`은 축소 스케일(4~16px)로 덮어써 둔 채 남아 있다(기존 사용처 약 40곳). 새 코드는 위 표의 클래스만 쓴다.
 
 ---
 
@@ -149,7 +149,7 @@ Link에 같은 모양이 필요하면 `buttonClass(variant, size)`를 쓴다.
 활성 탭 칩 = `bg-c-accent text-c-on-accent`.
 
 ### 6.4 시트·드로어
-뒤 화면 `bg-c-scrim`, 본체 `bg-c-surface`(드로어는 `c-bg`), 바텀시트는 위쪽만 28px,
+뒤 화면 `bg-c-scrim`, 본체 `bg-c-surface` 또는 `bg-c-bg`, 바텀시트는 위쪽만 둥글게(`rounded-t-[28px]` 또는 `rounded-t-card` — 통일은 후속 과제),
 바깥 탭·Esc로 닫힘. 참고 구현: `components/home/ComingSoonSheet.tsx`, `components/nav/Drawer.tsx`.
 
 ### 6.5 아이콘
@@ -220,7 +220,7 @@ Link에 같은 모양이 필요하면 `buttonClass(variant, size)`를 쓴다.
 ## 11. 레이아웃·레이어·접근성
 
 - 전 화면 **모바일 단일 컬럼 max-width 640px** 가운데 정렬. PC 전용 레이아웃 없음. 가로 스크롤 금지.
-- 화면 배경은 `bg-c-bg`. (Task 21 전까지 일부 페이지는 음수 마진으로 배경을 칠한다 — 정리 예정.)
+- 화면 배경은 `body`가 `var(--c-bg)`로 칠한다. 페이지가 따로 배경을 칠하지 않는다.
 
 ### z-index
 
