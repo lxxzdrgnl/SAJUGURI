@@ -61,7 +61,7 @@
   --c-counsel-bg: #04332F;
   --c-counsel-fg: #E9F4F1;
   --c-scrim: rgba(0, 0, 0, 0.45);
-  /* 포스터 카드 배경 — 카테고리별 파스텔 (홈 진열대) */
+  /* 포스터 카드 배경 — 원천: packages/design posterByTheme (light / dark 블록 각각) */
   --c-poster-butter: #FFF3C4;
   --c-poster-rose: #FDE4EA;
   --c-poster-lilac: #ECE7FA;

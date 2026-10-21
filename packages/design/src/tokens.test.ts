@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { colors, ohaeng, ohaengTint, radius, shadow, toCssVariables, semantic, ohaengByTheme, ohaengTintByTheme } from './tokens'
+import { colors, ohaeng, ohaengTint, radius, shadow, toCssVariables, semantic, ohaengByTheme, ohaengTintByTheme, posterByTheme } from './tokens'
 
 describe('design tokens', () => {
   it('비비드 캔디 핵심 팔레트 값 (docs/design.md §2.1)', () => {
@@ -93,5 +93,32 @@ describe('semantic tokens', () => {
   it('기존 export 보존 (모바일 보호)', () => {
     expect(colors.bgBase).toBeDefined()
     expect(shadow).toBeDefined()
+  })
+})
+
+describe('poster tokens', () => {
+  const themes = ['light', 'dark'] as const
+  it('라이트·다크는 같은 키 집합', () => {
+    expect(Object.keys(posterByTheme.dark).sort()).toEqual(Object.keys(posterByTheme.light).sort())
+  })
+  for (const t of themes) {
+    it(`${t}: 본문 텍스트 대비 4.5 이상`, () => {
+      for (const [k, c] of Object.entries(posterByTheme[t])) {
+        expect(c, k).toMatch(/^#[0-9A-F]{6}$/i)
+        expect(contrast(semantic[t].text, c), k).toBeGreaterThanOrEqual(4.5)
+      }
+    })
+  }
+  it('apps/web globals.css가 포스터 값을 미러한다', async () => {
+    const { readFile } = await import('node:fs/promises')
+    const css = await readFile(new URL('../../../apps/web/app/globals.css', import.meta.url), 'utf8')
+    const split = css.indexOf(':root[data-theme="dark"]')
+    const light = css.slice(0, split)
+    const dark = css.slice(split)
+    for (const [k, v] of Object.entries(posterByTheme.light)) expect(light).toContain(`--c-poster-${k}: ${v};`)
+    for (const [k, v] of Object.entries(posterByTheme.dark)) expect(dark).toContain(`--c-poster-${k}: ${v};`)
+    for (const k of Object.keys(posterByTheme.light)) {
+      expect(css).toContain(`--color-c-poster-${k}: var(--c-poster-${k});`)
+    }
   })
 })
