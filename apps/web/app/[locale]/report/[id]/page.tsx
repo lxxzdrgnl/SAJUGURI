@@ -12,6 +12,7 @@ export default async function ReportDetailPage({
 }) {
   const { id } = await params
   const t = await getTranslations('report')
+  const tf = await getTranslations('manse.form')
 
   let report = null
   try {
@@ -33,7 +34,7 @@ export default async function ReportDetailPage({
   const summaryLine = [
     bi.name,
     bi.birth_date,
-    bi.gender === 'male' ? '남성' : '여성',
+    bi.gender === 'male' ? tf('male') : tf('female'),
   ]
     .filter(Boolean)
     .join(' · ')

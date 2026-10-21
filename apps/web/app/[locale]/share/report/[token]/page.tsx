@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import { serverApi } from '@/lib/api'
 import { getSharedReport } from '@sajuguri/api-client'
 import ReportView from '@/components/report/ReportView'
@@ -14,6 +15,8 @@ export async function generateMetadata({
   params: Promise<{ token: string }>
 }): Promise<Metadata> {
   const { token } = await params
+  const t = await getTranslations('report.shared')
+  const site = (await getTranslations('meta'))('siteName')
   let profileName = ''
   try {
     const report = await getSharedReport(serverApi, token)
@@ -23,10 +26,8 @@ export async function generateMetadata({
   }
   // 이름이 있으면 "{이름}님의 사주 리포트", 없으면(게스트) "님의" 없는 익명 제목.
   const hasName = Boolean(profileName)
-  const title = hasName ? `${profileName}님의 사주 리포트 | 사주구리` : '사주구리 사주 리포트'
-  const description = hasName
-    ? `${profileName}님의 AI 사주 리포트를 확인해보세요.`
-    : 'AI 사주 리포트를 확인해보세요. · 사주구리'
+  const title = hasName ? t('metaTitle', { name: profileName, site }) : t('metaTitleAnon', { site })
+  const description = hasName ? t('metaDescription', { name: profileName }) : t('metaDescriptionAnon', { site })
   return {
     title,
     description,
@@ -34,7 +35,7 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      siteName: '사주구리',
+      siteName: site,
     },
   }
 }
@@ -45,6 +46,9 @@ export default async function SharedReportPage({
   params: Promise<{ token: string }>
 }) {
   const { token } = await params
+  const t = await getTranslations('report.shared')
+  const tr = await getTranslations('report')
+  const tf = await getTranslations('manse.form')
 
   let report = null
   try {
@@ -56,8 +60,8 @@ export default async function SharedReportPage({
   if (!report) {
     return (
       <main className="-mx-4 -mt-2 -mb-8 min-h-[calc(100dvh-3.5rem)] px-4 pt-16 text-center">
-        <p className="text-[15px] font-extrabold text-c-text-sub">공유 링크를 찾을 수 없어요.</p>
-        <p className="mt-2 text-[13px] text-c-text-sub">링크가 만료됐거나 잘못된 주소예요.</p>
+        <p className="text-[15px] font-extrabold text-c-text-sub">{t('notFoundTitle')}</p>
+        <p className="mt-2 text-[13px] text-c-text-sub">{t('notFoundDesc')}</p>
       </main>
     )
   }
@@ -66,7 +70,7 @@ export default async function SharedReportPage({
   const summaryLine = [
     bi.name,
     bi.birth_date,
-    bi.gender === 'male' ? '남성' : '여성',
+    bi.gender === 'male' ? tf('male') : tf('female'),
   ]
     .filter(Boolean)
     .join(' · ')
@@ -81,17 +85,17 @@ export default async function SharedReportPage({
       <ReportView report={report} reportId={0} shareMode />
 
       {/* 안내 — 하단 */}
-      <p className="pb-2 text-center text-[13px] text-c-text-sub">각 제목을 클릭하면 해설이 펼쳐져요</p>
+      <p className="pb-2 text-center text-[13px] text-c-text-sub">{tr('page.guideText')}</p>
 
       {/* 나도 확인 CTA */}
       <Card className="mt-2 p-5">
-        <p className="mb-1 text-[14px] font-extrabold">나도 내 사주가 궁금하다면?</p>
-        <p className="mb-3 text-[13px] text-c-text-sub">생년월일시만 입력하면 무료로 만세력을 확인할 수 있어요.</p>
+        <p className="mb-1 text-[14px] font-extrabold">{t('ctaTitle')}</p>
+        <p className="mb-3 text-[13px] text-c-text-sub">{t('ctaDesc')}</p>
         <a
           href="/"
           className={`${buttonClass('primary', 'md')} w-full`}
         >
-          나도 확인해보기
+          {t('ctaBtn')}
         </a>
       </Card>
     </main>
