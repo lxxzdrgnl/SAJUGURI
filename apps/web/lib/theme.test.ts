@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { parseThemePref, THEME_COOKIE } from './theme'
+import { nextRadioIndex, parseThemePref, THEME_COOKIE } from './theme'
 
 describe('parseThemePref', () => {
   it('알려진 값은 그대로', () => {
@@ -48,5 +48,17 @@ describe('globals.css 다크 블록 동기화', () => {
       if (v.startsWith('var(')) continue // 별칭은 원본을 따라간다
       expect(forced.has(k), k).toBe(true)
     }
+  })
+})
+
+describe('nextRadioIndex', () => {
+  it('오른쪽/아래는 다음, 왼쪽/위는 이전, 끝에서 순환', () => {
+    expect(nextRadioIndex('ArrowRight', 0, 3)).toBe(1)
+    expect(nextRadioIndex('ArrowDown', 2, 3)).toBe(0)
+    expect(nextRadioIndex('ArrowLeft', 0, 3)).toBe(2)
+    expect(nextRadioIndex('ArrowUp', 1, 3)).toBe(0)
+  })
+  it('다른 키는 null', () => {
+    expect(nextRadioIndex('Enter', 0, 3)).toBeNull()
   })
 })
