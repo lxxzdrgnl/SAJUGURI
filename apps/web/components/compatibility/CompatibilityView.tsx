@@ -83,7 +83,7 @@ export default function CompatibilityView({
         overview={
           <>
             {summaryLine && (
-              <p className="text-[20px] font-extrabold leading-snug text-ink">{summaryLine}</p>
+              <p className="text-[20px] font-extrabold leading-snug text-c-text">{summaryLine}</p>
             )}
             <ScoreOverview score={detail.score} nameA={nameA} nameB={nameB} />
             <ElementFlowDiagram synastry={detail.synastry} nameA={nameA} nameB={nameB} />

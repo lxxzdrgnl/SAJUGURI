@@ -13,6 +13,7 @@
  */
 
 import { useTranslations } from 'next-intl'
+import Card from '@/components/ui/Card'
 
 // ── 인터페이스 ─────────────────────────────────────────────────────────────────
 
@@ -37,7 +38,7 @@ export interface ElementFlowDiagramProps {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="mb-2 text-[12px] font-extrabold tracking-[0.14em] text-teal-deep">
+    <p className="mb-2 text-[12px] font-extrabold tracking-[0.14em] text-c-text-sub">
       {children}
     </p>
   )
@@ -52,19 +53,19 @@ function Chip({
 }) {
   const base = 'inline-flex items-center rounded-full px-2.5 py-1 text-[12px] font-extrabold'
   const variants: Record<string, string> = {
-    default: 'bg-teal-tint text-teal-deep border border-teal',
-    clash: 'bg-orange-tint text-orange border border-orange',
-    'synergy-saeng': 'bg-teal-tint text-teal-deep border border-teal',
-    'synergy-geuk': 'bg-orange-tint text-orange border border-orange',
-    yongsin: 'bg-yellow-tint text-ink border border-amber',
+    default: 'bg-c-surface-soft text-c-text border border-c-line',
+    clash: 'bg-c-surface-soft text-c-danger border border-c-danger',
+    'synergy-saeng': 'bg-c-surface-soft text-c-text border border-c-line',
+    'synergy-geuk': 'bg-c-surface-soft text-c-danger border border-c-danger',
+    yongsin: 'bg-c-accent text-c-on-accent border border-c-accent',
   }
   return <span className={`${base} ${variants[variant]}`}>{children}</span>
 }
 
 function Arrow({ direction = 'right' }: { direction?: 'right' | 'left' | 'both' }) {
-  if (direction === 'both') return <span className="text-[15px] font-black text-teal">⇌</span>
-  if (direction === 'left') return <span className="text-[15px] font-black text-teal">←</span>
-  return <span className="text-[15px] font-black text-teal">→</span>
+  if (direction === 'both') return <span className="text-[15px] font-black text-c-text">⇌</span>
+  if (direction === 'left') return <span className="text-[15px] font-black text-c-text">←</span>
+  return <span className="text-[15px] font-black text-c-text">→</span>
 }
 
 // ── 메인 컴포넌트 ─────────────────────────────────────────────────────────────
@@ -107,8 +108,8 @@ export default function ElementFlowDiagram({
   }
 
   return (
-    <div className="flex flex-col gap-5 rounded-lg border-2 border-ink bg-surface p-5 shadow-brutal">
-      <p className="text-[17px] font-extrabold text-teal">
+    <Card className="flex flex-col gap-5 p-5">
+      <p className="text-[17px] font-extrabold text-c-text">
         {t('elementFlow.title')}
       </p>
 
@@ -117,19 +118,19 @@ export default function ElementFlowDiagram({
         <div className="flex flex-col gap-1">
           <SectionLabel>{t('elementFlow.stemHapLabel')}</SectionLabel>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="rounded-lg border-2 border-ink bg-yellow-tint px-3 py-1.5 text-[14px] font-extrabold text-ink">
+            <span className="rounded-pill border border-c-line bg-c-surface-soft px-3 py-1.5 text-[14px] font-extrabold text-c-text">
               {nameA}
             </span>
-            <span className="text-[15px] font-black text-text-sub">+</span>
-            <span className="rounded-lg border-2 border-ink bg-yellow-tint px-3 py-1.5 text-[14px] font-extrabold text-ink">
+            <span className="text-[15px] font-black text-c-text-sub">+</span>
+            <span className="rounded-pill border border-c-line bg-c-surface-soft px-3 py-1.5 text-[14px] font-extrabold text-c-text">
               {nameB}
             </span>
-            <span className="text-[15px] font-black text-text-sub">→</span>
-            <span className="rounded-lg border-2 border-teal bg-teal-tint px-3 py-1.5 text-[14px] font-extrabold text-teal-deep">
+            <span className="text-[15px] font-black text-c-text-sub">→</span>
+            <span className="rounded-pill border border-c-line bg-c-accent px-3 py-1.5 text-[14px] font-extrabold text-c-on-accent">
               {stem_hap}
             </span>
           </div>
-          <p className="text-[12px] text-text-sub">
+          <p className="text-[12px] text-c-text-sub">
             {t('elementFlow.stemHapDesc', { element: stem_hap ?? '' })}
           </p>
         </div>
@@ -140,9 +141,9 @@ export default function ElementFlowDiagram({
         <div className="flex flex-col gap-1">
           <SectionLabel>{t('elementFlow.synergyLabel')}</SectionLabel>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[13px] font-extrabold text-ink">{nameA}</span>
+            <span className="text-[13px] font-extrabold text-c-text">{nameA}</span>
             <Arrow direction="right" />
-            <span className="text-[13px] font-extrabold text-ink">{nameB}</span>
+            <span className="text-[13px] font-extrabold text-c-text">{nameB}</span>
             <Chip variant={isSaeng ? 'synergy-saeng' : isGeuk ? 'synergy-geuk' : 'default'}>
               {element_synergy}
             </Chip>
@@ -157,10 +158,10 @@ export default function ElementFlowDiagram({
 
           {complement_a_to_b.length > 0 && (
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[12px] font-extrabold text-ink">{nameA}</span>
+              <span className="text-[12px] font-extrabold text-c-text">{nameA}</span>
               <Arrow direction="right" />
-              <span className="text-[12px] font-extrabold text-ink">{nameB}</span>
-              <span className="text-[11px] text-text-sub mx-1">:</span>
+              <span className="text-[12px] font-extrabold text-c-text">{nameB}</span>
+              <span className="text-[11px] text-c-text-sub mx-1">:</span>
               {complement_a_to_b.map((el) => (
                 <Chip key={el}>{el}</Chip>
               ))}
@@ -169,10 +170,10 @@ export default function ElementFlowDiagram({
 
           {complement_b_to_a.length > 0 && (
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[12px] font-extrabold text-ink">{nameB}</span>
+              <span className="text-[12px] font-extrabold text-c-text">{nameB}</span>
               <Arrow direction="right" />
-              <span className="text-[12px] font-extrabold text-ink">{nameA}</span>
-              <span className="text-[11px] text-text-sub mx-1">:</span>
+              <span className="text-[12px] font-extrabold text-c-text">{nameA}</span>
+              <span className="text-[11px] text-c-text-sub mx-1">:</span>
               {complement_b_to_a.map((el) => (
                 <Chip key={el}>{el}</Chip>
               ))}
@@ -206,10 +207,10 @@ export default function ElementFlowDiagram({
       {/* 십성 라벨 */}
       <div className="flex flex-col gap-1">
         <SectionLabel>{t('elementFlow.tenGodLabel')}</SectionLabel>
-        <p className="text-[14px] font-extrabold text-ink">
+        <p className="text-[14px] font-extrabold text-c-text">
           {t('elementFlow.tenGodDesc', { nameA, tenGod: day_ten_god })}
         </p>
       </div>
-    </div>
+    </Card>
   )
 }

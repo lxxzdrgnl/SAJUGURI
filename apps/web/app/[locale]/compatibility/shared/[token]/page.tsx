@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { serverApi } from '@/lib/api'
 import { getSharedCompatibilityReport } from '@sajuguri/api-client'
+import Card from '@/components/ui/Card'
+import { buttonClass } from '@/components/ui/Button'
 import CompatibilityView from '@/components/compatibility/CompatibilityView'
 
 export const dynamic = 'force-dynamic'
@@ -54,31 +56,31 @@ export default async function SharedCompatibilityPage({
 
   if (!detail) {
     return (
-      <main className="pt-16 text-center">
-        <p className="text-[15px] font-extrabold text-text-sub">{t('share.notFoundTitle')}</p>
-        <p className="mt-2 text-[13px] text-text-sub">{t('share.notFoundDesc')}</p>
+      <main className="-mx-4 -mt-2 -mb-8 bg-c-bg px-4 pb-8 pt-4 shadow-[0_0_0_100vmax_var(--c-bg)] [clip-path:inset(0_-100vmax_-100vmax)] text-center">
+        <p className="text-[15px] font-extrabold text-c-text-sub">{t('share.notFoundTitle')}</p>
+        <p className="mt-2 text-[13px] text-c-text-sub">{t('share.notFoundDesc')}</p>
       </main>
     )
   }
 
   return (
-    <main className="flex flex-col gap-4">
-      <p className="text-[13px] text-text-sub">{t('view.guideText')}</p>
+    <main className="-mx-4 -mt-2 -mb-8 bg-c-bg px-4 pb-8 pt-4 shadow-[0_0_0_100vmax_var(--c-bg)] [clip-path:inset(0_-100vmax_-100vmax)] flex flex-col gap-4">
+      <p className="text-[13px] text-c-text-sub">{t('view.guideText')}</p>
 
       {/* 공유 모드 — 공유/재생성 CTA 없음, 저장 스냅샷 */}
       <CompatibilityView detail={detail} shareMode />
 
       {/* 나도 확인 CTA */}
-      <div className="mt-2 rounded-lg border-2 border-ink bg-surface p-4 shadow-brutal">
-        <p className="mb-1 text-[14px] font-extrabold text-ink">{t('share.ctaTitle')}</p>
-        <p className="mb-3 text-[13px] text-text-sub">{t('share.ctaDesc')}</p>
+      <Card className="mt-2 p-4">
+        <p className="mb-1 text-[14px] font-extrabold text-c-text">{t('share.ctaTitle')}</p>
+        <p className="mb-3 text-[13px] text-c-text-sub">{t('share.ctaDesc')}</p>
         <a
           href="/compatibility/new"
-          className="block w-full rounded-lg border-2 border-ink bg-yellow py-3 text-center text-sm font-extrabold shadow-brutal"
+          className={`${buttonClass('primary', 'md')} w-full`}
         >
           {t('share.ctaBtn')}
         </a>
-      </div>
+      </Card>
     </main>
   )
 }

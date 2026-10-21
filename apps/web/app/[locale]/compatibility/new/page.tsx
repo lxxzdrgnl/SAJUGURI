@@ -8,6 +8,8 @@ import type { ProfileResponse, BirthInput } from '@sajuguri/api-client'
 import { api } from '@/lib/api'
 import { createCompatibilityJob } from '@sajuguri/api-client'
 import { useGenerationJob } from '@/lib/hooks/useGenerationJob'
+import Card from '@/components/ui/Card'
+import { buttonClass } from '@/components/ui/Button'
 import PersonSlotPicker, { type PersonPick } from '@/components/compatibility/PersonSlotPicker'
 
 export default function CompatibilityNewPage() {
@@ -96,10 +98,10 @@ export default function CompatibilityNewPage() {
   // 로딩 중 화면
   if (loading) {
     return (
-      <main className="flex min-h-[70vh] flex-col items-center justify-center gap-6 px-4 text-center">
+      <main className="-mx-4 -mt-2 -mb-8 bg-c-bg px-4 pb-8 pt-4 shadow-[0_0_0_100vmax_var(--c-bg)] [clip-path:inset(0_-100vmax_-100vmax)] flex min-h-[70vh] flex-col items-center justify-center gap-6 text-center">
         <Image src="/mascot.svg" alt="" width={72} height={72} className="animate-bounce" priority />
-        <p className="text-[15px] font-extrabold text-ink">{loadingPhrases[phraseIdx]}</p>
-        <p className="text-[13px] text-text-sub">{t('new.loadingNote')}</p>
+        <p className="text-[15px] font-extrabold text-c-text">{loadingPhrases[phraseIdx]}</p>
+        <p className="text-[13px] text-c-text-sub">{t('new.loadingNote')}</p>
       </main>
     )
   }
@@ -107,8 +109,8 @@ export default function CompatibilityNewPage() {
   // 로그인 확인 중
   if (isLoggedIn === null) {
     return (
-      <main className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-sm text-text-sub">{t('new.checking')}</p>
+      <main className="-mx-4 -mt-2 -mb-8 bg-c-bg px-4 pb-8 pt-4 shadow-[0_0_0_100vmax_var(--c-bg)] [clip-path:inset(0_-100vmax_-100vmax)] flex min-h-[60vh] items-center justify-center">
+        <p className="text-sm text-c-text-sub">{t('new.checking')}</p>
       </main>
     )
   }
@@ -116,33 +118,32 @@ export default function CompatibilityNewPage() {
   // 비로그인
   if (!isLoggedIn) {
     return (
-      <main className="flex flex-col gap-5">
-        <h1 className="text-lg font-black">{t('new.title')}</h1>
-        <div className="flex flex-col items-center gap-4 rounded-lg border-2 border-ink bg-surface p-6 text-center shadow-brutal">
+      <main className="-mx-4 -mt-2 -mb-8 bg-c-bg px-4 pb-8 pt-4 shadow-[0_0_0_100vmax_var(--c-bg)] [clip-path:inset(0_-100vmax_-100vmax)] flex flex-col gap-5">
+        <h1 className="text-lg font-black text-c-text">{t('new.title')}</h1>
+        <Card className="flex flex-col items-center gap-4 p-6 text-center">
           <Image src="/mascot.svg" alt="" width={56} height={56} />
           <p className="text-[15px] font-extrabold">{t('new.loginRequired')}</p>
-          <p className="text-[13px] text-text-sub">{t('new.loginDesc')}</p>
+          <p className="text-[13px] text-c-text-sub">{t('new.loginDesc')}</p>
           <a
             href={GOOGLE_LOGIN_URL}
-            className="w-full rounded-lg border-2 border-ink bg-yellow py-3 text-sm font-extrabold shadow-brutal"
+            className={`${buttonClass('primary', 'md')} w-full`}
           >
             {t('new.loginWithGoogle')}
           </a>
-        </div>
+        </Card>
       </main>
     )
   }
 
   // 로그인 상태 — 슬롯 선택 + 요청 주제
   return (
-    <main className="flex flex-col gap-5">
+    <main className="-mx-4 -mt-2 -mb-8 bg-c-bg px-4 pb-8 pt-4 shadow-[0_0_0_100vmax_var(--c-bg)] [clip-path:inset(0_-100vmax_-100vmax)] flex flex-col gap-5">
       <div>
-        <h1 className="text-[22px] font-black leading-tight text-ink">{t('new.title')}</h1>
-        <span className="mt-2 block h-1.5 w-12 rounded-full bg-orange" />
+        <h1 className="text-[22px] font-black leading-tight text-c-text">{t('new.title')}</h1>
       </div>
-      <p className="text-[13px] leading-relaxed text-text-sub">{t('new.guideline')}</p>
+      <p className="text-[13px] leading-relaxed text-c-text-sub">{t('new.guideline')}</p>
 
-      {/* 요청 주제 입력 (브루탈 스타일) */}
+      {/* 요청 주제 입력 */}
       <div className="flex flex-col gap-1.5">
         <label className="text-[13px] font-extrabold" htmlFor="topics">
           {t('new.topicsLabel')}
@@ -153,14 +154,14 @@ export default function CompatibilityNewPage() {
           value={topics}
           onChange={(e) => setTopics(e.target.value)}
           placeholder={t('new.topicsPlaceholder')}
-          className="w-full rounded-lg border-2 border-ink bg-surface px-4 py-3 text-sm shadow-brutal"
+          className="w-full rounded-card border border-c-line bg-c-surface px-4 py-3 text-sm text-c-text"
           maxLength={100}
         />
-        <p className="text-[12px] text-text-sub">{t('new.topicsHint')}</p>
+        <p className="text-[12px] text-c-text-sub">{t('new.topicsHint')}</p>
       </div>
 
       {(error || jobError) && (
-        <p className="rounded-lg border-[1.5px] border-orange-tint bg-orange-tint px-4 py-3 text-[13px] font-bold text-orange">
+        <p className="rounded-card border border-c-line bg-c-surface-soft px-4 py-3 text-[13px] font-bold text-c-danger">
           {error || t('new.errorFallback')}
         </p>
       )}
