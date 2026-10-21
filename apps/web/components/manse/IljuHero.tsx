@@ -23,12 +23,12 @@ export default async function IljuHero({ dayPillar, label }: { dayPillar: Pillar
           </p>
           <p className="text-[15px] font-black">{t('iljuName', { name: dayPillar.ganji_name })}</p>
           {nickname && (
-            <span className="mt-0.5 inline-block rounded-pill bg-white/70 px-2.5 py-0.5 text-[12px] font-extrabold">
+            <span className="mt-0.5 inline-block rounded-pill bg-c-surface/70 px-2.5 py-0.5 text-[12px] font-extrabold">
               {nickname}
             </span>
           )}
         </div>
-        <div className="ml-3 flex h-[84px] w-[84px] shrink-0 items-center justify-center rounded-2xl bg-white/60">
+        <div className="ml-3 flex h-[84px] w-[84px] shrink-0 items-center justify-center rounded-2xl bg-c-surface/60">
           <MascotTinted stem={dayPillar.stem} width={64} height={64} />
         </div>
       </div>

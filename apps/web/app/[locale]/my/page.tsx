@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getTranslations } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 import { currentUser, serverAuthApi } from '@/lib/serverAuth'
 import { maskEmail } from '@/lib/mask'
 import Card from '@/components/ui/Card'
@@ -13,9 +13,9 @@ import GoogleLoginLink from '@/components/auth/GoogleLoginLink'
 
 // 브라우저가 직접 여는 풀 URL — next.config rewrites를 타지 않도록 백엔드 절대 주소 사용.
 
-/** 날짜 문자열(YYYY-MM-DD) → 한국식 날짜 표기 */
-function formatDate(date: string): string {
-  return new Date(date).toLocaleDateString('ko-KR', {
+/** 날짜 문자열(YYYY-MM-DD) → 활성 로케일 날짜 표기 */
+function formatDate(date: string, locale: string): string {
+  return new Date(date).toLocaleDateString(locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -24,6 +24,7 @@ function formatDate(date: string): string {
 
 export default async function MyPage() {
   const t = await getTranslations('my')
+  const locale = await getLocale()
   const user = await currentUser()
 
   if (!user) {
@@ -78,7 +79,7 @@ export default async function MyPage() {
                   </p>
                 )}
                 <p className="mt-1 text-[12px] font-semibold text-c-text-sub">
-                  {t('repCard.born')} {formatDate(repProfile.birth_date)}
+                  {t('repCard.born')} {formatDate(repProfile.birth_date, locale)}
                 </p>
                 <p className="mt-1 text-[11px] text-c-text-sub">{maskEmail(user.email)}</p>
               </div>

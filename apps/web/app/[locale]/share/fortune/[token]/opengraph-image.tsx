@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og'
+import { getTranslations } from 'next-intl/server'
 import { serverApi } from '@/lib/api'
 import { getSharedFortune } from '@sajuguri/api-client'
 import type { DailyStoryResponse } from '@sajuguri/api-client'
@@ -15,9 +16,8 @@ const BG = '#FFD900'
 const INK = '#15233A'
 const PINK = '#FF2D78'
 
-const CATEGORY_LABELS: Record<string, string> = {
-  exam: '학업', money: '금전', love: '연애', career: '직업', health: '건강', social: '사교',
-}
+// 카테고리 키 순서 — 라벨은 메시지(fortune.categories)에서 로케일별로 가져온다.
+const CATEGORY_KEYS = ['exam', 'money', 'love', 'career', 'health', 'social'] as const
 
 /** 총점 — overall 카드 점수 또는 카테고리 평균 (SummaryCard와 동일 규칙). */
 function overallScore(story: DailyStoryResponse): number | undefined {
@@ -60,8 +60,10 @@ async function loadKoreanFont(text: string): Promise<ArrayBuffer | null> {
   }
 }
 
-export default async function Image({ params }: { params: Promise<{ token: string }> }) {
-  const { token } = await params
+export default async function Image({ params }: { params: Promise<{ token: string; locale: string }> }) {
+  const { token, locale } = await params
+  const tc = await getTranslations({ locale, namespace: 'fortune.categories' })
+  const siteName = (await getTranslations({ locale, namespace: 'meta' }))('siteName')
 
   let story: DailyStoryResponse | null = null
   try {
@@ -70,19 +72,19 @@ export default async function Image({ params }: { params: Promise<{ token: strin
     story = null
   }
 
-  const name = story?.profile_name || '사주구리'
+  const name = story?.profile_name || siteName
   const keyword = story?.keyword || ''
   const date = story?.date || ''
   const score = story ? overallScore(story) : undefined
   const orderedKeys = story
-    ? Object.keys(CATEGORY_LABELS).filter((k) => k in story!.scores)
+    ? CATEGORY_KEYS.filter((k) => k in story!.scores)
     : []
 
   // 렌더에 등장하는 모든 한글을 서브셋 텍스트로 모은다.
   const fontText =
-    '사주구리오늘의운세키워드점' +
+    siteName +
     name + keyword + date +
-    orderedKeys.map((k) => CATEGORY_LABELS[k]).join('')
+    orderedKeys.map((k) => tc(k)).join('')
   const fontData = await loadKoreanFont(fontText)
 
   // 서브셋 응답은 regular(400) 자형 — 단일 등록이라 satori가 모든 fontWeight에 사용.
@@ -114,7 +116,7 @@ export default async function Image({ params }: { params: Promise<{ token: strin
               letterSpacing: '0.04em',
             }}
           >
-            사주구리
+            {siteName}
           </div>
           <div style={{ fontSize: 28, fontWeight: 700, color: INK, opacity: 0.55 }}>{date}</div>
         </div>
@@ -164,7 +166,7 @@ export default async function Image({ params }: { params: Promise<{ token: strin
                 color: INK,
               }}
             >
-              <span style={{ opacity: 0.7 }}>{CATEGORY_LABELS[k]}</span>
+              <span style={{ opacity: 0.7 }}>{tc(k)}</span>
               <span>{story?.scores[k] ?? 0}</span>
             </div>
           ))}

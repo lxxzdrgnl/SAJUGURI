@@ -13,14 +13,7 @@ import Card from '@/components/ui/Card'
 import Button, { buttonClass } from '@/components/ui/Button'
 import GoogleLoginLink from '@/components/auth/GoogleLoginLink'
 
-const LOADING_PHRASES = [
-  '사주를 읽고 있어요...',
-  '천간과 지지를 살피는 중이에요...',
-  '대운의 흐름을 분석하고 있어요...',
-  '오행의 균형을 파악하는 중이에요...',
-  '당신만의 해설을 작성하고 있어요...',
-  '거의 다 됐어요, 조금만 기다려 주세요...',
-]
+const LOADING_PHRASE_COUNT = 6
 
 export default function ReportNewPage() {
   const t = useTranslations('report')
@@ -48,7 +41,7 @@ export default function ReportNewPage() {
   useEffect(() => {
     if (!loading) return
     const timer = setInterval(() => {
-      setPhraseIdx(i => (i + 1) % LOADING_PHRASES.length)
+      setPhraseIdx(i => (i + 1) % LOADING_PHRASE_COUNT)
     }, 3000)
     return () => clearInterval(timer)
   }, [loading])
@@ -106,7 +99,7 @@ export default function ReportNewPage() {
     return (
       <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] flex-col items-center justify-center gap-6 px-4 text-center">
         <Image src="/mascot.svg" alt="" width={72} height={72} className="animate-bounce" priority />
-        <p className="text-[15px] font-extrabold text-c-text">{LOADING_PHRASES[phraseIdx]}</p>
+        <p className="text-[15px] font-extrabold text-c-text">{t(`loadingPhrase${phraseIdx}`)}</p>
         <p className="text-[13px] text-c-text-sub">{t('loadingNote')}</p>
       </main>
     )

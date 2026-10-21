@@ -26,6 +26,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { token } = await params
   const t = await getTranslations('question.shared')
+  const site = (await getTranslations('meta'))('siteName')
   const detail = await fetchShared(token)
 
   if (!detail) {
@@ -34,8 +35,8 @@ export async function generateMetadata({
 
   // 이름이 있으면 "{이름}님의 한줄상담", 없으면(게스트) "님의" 없는 익명 제목.
   const title = detail.name
-    ? `${detail.name}님의 한줄상담 · ${detail.headline} | 사주구리`
-    : `사주구리 한줄상담 · ${detail.headline}`
+    ? t('metaTitle', { name: detail.name, headline: detail.headline, site })
+    : t('metaTitleAnon', { headline: detail.headline, site })
   return {
     title,
     description: detail.headline,
@@ -43,7 +44,7 @@ export async function generateMetadata({
     openGraph: {
       title,
       description: detail.headline,
-      siteName: '사주구리',
+      siteName: site,
       type: 'website',
     },
     twitter: {

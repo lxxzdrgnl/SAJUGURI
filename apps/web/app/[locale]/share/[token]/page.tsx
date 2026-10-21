@@ -47,7 +47,7 @@ export async function generateMetadata({
     title,
     description,
     robots: { index: false },
-    openGraph: { title, description, siteName: '사주구리', type: 'website' },
+    openGraph: { title, description, siteName: (await getTranslations('meta'))('siteName'), type: 'website' },
     twitter: { card: 'summary_large_image', title, description },
   }
 }
