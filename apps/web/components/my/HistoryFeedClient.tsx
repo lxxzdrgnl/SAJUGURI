@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import BrutalCard from '@/components/ui/BrutalCard'
+import Card from '@/components/ui/Card'
 import { RECORD_TYPES, type RecordItem, type Translate } from '@/lib/records/registry'
 import { mergeFeed, filterFeed } from '@/lib/records/feed'
 
@@ -19,8 +19,8 @@ function ChipButton({ active, onClick, children }: { active: boolean; onClick: (
       type="button"
       onClick={onClick}
       className={
-        'shrink-0 whitespace-nowrap rounded-lg border-2 border-ink px-3 py-1.5 text-[13px] font-extrabold shadow-brutal-sm transition-opacity ' +
-        (active ? 'bg-yellow text-ink' : 'bg-surface text-text-sub hover:opacity-80')
+        'shrink-0 whitespace-nowrap rounded-pill px-3.5 py-1.5 text-[13px] font-extrabold transition-opacity ' +
+        (active ? 'bg-c-accent text-c-on-accent' : 'border border-c-line bg-c-surface text-c-text-sub hover:opacity-80')
       }
     >
       {children}
@@ -58,9 +58,9 @@ export default function HistoryFeedClient({ records, initialType }: Props) {
       </div>
 
       {visible.length === 0 ? (
-        <BrutalCard intensity="soft" className="py-8 text-center">
-          <p className="text-[13px] text-text-sub">{t('feedEmpty')}</p>
-        </BrutalCard>
+        <Card tone="soft" className="py-8 text-center">
+          <p className="text-[13px] text-c-text-sub">{t('feedEmpty')}</p>
+        </Card>
       ) : (
         <ul className="flex flex-col gap-2">
           {visible.map((e) => {

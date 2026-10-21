@@ -19,7 +19,7 @@ export default function LanguageToggleInline() {
 
   return (
     <div className="mb-3">
-      <p className="mb-2 text-[13px] font-extrabold uppercase tracking-wide text-ink">
+      <p className="mb-2 text-xs font-extrabold text-c-text-sub">
         {t('title')}
       </p>
       <div className="flex gap-2">
@@ -41,8 +41,8 @@ function LangButton({ active, onClick, children }: { active: boolean; onClick: (
       onClick={onClick}
       aria-pressed={active}
       className={
-        'flex-1 rounded-lg border-2 border-ink py-2.5 text-[13px] font-extrabold shadow-brutal-sm transition-opacity ' +
-        (active ? 'bg-yellow text-ink' : 'bg-surface text-text-sub hover:opacity-80')
+        'h-10 flex-1 rounded-pill text-[13px] font-extrabold transition-opacity ' +
+        (active ? 'bg-c-accent text-c-on-accent' : 'border border-c-line bg-c-surface text-c-text-sub hover:opacity-80')
       }
     >
       {children}

@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { ApiClient } from '@sajuguri/api-client'
-import BrutalCard from '@/components/ui/BrutalCard'
+import Card from '@/components/ui/Card'
+import Button, { buttonClass } from '@/components/ui/Button'
 import { RECORD_TYPES, type RecordItem, type RecordType, type Translate } from '@/lib/records/registry'
 import { mergeFeed, filterFeed } from '@/lib/records/feed'
 
@@ -28,8 +29,8 @@ function ChipButton({ active, onClick, children }: { active: boolean; onClick: (
       type="button"
       onClick={onClick}
       className={
-        'shrink-0 whitespace-nowrap rounded-lg border-2 border-ink px-3 py-1.5 text-[13px] font-extrabold shadow-brutal-sm transition-opacity ' +
-        (active ? 'bg-yellow text-ink' : 'bg-surface text-text-sub hover:opacity-80')
+        'shrink-0 whitespace-nowrap rounded-pill px-3.5 py-1.5 text-[13px] font-extrabold transition-opacity ' +
+        (active ? 'bg-c-accent text-c-on-accent' : 'border border-c-line bg-c-surface text-c-text-sub hover:opacity-80')
       }
     >
       {children}
@@ -41,13 +42,9 @@ function ChipButton({ active, onClick, children }: { active: boolean; onClick: (
 
 function EditToggleButton({ editMode, onToggle, t }: { editMode: boolean; onToggle: () => void; t: Translate }) {
   return (
-    <button
-      type="button"
-      className="rounded-lg border-2 border-ink bg-surface px-3 py-1 text-[12px] font-extrabold text-ink shadow-brutal-sm transition-opacity hover:opacity-80"
-      onClick={onToggle}
-    >
+    <Button type="button" variant="secondary" size="sm" onClick={onToggle}>
       {editMode ? t('editDone') : t('editToggle')}
-    </button>
+    </Button>
   )
 }
 
@@ -76,16 +73,16 @@ function DeleteModal({ label, onConfirm, onClose, t }: DeleteModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-c-scrim sm:items-center"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="w-full max-w-[480px] rounded-t-lg border-2 border-ink bg-surface p-6 shadow-brutal-up sm:rounded-lg sm:shadow-brutal">
+      <div className="w-full max-w-[480px] rounded-t-card bg-c-surface p-6 sm:rounded-card">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-[15px] font-extrabold text-ink">{t('delete.confirm')}</h2>
+          <h2 className="text-[15px] font-extrabold text-c-text">{t('delete.confirm')}</h2>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full border-[1.5px] border-border-soft text-text-sub"
+            className="flex h-8 w-8 items-center justify-center rounded-pill border border-c-line text-c-text-sub"
             aria-label={t('delete.cancel')}
           >
             <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
@@ -94,22 +91,18 @@ function DeleteModal({ label, onConfirm, onClose, t }: DeleteModalProps) {
           </button>
         </div>
 
-        <p className="mb-6 truncate rounded-lg border-[1.5px] border-border-soft bg-surface px-4 py-3 text-[14px] font-bold text-ink">
+        <p className="mb-6 truncate rounded-card bg-c-surface-soft px-4 py-3 text-[14px] font-bold text-c-text">
           {label}
         </p>
 
         <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 rounded-lg border-2 border-ink bg-surface py-3 text-sm font-extrabold text-ink shadow-brutal-sm transition-opacity hover:opacity-80"
-          >
+          <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
             {t('delete.cancel')}
-          </button>
+          </Button>
           <button
             type="button"
             onClick={onConfirm}
-            className="flex-1 rounded-lg border-2 border-ink bg-ink py-3 text-sm font-extrabold text-surface shadow-brutal-sm transition-opacity hover:opacity-80"
+            className={`${buttonClass('primary', 'md')} flex-1 !bg-c-danger !text-c-surface`}
           >
             {t('delete.yes')}
           </button>
@@ -125,11 +118,11 @@ function DeleteIconButton({ label, onClick }: { label: string; onClick: () => vo
   return (
     <button
       type="button"
-      className="shrink-0 rounded-lg border-2 border-ink bg-surface p-2 shadow-brutal-sm transition-opacity hover:opacity-70"
+      className="shrink-0 rounded-pill border border-c-line bg-c-surface p-2 text-c-danger transition-opacity hover:opacity-70"
       onClick={onClick}
       aria-label={label}
     >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ink">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="3 6 5 6 21 6" />
         <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
         <path d="M10 11v6" />
@@ -215,16 +208,16 @@ export default function MyRecordsClient({ records: initial, previewCount = PREVI
   return (
     <section className="mb-6">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-[13px] font-extrabold uppercase tracking-wide text-ink">{t('title')}</h2>
+        <h2 className="font-display text-lg font-normal text-c-text">{t('title')}</h2>
         {totalCount > 0 && (
           <EditToggleButton editMode={editMode} onToggle={() => setEditMode((v) => !v)} t={t} />
         )}
       </div>
 
       {totalCount === 0 ? (
-        <BrutalCard intensity="soft" className="py-8 text-center">
-          <p className="text-[13px] text-text-sub">{t('feedEmpty')}</p>
-        </BrutalCard>
+        <Card tone="soft" className="py-8 text-center">
+          <p className="text-[13px] text-c-text-sub">{t('feedEmpty')}</p>
+        </Card>
       ) : (
         <>
           {/* 가로 스크롤 필터 칩 */}
@@ -240,9 +233,9 @@ export default function MyRecordsClient({ records: initial, previewCount = PREVI
           </div>
 
           {preview.length === 0 ? (
-            <BrutalCard intensity="soft" className="py-8 text-center">
-              <p className="text-[13px] text-text-sub">{t('feedEmpty')}</p>
-            </BrutalCard>
+            <Card tone="soft" className="py-8 text-center">
+              <p className="text-[13px] text-c-text-sub">{t('feedEmpty')}</p>
+            </Card>
           ) : (
             <ul className="flex flex-col gap-2">
               {preview.map((e) => {
@@ -260,7 +253,7 @@ export default function MyRecordsClient({ records: initial, previewCount = PREVI
           {filtered.length > preview.length && (
             <Link
               href="/my/history"
-              className="mt-3 block rounded-lg border-2 border-teal bg-surface py-3 text-center text-[13px] font-extrabold text-teal-deep shadow-brutal-sm transition-opacity hover:opacity-80"
+              className={`${buttonClass('secondary', 'md')} mt-3 w-full`}
             >
               {t('viewAllHistory')} →
             </Link>
