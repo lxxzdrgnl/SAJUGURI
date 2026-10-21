@@ -4,6 +4,8 @@ import { serverApi } from '@/lib/api'
 import { getSharedConsultation } from '@sajuguri/api-client'
 import type { ConsultationDetail } from '@sajuguri/api-client'
 import Markdown from '@/components/ui/Markdown'
+import Card from '@/components/ui/Card'
+import { buttonClass } from '@/components/ui/Button'
 import { renderTextWithCharts } from '@/lib/chat/chartMarkers'
 
 export const dynamic = 'force-dynamic'
@@ -63,9 +65,9 @@ export default async function SharedConsultationPage({
 
   if (!detail) {
     return (
-      <main className="pt-16 text-center">
-        <p className="text-[15px] font-extrabold text-text-sub">{t('notFoundTitle')}</p>
-        <p className="mt-2 text-[13px] text-text-sub">{t('notFoundBody')}</p>
+      <main className="-mx-4 -mt-2 -mb-8 min-h-[calc(100vh-56px)] bg-c-bg px-4 pb-8 pt-16 text-center">
+        <p className="text-[15px] font-extrabold text-c-text">{t('notFoundTitle')}</p>
+        <p className="mt-2 text-[13px] text-c-text-sub">{t('notFoundBody')}</p>
       </main>
     )
   }
@@ -73,47 +75,47 @@ export default async function SharedConsultationPage({
   const tq = await getTranslations('question')
 
   return (
-    <main className="flex flex-col gap-5">
-      <h1 className="text-lg font-black">{tq('title')}</h1>
+    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100vh-56px)] flex-col gap-5 bg-c-bg px-4 pb-8 pt-2">
+      <h1 className="font-display text-xl font-normal text-c-text">{tq('title')}</h1>
 
       {/* 질문 */}
-      <div className="rounded-lg border-[1.5px] border-border-soft bg-surface p-4">
-        <p className="mb-1 text-[11px] font-extrabold uppercase tracking-widest text-text-sub">
+      <Card tone="soft" className="p-4">
+        <p className="mb-1 text-[11px] font-extrabold uppercase tracking-widest text-c-text-sub">
           {tq('questionHeader')}
         </p>
-        <p className="text-[14px] font-bold text-ink">{detail.question}</p>
-      </div>
+        <p className="text-[14px] font-bold text-c-text">{detail.question}</p>
+      </Card>
 
       {/* 상담 결과 — 채팅과 동일: content의 [[chart:...]] 마커를 인라인 ToolCard로 렌더 */}
-      <div className="rounded-lg border-2 border-teal bg-surface p-5 shadow-brutal">
-        <p className="mb-3 text-[11px] font-extrabold uppercase tracking-widest text-text-sub">
+      <Card tone="plain" className="p-5">
+        <p className="mb-3 text-[11px] font-extrabold uppercase tracking-widest text-c-text-sub">
           {tq('resultLabel')}
         </p>
-        <p className="mb-2 text-[18px] font-black leading-snug text-ink">{detail.headline}</p>
+        <p className="mb-2 text-[18px] font-black leading-snug text-c-text">{detail.headline}</p>
         <div className="flex flex-col gap-3">
           {renderTextWithCharts(
             detail.content,
             Object.fromEntries((detail.charts ?? []).map((c) => [c.tool, c.payload])) as Record<string, Record<string, unknown>>,
             'sq',
-            { renderText: (seg, key) => <Markdown key={key} className="text-[14px] text-ink">{seg}</Markdown> },
+            { renderText: (seg, key) => <Markdown key={key} className="text-[14px] text-c-text">{seg}</Markdown> },
           )}
         </div>
-        <span className="mt-4 inline-block rounded-full border-[1.5px] border-ink bg-orange px-3 py-0.5 text-[11px] font-extrabold text-white">
+        <span className="mt-4 inline-block rounded-pill bg-c-surface-soft px-3 py-0.5 text-[11px] font-extrabold text-c-text-sub">
           {detail.category}
         </span>
-      </div>
+      </Card>
 
       {/* 나도 한줄상담 받기 CTA */}
-      <div className="mt-2 rounded-lg border-2 border-ink bg-surface p-4 shadow-brutal">
-        <p className="mb-1 text-[14px] font-extrabold text-ink">{t('ctaTitle')}</p>
-        <p className="mb-3 text-[13px] text-text-sub">{t('ctaBody')}</p>
+      <Card tone="counsel" className="mt-2 p-4">
+        <p className="mb-1 text-[14px] font-extrabold text-c-text">{t('ctaTitle')}</p>
+        <p className="mb-3 text-[13px] text-c-text-sub">{t('ctaBody')}</p>
         <a
           href="/question"
-          className="block w-full rounded-lg border-2 border-ink bg-yellow py-3 text-center text-sm font-extrabold shadow-brutal"
+          className={`${buttonClass('primary', 'md')} w-full`}
         >
           {t('ctaButton')}
         </a>
-      </div>
+      </Card>
     </main>
   )
 }
