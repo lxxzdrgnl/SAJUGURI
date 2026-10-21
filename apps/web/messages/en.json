@@ -115,7 +115,8 @@
       "again": "View again",
       "toCounsel": "Talk to Guriguri",
       "bubble": "What's on your plate today?",
-      "open": "See today's fortune"
+      "open": "See today's fortune",
+      "promoCta": "Take a look"
     },
     "counsel": {
       "title": "Talk to Guriguri right now",
@@ -160,6 +161,10 @@
       "placeholder": "What's on your mind?",
       "empty": "No results found",
       "toCounsel": "Ask Guriguri directly"
+    },
+    "tabsLabel": "Product categories",
+    "grid": {
+      "empty": "Nothing in this category yet"
     }
   },
   "manse": {

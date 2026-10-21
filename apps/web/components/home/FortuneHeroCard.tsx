@@ -41,7 +41,7 @@ export default function FortuneHeroCard({
   }, [rep])
 
   return (
-    <Card tone="soft" className="p-5">
+    <Card tone="soft" className="h-full p-5">
       <FortuneBannerClient profiles={profiles} isLoggedIn={isLoggedIn}>
         {summary.seen ? (
           <div className="flex items-center gap-4">
@@ -63,7 +63,7 @@ export default function FortuneHeroCard({
               <span className={`${buttonClass('primary', 'md')} mt-3`}>{t('cta')}</span>
             </div>
             <div className="relative shrink-0">
-              <span className="absolute -top-3 right-full mr-1 whitespace-nowrap rounded-card border border-c-line bg-c-surface px-2.5 py-1 text-xs font-bold">
+              <span className="absolute -top-3 right-full mr-1 hidden whitespace-nowrap min-[420px]:inline-block rounded-card border border-c-line bg-c-surface px-2.5 py-1 text-xs font-bold">
                 {t('bubble')}
               </span>
               <img src="/mascot/fortune.png" alt="" width={88} height={88} className="h-22 w-22 object-contain" />
