@@ -4,7 +4,10 @@ import { NextIntlClientProvider, hasLocale } from 'next-intl'
 import { notFound } from 'next/navigation'
 import { Noto_Serif_KR } from 'next/font/google'
 import { routing } from '@/i18n/routing'
-import TabBar from '@/components/TabBar'
+import AppHeader from '@/components/nav/AppHeader'
+import { currentUser, serverAuthApi } from '@/lib/serverAuth'
+import { listProfiles } from '@sajuguri/api-client'
+import type { MeResponse, ProfileResponse } from '@sajuguri/api-client'
 import LocaleBoot from '@/components/LocaleBoot'
 import '../globals.css'
 
@@ -51,6 +54,17 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params
   if (!hasLocale(routing.locales, locale)) notFound()
+  // 헤더용 — 백엔드 장애·비로그인이어도 레이아웃은 렌더된다
+  let user: MeResponse | null = null
+  let profiles: ProfileResponse[] = []
+  try {
+    user = await currentUser()
+    if (user) profiles = await listProfiles(await serverAuthApi())
+  } catch {
+    user = null
+    profiles = []
+  }
+  const repProfile = profiles.find((p) => p.is_representative) ?? null
   return (
     <html lang={locale} className={notoSerifKR.variable}>
       <body>
@@ -58,10 +72,8 @@ export default async function LocaleLayout({
           {/* 저장된 언어 선택을 부팅 시 강제 (영어 기기여도 한국어 유지) */}
           <LocaleBoot />
           {/* 모바일 단일 컬럼 — design.md §7 */}
-          <div className="mx-auto min-h-dvh max-w-[640px] px-4 pb-24 pt-[calc(1.25rem+env(safe-area-inset-top))] md:pb-8 md:pt-24">
-            {children}
-          </div>
-          <TabBar />
+          <AppHeader user={user} repProfile={repProfile} profiles={profiles} />
+          <div className="mx-auto max-w-[640px] px-4 pb-8 pt-2">{children}</div>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -1,10 +1,4 @@
 {
-  "tab": {
-    "home": "Home",
-    "manse": "Chart",
-    "chat": "Chat",
-    "my": "My"
-  },
   "auth": {
     "signingIn": "Signing in…"
   },
