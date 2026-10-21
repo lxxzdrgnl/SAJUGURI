@@ -14,7 +14,10 @@ export default function ScreenShell({
   center?: boolean
   children: ReactNode
 }) {
-  const base = 'min-h-[calc(100dvh-6rem)]'
+  // center는 레이아웃의 상하 패딩을 상쇄해 뷰포트 전체 높이 기준으로 가운데에 둔다
+  const base = center
+    ? '-mb-8 -mt-2 min-h-[calc(100dvh-3.5rem)]'
+    : 'min-h-[calc(100dvh-6rem)]'
   const c = center ? ' flex items-center justify-center' : ''
   return <main className={`${base}${c}${className ? ` ${className}` : ''}`}>{children}</main>
 }
