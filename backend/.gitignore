@@ -3,3 +3,4 @@ scripts/etl/out/
 
 # 덤프 파일 — 절대 커밋 금지
 *.sql
+scripts/.product_art_spend.jsonl
