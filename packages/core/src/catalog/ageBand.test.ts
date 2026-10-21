@@ -8,4 +8,8 @@ describe('ageBand', () => {
   it('birthday not yet reached', () => expect(ageBand('2001-12-01', today)).toBe('20-24'))
   it('future -> null', () => expect(ageBand('2030-01-01', today)).toBeNull())
   it('invalid -> null', () => expect(ageBand('not-a-date', today)).toBeNull())
+  it('uses local date parts (birthday just after local midnight)', () =>
+    expect(ageBand('2001-08-17', new Date(2026, 7, 17, 0, 30))).toBe('25-29'))
+  it('uses local date parts (day before birthday late evening)', () =>
+    expect(ageBand('2001-08-17', new Date(2026, 7, 16, 23, 30))).toBe('20-24'))
 })
