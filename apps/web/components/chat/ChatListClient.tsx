@@ -5,7 +5,8 @@ import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { ApiClient, deleteSession } from '@sajuguri/api-client'
 import type { ChatSession, ProfileResponse } from '@sajuguri/api-client'
-import BrutalCard from '@/components/ui/BrutalCard'
+import Card from '@/components/ui/Card'
+import Button from '@/components/ui/Button'
 import ChatEntrySheet from './ChatEntrySheet'
 import PageHeading from '@/components/ui/PageHeading'
 
@@ -16,7 +17,7 @@ interface Props {
   prefill?: string | null
 }
 
-const SESSION_COLORS = ['var(--orange)', 'var(--yellow)', 'var(--sky)', 'var(--teal)']
+const SESSION_COLORS = ['bg-c-poster-butter', 'bg-c-poster-rose', 'bg-c-poster-lilac', 'bg-c-poster-peach', 'bg-c-poster-sky', 'bg-c-poster-mint']
 
 function sessionColor(id: string): string {
   let hash = 0
@@ -53,16 +54,16 @@ function DeleteModal({ sessionTitle, onConfirm, onClose, t }: DeleteModalProps) 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-c-scrim sm:items-center"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="w-full max-w-[480px] rounded-t-lg border-2 border-ink bg-surface p-6 shadow-brutal-up sm:rounded-lg sm:shadow-brutal">
+      <div className="w-full max-w-[480px] rounded-t-card bg-c-surface p-6 sm:rounded-card">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-[15px] font-extrabold text-ink">{t('deleteConfirm')}</h2>
+          <h2 className="text-[15px] font-extrabold text-c-text">{t('deleteConfirm')}</h2>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full border-[1.5px] border-border-soft text-text-sub"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-c-line text-c-text-sub"
             aria-label={t('deleteConfirmCancel')}
           >
             <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
@@ -71,25 +72,17 @@ function DeleteModal({ sessionTitle, onConfirm, onClose, t }: DeleteModalProps) 
           </button>
         </div>
 
-        <p className="mb-6 truncate rounded-lg border-[1.5px] border-border-soft bg-surface px-4 py-3 text-[14px] font-bold text-ink">
+        <p className="mb-6 truncate rounded-card bg-c-surface-soft px-4 py-3 text-[14px] font-bold text-c-text">
           {sessionTitle}
         </p>
 
         <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 rounded-lg border-2 border-ink bg-surface py-3 text-sm font-extrabold text-ink shadow-brutal-sm transition-opacity hover:opacity-80"
-          >
+          <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
             {t('deleteConfirmCancel')}
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            className="flex-1 rounded-lg border-2 border-ink bg-ink py-3 text-sm font-extrabold text-surface shadow-brutal-sm transition-opacity hover:opacity-80"
-          >
+          </Button>
+          <Button type="button" onClick={onConfirm} className="flex-1">
             {t('deleteConfirmYes')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -129,52 +122,42 @@ export default function ChatListClient({ sessions: initialSessions, profiles, pr
         <PageHeading title={t('title')} accent="teal" />
         <div className="flex items-center gap-2">
           {sessions.length > 0 && (
-            <button
-              className="rounded-lg border-2 border-ink bg-surface px-3 py-1.5 text-sm font-extrabold text-ink shadow-brutal-sm transition-opacity hover:opacity-80"
-              onClick={() => setEditMode((v) => !v)}
-            >
+            <Button variant="secondary" size="sm" onClick={() => setEditMode((v) => !v)}>
               {editMode ? t('editDone') : t('editToggle')}
-            </button>
+            </Button>
           )}
-          <button
-            className="rounded-lg border-2 border-teal bg-surface px-4 py-1.5 text-sm font-extrabold text-teal shadow-brutal-sm transition-opacity hover:opacity-80"
-            onClick={() => setSheetOpen(true)}
-          >
+          <Button size="sm" onClick={() => setSheetOpen(true)}>
             {t('newSession')}
-          </button>
+          </Button>
         </div>
       </div>
 
       {sessions.length === 0 ? (
-        <BrutalCard className="flex flex-col items-center gap-3 py-10 text-center">
+        <Card tone="soft" className="flex flex-col items-center gap-3 px-5 py-10 text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/mascot.svg" alt="" width={64} height={64} />
           <p className="text-[15px] font-extrabold">{t('empty')}</p>
-          <p className="text-sm text-text-sub">{t('emptyHint')}</p>
-          <button
-            className="mt-1 rounded-lg border-2 border-teal bg-surface px-6 py-2.5 text-sm font-extrabold text-teal shadow-brutal transition-opacity hover:opacity-80"
-            onClick={() => setSheetOpen(true)}
-          >
+          <p className="text-sm text-c-text-sub">{t('emptyHint')}</p>
+          <Button className="mt-1" onClick={() => setSheetOpen(true)}>
             {t('newSession')}
-          </button>
-        </BrutalCard>
+          </Button>
+        </Card>
       ) : (
         <ul className="flex flex-col gap-3">
           {sessions.map((s) => (
             <li key={s.id}>
               <div className="flex items-center gap-2">
                 <Link href={`/chat/${s.id}`} className="min-w-0 flex-1">
-                  <BrutalCard className="flex items-center gap-3 transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
+                  <Card className="flex items-center gap-3 p-3 transition-transform active:scale-[0.99]">
                     <span
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border-2 border-ink"
-                      style={{ backgroundColor: sessionColor(s.id) }}
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-c-text ${sessionColor(s.id)}`}
                     >
                       <svg
                         width="20"
                         height="20"
                         viewBox="0 0 24 24"
                         fill="none"
-                        stroke="#fff"
+                        stroke="currentColor"
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -182,17 +165,17 @@ export default function ChatListClient({ sessions: initialSessions, profiles, pr
                         <path d="M4 6 a3 3 0 0 1 3-3 h10 a3 3 0 0 1 3 3 v7 a3 3 0 0 1-3 3 H10 l-4.5 4 v-4 H7 a3 3 0 0 1-3-3 Z" />
                       </svg>
                     </span>
-                    <span className="min-w-0 flex-1 truncate text-[15px] font-extrabold text-ink">
+                    <span className="min-w-0 flex-1 truncate text-[15px] font-extrabold text-c-text">
                       {s.title || t('sessionFallback')}
                     </span>
-                    <span className="ml-2 shrink-0 text-xs font-semibold text-text-sub">
+                    <span className="ml-2 shrink-0 text-xs font-semibold text-c-text-sub">
                       {formatDate(s.last_message_at)}
                     </span>
-                  </BrutalCard>
+                  </Card>
                 </Link>
                 {editMode && (
                   <button
-                    className="shrink-0 rounded-lg border-2 border-ink bg-surface p-2 shadow-brutal-sm transition-opacity hover:opacity-70"
+                    className="shrink-0 rounded-full border border-c-line bg-c-surface p-2 text-c-text transition-opacity hover:opacity-70"
                     onClick={() => setDeletingSession(s)}
                     aria-label={t('deleteConfirm')}
                   >

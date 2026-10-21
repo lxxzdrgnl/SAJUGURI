@@ -396,11 +396,12 @@ export default function ChatView({ sessionId, initialTitle, profiles, partnerNam
   }
 
   return (
+    <div className="-mx-4 -mb-8 -mt-2 bg-c-bg px-4 pb-8 pt-2 text-c-text">
     <div className="flex flex-col" style={{ height: 'calc(100dvh - 96px - env(safe-area-inset-top))' }}>
       {/* 헤더 */}
-      <div className="flex shrink-0 items-center gap-2 border-b-2 border-border-soft pb-3">
+      <div className="flex shrink-0 items-center gap-2 border-b border-c-line pb-3">
         <button
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 border-ink bg-surface shadow-brutal-sm transition-opacity hover:opacity-70"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-c-line bg-c-surface text-c-text transition-opacity hover:opacity-70"
           onClick={() => router.push('/chat')}
           aria-label="back"
         >
@@ -408,18 +409,18 @@ export default function ChatView({ sessionId, initialTitle, profiles, partnerNam
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
-        <h1 className="truncate text-[16px] font-extrabold text-ink">
+        <h1 className="truncate text-[16px] font-extrabold text-c-text">
           {title || t('sessionFallback')}
         </h1>
       </div>
 
       {/* 첨부 칩 줄 */}
-      <div className="flex shrink-0 flex-wrap gap-1.5 border-b border-border-soft py-2">
+      <div className="flex shrink-0 flex-wrap gap-1.5 border-b border-c-line py-2">
           <button
             type="button"
             onClick={() => setMyManseOpen(true)}
             aria-haspopup="dialog"
-            className="inline-flex items-center gap-1 rounded-full border-2 border-teal bg-teal-tint px-2.5 py-1 text-xs font-extrabold text-teal-deep shadow-brutal-sm transition-opacity hover:opacity-70"
+            className="inline-flex items-center gap-1 rounded-pill bg-c-surface-soft px-3 py-1 text-xs font-extrabold text-c-text transition-opacity hover:opacity-70"
           >
             {myName ? `${t('chip.my')}: ${myName}` : t('chip.my')}
           </button>
@@ -427,7 +428,7 @@ export default function ChatView({ sessionId, initialTitle, profiles, partnerNam
             <button
               type="button"
               onClick={() => setPartnerChipExpanded((v) => !v)}
-              className="inline-flex items-center gap-1 rounded-lg border-2 border-ink bg-yellow-tint px-2.5 py-1 text-xs font-extrabold text-ink shadow-brutal-sm transition-opacity hover:opacity-80"
+              className="inline-flex items-center gap-1 rounded-pill border border-c-line bg-c-surface px-3 py-1 text-xs font-extrabold text-c-text transition-opacity hover:opacity-80"
               aria-label={t('chip.partnerToggle')}
             >
               {t('chip.partner')}: {partnerName}
@@ -436,9 +437,11 @@ export default function ChatView({ sessionId, initialTitle, profiles, partnerNam
                   role="button"
                   aria-label={t('chip.partnerRemove')}
                   onClick={(e) => { e.stopPropagation(); handleDetachPartner() }}
-                  className="ml-1 flex h-4 w-4 items-center justify-center rounded-full border border-ink bg-ink text-[9px] font-black text-yellow leading-none"
+                  className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-c-text text-c-bg"
                 >
-                  ✕
+                  <svg viewBox="0 0 16 16" fill="none" className="h-2.5 w-2.5" aria-hidden="true">
+                    <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
                 </span>
               )}
             </button>
@@ -471,7 +474,7 @@ export default function ChatView({ sessionId, initialTitle, profiles, partnerNam
                     return (
                       <div
                         key={bi}
-                        className="rounded-lg border-2 border-teal bg-surface px-4 py-2.5 text-sm leading-relaxed text-ink"
+                        className="rounded-card bg-c-surface-soft px-4 py-2.5 text-sm leading-relaxed text-c-text"
                       >
                         <span className="inline-block animate-pulse">▋</span>
                       </div>
@@ -482,7 +485,7 @@ export default function ChatView({ sessionId, initialTitle, profiles, partnerNam
                     return (
                       <div
                         key={bi}
-                        className="rounded-lg px-4 py-2.5 text-sm font-bold leading-relaxed whitespace-pre-wrap break-words border-2 border-ink bg-yellow text-ink shadow-brutal-sm"
+                        className="rounded-card bg-c-accent px-4 py-2.5 text-sm font-bold leading-relaxed whitespace-pre-wrap break-words text-c-on-accent"
                       >
                         {block}
                       </div>
@@ -494,7 +497,7 @@ export default function ChatView({ sessionId, initialTitle, profiles, partnerNam
                     renderText: (text, key) => (
                       <div
                         key={key}
-                        className="rounded-lg px-4 py-2.5 text-sm font-medium leading-relaxed break-words border-2 border-teal bg-surface text-ink"
+                        className="rounded-card bg-c-surface-soft px-4 py-2.5 text-sm font-medium leading-relaxed break-words text-c-text"
                       >
                         <Markdown>{text}</Markdown>
                       </div>
@@ -525,9 +528,11 @@ export default function ChatView({ sessionId, initialTitle, profiles, partnerNam
                   return (
                     <div
                       key={bi}
-                      className="flex items-center gap-2 rounded-lg border-2 border-ink bg-yellow-tint px-3 py-2.5 text-[13px] font-extrabold text-ink shadow-brutal-sm"
+                      className="flex items-center gap-2 rounded-card bg-c-surface-soft px-3 py-2.5 text-[13px] font-extrabold text-c-text"
                     >
-                      <span className="text-base">📎</span>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M21 11.5l-8.5 8.5a5 5 0 0 1-7-7L14 4.5a3.5 3.5 0 0 1 5 5L10.5 18a2 2 0 0 1-3-3L15 7.5" />
+                      </svg>
                       <span>{t('partnerAttached', { name: block.name })}</span>
                     </div>
                   )
@@ -559,17 +564,17 @@ export default function ChatView({ sessionId, initialTitle, profiles, partnerNam
 
       {/* 오류 메시지 */}
       {errorMsg && (
-        <div className="shrink-0 px-4 py-1.5 text-xs font-semibold text-orange-500">
+        <div className="shrink-0 px-4 py-1.5 text-xs font-semibold text-c-danger">
           {errorMsg}
         </div>
       )}
 
       {/* 입력바 */}
-      <div className="shrink-0 border-t-2 border-ink pt-3 pb-1">
+      <div className="shrink-0 border-t border-c-line pt-3 pb-1">
         <div className="flex items-center gap-2">
           {/* + 첨부 버튼 */}
           <button
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-surface text-lg font-extrabold shadow-brutal-sm transition-opacity hover:opacity-70"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-c-line bg-c-surface text-lg font-extrabold text-c-text transition-opacity hover:opacity-70"
             onClick={() => setAttachOpen(true)}
             aria-label={t('attach.title')}
           >
@@ -579,7 +584,7 @@ export default function ChatView({ sessionId, initialTitle, profiles, partnerNam
           {/* 텍스트 입력 */}
           <textarea
             ref={textRef}
-            className="flex-1 resize-none rounded-lg border-2 border-ink bg-surface px-3 py-2 text-base text-ink"
+            className="flex-1 resize-none rounded-card border border-c-line bg-c-surface px-3 py-2 text-base text-c-text placeholder:text-c-text-sub"
             rows={1}
             placeholder={t('input.placeholder')}
             value={input}
@@ -590,7 +595,7 @@ export default function ChatView({ sessionId, initialTitle, profiles, partnerNam
 
           {/* 전송 버튼 */}
           <button
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-orange text-surface shadow-brutal-sm transition-opacity hover:opacity-80 disabled:opacity-40"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-c-accent text-c-on-accent transition-opacity hover:opacity-80 disabled:opacity-40"
             disabled={streaming || !input.trim()}
             onClick={send}
             aria-label={t('input.send')}
@@ -632,6 +637,7 @@ export default function ChatView({ sessionId, initialTitle, profiles, partnerNam
         }}
         sessionId={sessionId}
       />
+    </div>
     </div>
   )
 }

@@ -8,6 +8,8 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { ProfileResponse, PartnerAttachRequest } from '@sajuguri/api-client'
+import Card from '@/components/ui/Card'
+import Button from '@/components/ui/Button'
 import MansePickerSheet, { type MansePick } from '@/components/manse/MansePickerSheet'
 
 interface Props {
@@ -38,15 +40,15 @@ export default function InlinePartnerCard({ profiles, onSelect, onSubmitBirth }:
 
   return (
     <>
-      <div className="w-full rounded-lg border-2 border-orange bg-yellow-tint px-3 py-3">
-        <p className="mb-2 text-[13px] font-extrabold text-ink">{t('inlinePartner.prompt')}</p>
-        <button
-          className="rounded-lg border-2 border-ink bg-yellow px-4 py-2 text-[13px] font-extrabold shadow-brutal-sm transition-opacity hover:opacity-80"
+      <Card tone="soft" className="w-full p-4">
+        <p className="mb-3 text-[13px] font-extrabold text-c-text">{t('inlinePartner.prompt')}</p>
+        <Button
+          size="sm"
           onClick={() => setSheetOpen(true)}
         >
           {t('inlinePartner.action')}
-        </button>
-      </div>
+        </Button>
+      </Card>
 
       <MansePickerSheet
         open={sheetOpen}

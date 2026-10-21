@@ -2,7 +2,8 @@ import { getTranslations } from 'next-intl/server'
 import { currentUser, serverAuthApi } from '@/lib/serverAuth'
 import { listSessions, listProfiles } from '@sajuguri/api-client'
 import type { ChatSession, ProfileResponse } from '@sajuguri/api-client'
-import BrutalCard from '@/components/ui/BrutalCard'
+import Card from '@/components/ui/Card'
+import { buttonClass } from '@/components/ui/Button'
 import ChatListClient from '@/components/chat/ChatListClient'
 import PageHeading from '@/components/ui/PageHeading'
 import { firstParam, resolvePrefill } from '@/lib/chat/prefill'
@@ -27,22 +28,22 @@ export default async function ChatPage({ searchParams }: Props) {
 
   if (!user) {
     return (
-      <main>
+      <main className="-mx-4 -mb-8 -mt-2 min-h-[calc(100dvh-3.5rem)] bg-c-bg px-4 pb-10 pt-4">
         <div className="mb-4">
           <PageHeading title={t('title')} accent="teal" />
         </div>
-        <BrutalCard className="flex flex-col items-center gap-4 py-8 text-center">
+        <Card tone="soft" className="flex flex-col items-center gap-4 px-5 py-8 text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/mascot.svg" alt="" width={72} height={72} />
           <p className="text-[15px] font-extrabold">{t('loginRequired')}</p>
-          <p className="text-sm text-text-sub">{t('loginDesc')}</p>
+          <p className="text-sm text-c-text-sub">{t('loginDesc')}</p>
           <a
             href={GOOGLE_LOGIN_URL}
-            className="w-full rounded-lg border-2 border-ink bg-yellow py-3 text-sm font-extrabold shadow-brutal text-center block"
+            className={`${buttonClass('primary', 'md')} w-full`}
           >
             {t('loginWithGoogle')}
           </a>
-        </BrutalCard>
+        </Card>
       </main>
     )
   }
@@ -59,7 +60,7 @@ export default async function ChatPage({ searchParams }: Props) {
   ])
 
   return (
-    <main>
+    <main className="-mx-4 -mb-8 -mt-2 min-h-[calc(100dvh-3.5rem)] bg-c-bg px-4 pb-10 pt-4">
       <ChatListClient sessions={sessions} profiles={profiles} prefill={prefill} />
     </main>
   )

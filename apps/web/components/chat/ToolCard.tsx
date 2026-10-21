@@ -39,17 +39,17 @@ function DaeUnMini({ payload }: { payload: Record<string, unknown> }) {
           return (
             <div
               key={e.start_age}
-              className={`flex shrink-0 flex-col items-center gap-0.5 rounded-lg border-2 px-2.5 py-1.5 text-center ${
+              className={`flex shrink-0 flex-col items-center gap-0.5 rounded-xl border px-2.5 py-1.5 text-center ${
                 isCurrent
-                  ? 'border-orange bg-orange-tint font-extrabold'
-                  : 'border-border-soft bg-surface'
+                  ? 'border-c-text bg-c-poster-butter font-extrabold'
+                  : 'border-c-line bg-c-surface'
               }`}
             >
-              <span className="text-[10px] text-text-sub">{e.start_age}세</span>
+              <span className="text-[10px] text-c-text-sub">{e.start_age}세</span>
               <span className="font-serif text-[15px] font-bold leading-none">
                 {e.stem ?? ''}{e.branch ?? ''}
               </span>
-              <span className="text-[10px] text-text-sub">{e.ganji_name ?? ''}</span>
+              <span className="text-[10px] text-c-text-sub">{e.ganji_name ?? ''}</span>
             </div>
           )
         })}
@@ -68,15 +68,15 @@ function UnMini({ payload, label }: { payload: Record<string, unknown>; label: s
 
   return (
     <div className="overflow-x-auto">
-      <p className="mb-1 text-[10px] font-extrabold uppercase tracking-widest text-text-sub">{label}</p>
+      <p className="mb-1 text-[10px] font-extrabold uppercase tracking-widest text-c-text-sub">{label}</p>
       <div className="flex gap-1.5 pb-1">
         {entries.slice(0, 12).map((e, i) => (
           <div
             key={i}
-            className="flex shrink-0 flex-col items-center gap-0.5 rounded-lg border border-border-soft bg-surface px-1.5 py-1"
+            className="flex shrink-0 flex-col items-center gap-0.5 rounded-xl border border-c-line bg-c-surface px-1.5 py-1"
           >
             {(e.month ?? e.year) !== undefined && (
-              <span className="text-[9px] text-text-sub">{e.month ?? e.year}</span>
+              <span className="text-[9px] text-c-text-sub">{e.month ?? e.year}</span>
             )}
             <span className="font-serif text-[13px] font-bold leading-none">
               {e.stem ?? ''}{e.branch ?? ''}
@@ -96,12 +96,12 @@ function FortuneScoreCard({ payload }: { payload: Record<string, unknown> }) {
   return (
     <div className="flex items-center gap-3">
       {score !== undefined && (
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border-2 border-ink bg-yellow text-[20px] font-extrabold">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-c-accent text-[20px] font-extrabold text-c-on-accent">
           {score}
         </span>
       )}
       {overall && (
-        <p className="text-sm leading-snug text-ink">{overall}</p>
+        <p className="text-sm leading-snug text-c-text">{overall}</p>
       )}
     </div>
   )
@@ -125,9 +125,9 @@ function IlJinSummary({ payload }: { payload: Record<string, unknown> }) {
     const branch = payload.branch as string | undefined
     return (
       <div className="flex items-center gap-3">
-        {date && <span className="text-xs text-text-sub">{date}</span>}
+        {date && <span className="text-xs text-c-text-sub">{date}</span>}
         <span className="font-serif text-xl font-extrabold">{stem}{branch}</span>
-        {ganji && <span className="text-sm text-text-sub">{ganji}</span>}
+        {ganji && <span className="text-sm text-c-text-sub">{ganji}</span>}
       </div>
     )
   }
@@ -140,16 +140,16 @@ function IlJinSummary({ payload }: { payload: Record<string, unknown> }) {
       {/* 오늘 일진 강조 */}
       {todayEntry && (
         <div className="flex items-center gap-3">
-          <span className="rounded-lg border-2 border-ink bg-yellow px-2 py-1 text-xs font-extrabold">{todayEntry.date}</span>
+          <span className="rounded-pill bg-c-accent px-2.5 py-1 text-xs font-extrabold text-c-on-accent">{todayEntry.date}</span>
           <span className="font-serif text-xl font-extrabold">{todayEntry.stem}{todayEntry.branch}</span>
-          {todayEntry.ganji_name && <span className="text-sm text-text-sub">{todayEntry.ganji_name}</span>}
-          {todayEntry.solar_term && <span className="rounded-md bg-teal-tint px-1.5 py-0.5 text-[10px] font-extrabold text-teal-deep">{todayEntry.solar_term}</span>}
+          {todayEntry.ganji_name && <span className="text-sm text-c-text-sub">{todayEntry.ganji_name}</span>}
+          {todayEntry.solar_term && <span className="rounded-md bg-c-poster-mint px-1.5 py-0.5 text-[10px] font-extrabold text-c-text">{todayEntry.solar_term}</span>}
         </div>
       )}
       {/* 이달 일진 미니 그리드 (첫 14일) */}
       {days.length > 1 && (
         <div className="w-full min-w-0 overflow-x-auto">
-          <p className="mb-1 text-[10px] font-extrabold uppercase tracking-widest text-text-sub">
+          <p className="mb-1 text-[10px] font-extrabold uppercase tracking-widest text-c-text-sub">
             {year}년 {month}월
           </p>
           <div className="flex gap-1 pb-1" style={{ width: 'max-content' }}>
@@ -158,11 +158,11 @@ function IlJinSummary({ payload }: { payload: Record<string, unknown> }) {
               return (
                 <div
                   key={d.date}
-                  className={`flex shrink-0 flex-col items-center gap-0.5 rounded-lg border px-1.5 py-1 text-center ${
-                    isToday ? 'border-orange bg-orange-tint font-extrabold' : 'border-border-soft bg-surface'
+                  className={`flex shrink-0 flex-col items-center gap-0.5 rounded-xl border px-1.5 py-1 text-center ${
+                    isToday ? 'border-c-text bg-c-poster-butter font-extrabold' : 'border-c-line bg-c-surface'
                   }`}
                 >
-                  <span className="text-[9px] text-text-sub">{d.date.slice(8)}</span>
+                  <span className="text-[9px] text-c-text-sub">{d.date.slice(8)}</span>
                   <span className="font-serif text-[12px] font-bold leading-none">{d.stem}{d.branch}</span>
                 </div>
               )
@@ -187,11 +187,11 @@ function CompatibilityCard({ payload }: { payload: Record<string, unknown> }) {
   return (
     <div className="flex items-center gap-3">
       {score !== undefined && (
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border-2 border-ink bg-teal-tint text-[20px] font-extrabold text-teal-deep">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-c-poster-mint text-[20px] font-extrabold text-c-text">
           {score}
         </span>
       )}
-      {summary && <p className="text-sm leading-snug text-ink">{summary}</p>}
+      {summary && <p className="text-sm leading-snug text-c-text">{summary}</p>}
     </div>
   )
 }
@@ -212,14 +212,14 @@ function WuxingMini({ payload }: { payload: Record<string, unknown> }) {
   return (
     <div>
       <div className="mb-2 flex items-center gap-2">
-        <span className="rounded-lg bg-ink px-2 py-0.5 text-[11px] font-black text-yellow">{score}/100</span>
+        <span className="rounded-pill bg-c-text px-2 py-0.5 text-[11px] font-black text-c-bg">{score}/100</span>
         <span
           className={`rounded-md px-2 py-0.5 text-[10px] font-extrabold ${
             label.tone === 'good'
-              ? 'bg-teal-tint text-[#00665F]'
+              ? 'bg-c-poster-mint text-c-text'
               : label.tone === 'mid'
-                ? 'bg-yellow-tint text-[#6B5500]'
-                : 'bg-orange-tint text-[#B34800]'
+                ? 'bg-c-poster-butter text-c-text'
+                : 'bg-c-poster-peach text-c-text'
           }`}
         >
           {label.text}
@@ -227,12 +227,12 @@ function WuxingMini({ payload }: { payload: Record<string, unknown> }) {
       </div>
       {/* 합에 따른 오행 변화 적용 토글 — 만세력 차트와 동일 */}
       {hasBoth && (
-        <label className="mb-2 flex cursor-pointer items-center gap-1.5 text-[11px] font-bold text-text-sub">
+        <label className="mb-2 flex cursor-pointer items-center gap-1.5 text-[11px] font-bold text-c-text-sub">
           <input
             type="checkbox"
             checked={applyHap}
             onChange={(e) => setApplyHap(e.target.checked)}
-            className="h-3.5 w-3.5 accent-ink"
+            className="h-3.5 w-3.5 accent-c-text"
           />
           {tw('applyHap')}
         </label>
@@ -243,13 +243,13 @@ function WuxingMini({ payload }: { payload: Record<string, unknown> }) {
         return (
           <div key={el} className="mt-1 flex items-center gap-2 text-xs">
             <span className="w-4 font-black" style={{ color }}>{el}</span>
-            <div className="h-2 flex-1 overflow-hidden rounded-full bg-border-soft">
+            <div className="h-2 flex-1 overflow-hidden rounded-full bg-c-line">
               <i className="block h-full rounded-full" style={{ width: `${Math.min(pct[el], 100)}%`, background: color }} />
             </div>
-            <span className="w-8 text-right font-bold text-text-sub">{pct[el]}%</span>
+            <span className="w-8 text-right font-bold text-c-text-sub">{pct[el]}%</span>
             <span
               className={`w-8 rounded text-center text-[9px] font-extrabold ${
-                v === '과다' ? 'text-[#B34800]' : v === '부족' ? 'text-[#00665F]' : 'text-text-sub'
+                v === '과다' ? 'text-c-danger' : v === '부족' ? 'text-c-text' : 'text-c-text-sub'
               }`}
             >
               {v}
@@ -274,11 +274,11 @@ function TenGodsMini({ payload }: { payload: Record<string, unknown> }) {
         const hot = dominant.includes(g.group)
         return (
           <div key={g.group} className="mt-1 flex items-center gap-2 text-xs">
-            <span className={`w-10 shrink-0 font-black ${hot ? 'text-orange' : 'text-ink'}`}>{g.group}</span>
-            <div className="h-2 flex-1 overflow-hidden rounded-full bg-border-soft">
-              <i className="block h-full rounded-full" style={{ width: `${Math.min(g.pct, 100)}%`, background: hot ? 'var(--orange)' : '#A09880' }} />
+            <span className={`w-10 shrink-0 font-black ${hot ? 'text-c-text' : 'text-c-text-sub'}`}>{g.group}</span>
+            <div className="h-2 flex-1 overflow-hidden rounded-full bg-c-line">
+              <i className="block h-full rounded-full" style={{ width: `${Math.min(g.pct, 100)}%`, background: hot ? 'var(--c-text)' : 'var(--c-text-sub)' }} />
             </div>
-            <span className="w-8 text-right font-bold text-text-sub">{g.pct}%</span>
+            <span className="w-8 text-right font-bold text-c-text-sub">{g.pct}%</span>
           </div>
         )
       })}
@@ -289,7 +289,7 @@ function TenGodsMini({ payload }: { payload: Record<string, unknown> }) {
 /** 신살 칩 목록 — 길신 틸 / 흉살 오렌지 */
 function SinSalChips({ payload, t }: { payload: Record<string, unknown>; t: ReturnType<typeof useTranslations> }) {
   const sals = (payload.sin_sals ?? []) as SinSal[]
-  if (sals.length === 0) return <p className="text-xs text-text-sub">{t('fields.none')}</p>
+  if (sals.length === 0) return <p className="text-xs text-c-text-sub">{t('fields.none')}</p>
 
   return (
     <div className="flex flex-wrap gap-1.5">
@@ -297,12 +297,12 @@ function SinSalChips({ payload, t }: { payload: Record<string, unknown>; t: Retu
         const good = s.type === 'lucky'
         const bad = s.type === 'unlucky' || s.type === 'warning'
         const tone = good
-          ? 'bg-teal-tint text-[#00665F]'
+          ? 'bg-c-poster-mint text-c-text'
           : bad
-            ? 'bg-orange-tint text-[#B34800]'
-            : 'bg-border-soft text-text-sub'
+            ? 'bg-c-poster-peach text-c-text'
+            : 'bg-c-surface-soft text-c-text-sub'
         return (
-          <span key={s.name} className={`rounded-lg border-[1.5px] border-ink px-2 py-0.5 text-[11px] font-extrabold ${tone}`}>
+          <span key={s.name} className={`rounded-xl border border-c-line px-2 py-0.5 text-[11px] font-extrabold ${tone}`}>
             {s.name}
           </span>
         )
@@ -320,11 +320,11 @@ function PillarMini({ pillar, isDay }: { pillar?: Pillar | null; isDay?: boolean
         const kor = kind === 'stem' ? pillar.stem : pillar.branch
         const element = kind === 'stem' ? pillar.stem_element : pillar.branch_element
         const color = ohaengColor(element)
-        const border = isDay && kind === 'stem' ? 'border-orange' : 'border-border-soft'
+        const border = isDay && kind === 'stem' ? 'border-c-text' : 'border-c-line'
         return (
           <div
             key={kind}
-            className={`rounded-lg border-2 ${border} px-1 py-1 text-center`}
+            className={`rounded-xl border-2 ${border} px-1 py-1 text-center`}
             style={{ background: ohaengTintColor(element) }}
           >
             <span className="font-serif text-[16px] font-black leading-none" style={{ color }}>{kor}</span>
@@ -366,7 +366,7 @@ function StrengthMini({ payload, t }: { payload: Record<string, unknown>; t: Ret
   function ElPill({ el }: { el: string }) {
     const color = ohaengColor(el)
     return (
-      <span className="inline-flex items-center gap-1 rounded-md border-[1.5px] border-ink px-1.5 py-0.5 text-[11px] font-extrabold" style={{ background: `${color}1A` }}>
+      <span className="inline-flex items-center gap-1 rounded-md border border-c-line px-1.5 py-0.5 text-[11px] font-extrabold" style={{ background: `${color}1A` }}>
         <span className="h-2 w-2 rounded-full" style={{ background: color }} />
         <span style={{ color }}>{el}</span>
       </span>
@@ -379,24 +379,24 @@ function StrengthMini({ payload, t }: { payload: Record<string, unknown>; t: Ret
         <div>
           <div className="mb-1 flex items-baseline gap-2">
             <span className="text-sm font-black">{s.level_8 || s.level}</span>
-            {score !== undefined && <span className="text-[11px] text-text-sub">{score}</span>}
+            {score !== undefined && <span className="text-[11px] text-c-text-sub">{score}</span>}
           </div>
           {score !== undefined && (
-            <div className="relative h-2 overflow-hidden rounded-full bg-border-soft">
-              <i className="block h-full rounded-full" style={{ width: `${score}%`, background: 'var(--yellow)' }} />
-              <i className="absolute top-0 h-full w-1 -translate-x-1/2 rounded-full bg-orange" style={{ left: `${score}%` }} />
+            <div className="relative h-2 overflow-hidden rounded-full bg-c-line">
+              <i className="block h-full rounded-full" style={{ width: `${score}%`, background: 'var(--c-accent)' }} />
+              <i className="absolute top-0 h-full w-1 -translate-x-1/2 rounded-full bg-c-text" style={{ left: `${score}%` }} />
             </div>
           )}
         </div>
       )}
       {y && (
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] font-bold text-text-sub">{t('fields.yongSin')}</span>
+          <span className="text-[10px] font-bold text-c-text-sub">{t('fields.yongSin')}</span>
           {y.primary && <ElPill el={y.primary} />}
           {y.secondary && <ElPill el={y.secondary} />}
           {y.ji_sin?.length > 0 && (
             <>
-              <span className="ml-1 text-[10px] font-bold text-text-sub">{t('fields.jiSin')}</span>
+              <span className="ml-1 text-[10px] font-bold text-c-text-sub">{t('fields.jiSin')}</span>
               {y.ji_sin.map((el) => <ElPill key={el} el={el} />)}
             </>
           )}
@@ -424,15 +424,15 @@ function TwelveUnSeongMini({ payload, t }: { payload: Record<string, unknown>; t
         {active.map(([key, label]) => {
           const p = pillarsWun[key]!
           return (
-            <div key={key} className="flex flex-1 flex-col items-center gap-0.5 rounded-lg border-[1.5px] border-border-soft bg-surface px-1.5 py-2 text-center">
-              <span className="text-[9px] font-bold text-text-sub">{label}주</span>
-              <span className="font-serif text-base font-black leading-none text-ink">{p.stem}{p.branch}</span>
-              <span className="mt-0.5 rounded-md bg-yellow-tint px-1.5 py-0.5 text-[10px] font-extrabold text-ink">{p.twelve_wun}</span>
+            <div key={key} className="flex flex-1 flex-col items-center gap-0.5 rounded-xl border border-c-line bg-c-surface px-1.5 py-2 text-center">
+              <span className="text-[9px] font-bold text-c-text-sub">{label}주</span>
+              <span className="font-serif text-base font-black leading-none text-c-text">{p.stem}{p.branch}</span>
+              <span className="mt-0.5 rounded-md bg-c-poster-butter px-1.5 py-0.5 text-[10px] font-extrabold text-c-text">{p.twelve_wun}</span>
             </div>
           )
         })}
       </div>
-      <p className="mt-2 text-[10px] text-text-sub">{t('hints.twelveUnSeong')}</p>
+      <p className="mt-2 text-[10px] text-c-text-sub">{t('hints.twelveUnSeong')}</p>
     </div>
   )
 }
@@ -452,17 +452,17 @@ function CompatBranchesCard({ payload }: { payload: Record<string, unknown> }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-[11px] font-bold text-text-sub">{nameA} ↔ {nameB} 지지 합·충</p>
+      <p className="text-[11px] font-bold text-c-text-sub">{nameA} ↔ {nameB} 지지 합·충</p>
       {bothEmpty ? (
-        <p className="text-[13px] text-ink">두드러진 합·충이 없어 잔잔한 관계예요.</p>
+        <p className="text-[13px] text-c-text">두드러진 합·충이 없어 잔잔한 관계예요.</p>
       ) : (
         <>
           {hapPairs.length > 0 && (
             <div className="flex flex-col gap-1">
-              <p className="text-[10px] font-extrabold uppercase tracking-widest text-teal-deep">끌어당기는 합(合)</p>
+              <p className="text-[10px] font-extrabold uppercase tracking-widest text-c-text-sub">끌어당기는 합(合)</p>
               <div className="flex flex-wrap gap-1.5">
                 {hapPairs.map((h, i) => (
-                  <span key={i} className="rounded-lg border-2 border-teal bg-surface px-2 py-1 font-serif text-[13px] font-bold text-teal">
+                  <span key={i} className="rounded-xl border border-c-line bg-c-poster-mint px-2 py-1 font-serif text-[13px] font-bold text-c-text">
                     {h.pair[0]}-{h.pair[1]} 합 → {h.element}
                   </span>
                 ))}
@@ -471,10 +471,10 @@ function CompatBranchesCard({ payload }: { payload: Record<string, unknown> }) {
           )}
           {clashLabels.length > 0 && (
             <div className="flex flex-col gap-1">
-              <p className="text-[10px] font-extrabold uppercase tracking-widest text-orange">충(衝)</p>
+              <p className="text-[10px] font-extrabold uppercase tracking-widest text-c-danger">충(衝)</p>
               <div className="flex flex-wrap gap-1.5">
                 {clashLabels.map((p, i) => (
-                  <span key={i} className="rounded-lg border-2 border-ink bg-surface px-2 py-1 font-serif text-[13px] font-bold text-ink">{p}</span>
+                  <span key={i} className="rounded-xl border border-c-line bg-c-surface px-2 py-1 font-serif text-[13px] font-bold text-c-text">{p}</span>
                 ))}
               </div>
             </div>
@@ -503,19 +503,19 @@ function DayRelationCard({ payload }: { payload: Record<string, unknown> }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-center gap-3">
-        <span className="font-serif text-2xl font-extrabold text-ink">{stemA}</span>
-        <span className="text-[12px] font-bold text-text-sub">{nameA}</span>
-        <span className="font-extrabold text-orange">↔</span>
-        <span className="font-serif text-2xl font-extrabold text-ink">{stemB}</span>
-        <span className="text-[12px] font-bold text-text-sub">{nameB}</span>
+        <span className="font-serif text-2xl font-extrabold text-c-text">{stemA}</span>
+        <span className="text-[12px] font-bold text-c-text-sub">{nameA}</span>
+        <span className="font-extrabold text-c-danger">↔</span>
+        <span className="font-serif text-2xl font-extrabold text-c-text">{stemB}</span>
+        <span className="text-[12px] font-bold text-c-text-sub">{nameB}</span>
       </div>
       {stemHap && (
-        <span className="self-center rounded-full border-2 border-ink bg-yellow px-2.5 py-0.5 text-[11px] font-extrabold">천간합 → {stemHap}</span>
+        <span className="self-center rounded-pill bg-c-accent px-2.5 py-0.5 text-[11px] font-extrabold">천간합 → {stemHap}</span>
       )}
-      {synergy && <p className="text-center text-[13px] font-bold text-ink">{synergyText[synergy] ?? synergy}</p>}
-      <div className="mt-1 flex flex-col gap-1 text-[12px] text-ink">
-        {tgAB && <p><span className="font-bold">{nameA}</span> → {nameB}: <span className="font-extrabold text-teal">{tgAB}</span></p>}
-        {tgBA && <p><span className="font-bold">{nameB}</span> → {nameA}: <span className="font-extrabold text-teal">{tgBA}</span></p>}
+      {synergy && <p className="text-center text-[13px] font-bold text-c-text">{synergyText[synergy] ?? synergy}</p>}
+      <div className="mt-1 flex flex-col gap-1 text-[12px] text-c-text">
+        {tgAB && <p><span className="font-bold">{nameA}</span> → {nameB}: <span className="font-extrabold text-c-text">{tgAB}</span></p>}
+        {tgBA && <p><span className="font-bold">{nameB}</span> → {nameA}: <span className="font-extrabold text-c-text">{tgBA}</span></p>}
       </div>
     </div>
   )
@@ -542,29 +542,29 @@ function YongsinComplementCard({ payload }: { payload: Record<string, unknown> }
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-center text-[13px] font-bold text-ink">{helpText}</p>
+      <p className="text-center text-[13px] font-bold text-c-text">{helpText}</p>
       {(yongA || yongB) && (
-        <div className="flex gap-3 text-[12px] text-ink">
-          {yongA && <p><span className="font-bold">{nameA}</span> 용신: <span className="font-extrabold text-teal">{yongA}</span></p>}
-          {yongB && <p><span className="font-bold">{nameB}</span> 용신: <span className="font-extrabold text-teal">{yongB}</span></p>}
+        <div className="flex gap-3 text-[12px] text-c-text">
+          {yongA && <p><span className="font-bold">{nameA}</span> 용신: <span className="font-extrabold text-c-text">{yongA}</span></p>}
+          {yongB && <p><span className="font-bold">{nameB}</span> 용신: <span className="font-extrabold text-c-text">{yongB}</span></p>}
         </div>
       )}
       {compAB.length > 0 && (
         <div className="flex flex-col gap-1">
-          <p className="text-[10px] font-extrabold uppercase tracking-widest text-text-sub">{nameA} → {nameB}</p>
+          <p className="text-[10px] font-extrabold uppercase tracking-widest text-c-text-sub">{nameA} → {nameB}</p>
           <div className="flex flex-wrap gap-1.5">
             {compAB.map((el, i) => (
-              <span key={i} className="rounded-lg border-[1.5px] border-ink bg-surface px-2 py-0.5 font-serif text-[12px] font-bold text-ink">{el}</span>
+              <span key={i} className="rounded-xl border border-c-line bg-c-surface px-2 py-0.5 font-serif text-[12px] font-bold text-c-text">{el}</span>
             ))}
           </div>
         </div>
       )}
       {compBA.length > 0 && (
         <div className="flex flex-col gap-1">
-          <p className="text-[10px] font-extrabold uppercase tracking-widest text-text-sub">{nameB} → {nameA}</p>
+          <p className="text-[10px] font-extrabold uppercase tracking-widest text-c-text-sub">{nameB} → {nameA}</p>
           <div className="flex flex-wrap gap-1.5">
             {compBA.map((el, i) => (
-              <span key={i} className="rounded-lg border-[1.5px] border-ink bg-surface px-2 py-0.5 font-serif text-[12px] font-bold text-ink">{el}</span>
+              <span key={i} className="rounded-xl border border-c-line bg-c-surface px-2 py-0.5 font-serif text-[12px] font-bold text-c-text">{el}</span>
             ))}
           </div>
         </div>
@@ -612,31 +612,28 @@ function HapChungMini({ payload, t }: { payload: Record<string, unknown>; t: Ret
     relations.push({ label: '공망', items: gm.affected_pillars.map((p) => PLABEL[p] ?? p) })
   }
 
-  const HAP_COLOR = '#00A86B'
-  const CHUNG_COLOR = '#FF6B00'
-
+  
   return (
     <div>
       {relations.length === 0 ? (
-        <p className="text-xs text-text-sub">{t('fields.none')}</p>
+        <p className="text-xs text-c-text-sub">{t('fields.none')}</p>
       ) : (
         <div className="flex flex-col gap-1.5">
           {relations.map((rel) => (
             <div key={rel.label} className="flex flex-wrap items-center gap-1">
               <span
-                className="rounded-md px-1.5 py-0.5 text-[10px] font-extrabold"
-                style={{ color: rel.label === '충' || rel.label === '공망' ? CHUNG_COLOR : HAP_COLOR, background: `${rel.label === '충' || rel.label === '공망' ? CHUNG_COLOR : HAP_COLOR}1A` }}
+                className={`rounded-md px-1.5 py-0.5 text-[10px] font-extrabold text-c-text ${rel.label === '충' || rel.label === '공망' ? 'bg-c-poster-peach' : 'bg-c-poster-mint'}`}
               >
                 {rel.label}
               </span>
               {rel.items.map((item, i) => (
-                <span key={i} className="text-xs font-bold text-ink">{item}</span>
+                <span key={i} className="text-xs font-bold text-c-text">{item}</span>
               ))}
             </div>
           ))}
         </div>
       )}
-      <p className="mt-2 text-[10px] text-text-sub">{t('hints.hapChung')}</p>
+      <p className="mt-2 text-[10px] text-c-text-sub">{t('hints.hapChung')}</p>
     </div>
   )
 }
@@ -721,8 +718,8 @@ export default function ToolCard({ tool, payload }: Props) {
         : tool
 
   return (
-    <div className="w-full min-w-0 rounded-lg border-[1.5px] border-teal bg-teal-tint px-3 py-2.5 overflow-hidden">
-      <p className="mb-1.5 text-[10px] font-extrabold uppercase tracking-widest text-teal-deep">
+    <div className="w-full min-w-0 overflow-hidden rounded-card bg-c-surface-soft px-3.5 py-3 text-c-text">
+      <p className="mb-1.5 text-[10px] font-extrabold uppercase tracking-widest text-c-text-sub">
         {label}
       </p>
       {content}

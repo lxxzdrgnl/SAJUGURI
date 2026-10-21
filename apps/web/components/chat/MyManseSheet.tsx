@@ -13,17 +13,9 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { ProfileResponse, SessionProfileRequest } from '@sajuguri/api-client'
 import { useSheetTransition } from '@/lib/hooks/useSheetTransition'
+import Button, { buttonClass } from '@/components/ui/Button'
 import MascotTinted from '@/components/ui/MascotTinted'
 import MansePickerSheet, { type MansePick } from '@/components/manse/MansePickerSheet'
-
-/** 일간(천간) → 오행 크롬 토큰. 홈 배너와 같은 매핑을 쓴다. */
-const STEM_CHROME: Record<string, string> = {
-  갑: 'var(--chrome-mok)', 을: 'var(--chrome-mok)',
-  병: 'var(--chrome-hwa)', 정: 'var(--chrome-hwa)',
-  무: 'var(--chrome-to)', 기: 'var(--chrome-to)',
-  경: 'var(--chrome-geum)', 신: 'var(--chrome-geum)',
-  임: 'var(--chrome-su)', 계: 'var(--chrome-su)',
-}
 
 export interface SessionManse {
   name?: string | null
@@ -63,7 +55,6 @@ export default function MyManseSheet({
 
   if (!mounted) return null
 
-  const chrome = (manse.day_stem && STEM_CHROME[manse.day_stem]) || 'var(--chrome-default)'
   const timeText = manse.birth_time ?? t('timeUnknown')
   const genderText =
     manse.gender === 'female' ? t('female') : manse.gender === 'male' ? t('male') : null
@@ -97,7 +88,7 @@ export default function MyManseSheet({
   return (
     <>
       <div
-        className="fixed inset-0 z-40 bg-ink/40"
+        className="fixed inset-0 z-40 bg-c-scrim"
         style={{
           opacity: visible ? 1 : 0,
           transitionProperty: 'opacity',
@@ -111,7 +102,7 @@ export default function MyManseSheet({
         role="dialog"
         aria-modal="true"
         aria-label={t('title')}
-        className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[640px] overflow-hidden rounded-t-lg border-2 border-ink bg-surface shadow-brutal-up"
+        className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[640px] overflow-hidden rounded-t-card bg-c-surface text-c-text"
         style={{
           transform: visible ? 'translateY(0)' : 'translateY(100%)',
           opacity: visible ? 1 : 0,
@@ -123,28 +114,21 @@ export default function MyManseSheet({
         onTransitionEnd={onTransitionEnd}
       >
         {/* 정체 블록 — 일간 오행 크롬 위에 마스코트 + 이름 + 일주 */}
-        <div className="relative border-b-2 border-ink px-4 py-4" style={{ background: chrome }}>
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 mix-blend-screen"
-            style={{ background: 'var(--specular)' }}
-          />
-          <p className="relative mb-2.5 text-[11px] font-extrabold uppercase tracking-wider text-ink/70">
+        <div className="relative bg-c-surface-soft px-4 py-4">
+          <p className="relative mb-2.5 text-[11px] font-extrabold uppercase tracking-wider text-c-text-sub">
             {t('title')}
           </p>
           <div className="relative flex items-center gap-3">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-surface shadow-gloss">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-c-line bg-c-surface">
               <MascotTinted stem={manse.day_stem ?? null} width={30} height={30} />
             </span>
             <div className="min-w-0 flex-1">
               <p
-                className="truncate text-[17px] font-black leading-tight text-ink"
-                style={{ textShadow: '0 1px 0 rgba(255,255,255,.6)' }}
-              >
+                className="truncate text-[17px] font-black leading-tight text-c-text">
                 {manse.name || t('unnamed')}
               </p>
               {manse.ilju && (
-                <p className="mt-0.5 font-mono text-[13px] font-bold tabular-nums text-ink/75">
+                <p className="mt-0.5 font-mono text-[13px] font-bold tabular-nums text-c-text-sub">
                   {t('ilju', { ganji: manse.ilju })}
                 </p>
               )}
@@ -153,16 +137,16 @@ export default function MyManseSheet({
         </div>
 
         {/* 정보 행 */}
-        <dl className="divide-y divide-border-soft border-b-2 border-ink bg-bg-base">
+        <dl className="divide-y divide-c-line border-b border-c-line bg-c-surface">
           <div className="flex items-center justify-between px-4 py-2.5">
-            <dt className="text-[12px] font-bold text-text-sub">{t('birth')}</dt>
-            <dd className="font-mono text-[13px] font-bold tabular-nums text-ink">
+            <dt className="text-[12px] font-bold text-c-text-sub">{t('birth')}</dt>
+            <dd className="font-mono text-[13px] font-bold tabular-nums text-c-text">
               {manse.birth_date} · {timeText}
             </dd>
           </div>
           <div className="flex items-center justify-between px-4 py-2.5">
-            <dt className="text-[12px] font-bold text-text-sub">{t('detail')}</dt>
-            <dd className="text-[13px] font-bold text-ink">
+            <dt className="text-[12px] font-bold text-c-text-sub">{t('detail')}</dt>
+            <dd className="text-[13px] font-bold text-c-text">
               {[genderText, calendarText].filter(Boolean).join(' · ')}
             </dd>
           </div>
@@ -171,26 +155,21 @@ export default function MyManseSheet({
         {/* 행동 */}
         <div className="flex flex-col gap-2 px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
           {error && (
-            <p role="alert" className="text-[12px] font-bold text-orange">
+            <p role="alert" className="text-[12px] font-bold text-c-danger">
               {error}
             </p>
           )}
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => setPickerOpen(true)}
-            className="w-full rounded-full border-2 border-ink bg-yellow py-3 text-sm font-extrabold text-ink shadow-brutal-sm disabled:opacity-50"
-          >
+          <Button type="button" disabled={busy} onClick={() => setPickerOpen(true)} className="w-full disabled:opacity-50">
             {busy ? t('replacing') : t('replace')}
-          </button>
+          </Button>
           {/* 교체하면 앞선 답변은 이전 사람 사주 기준으로 남는다. 눌리기 전에 알려준다. */}
-          <p className="text-center text-[11.5px] leading-snug text-text-sub">
+          <p className="text-center text-[11.5px] leading-snug text-c-text-sub">
             {t('replaceNote')}
           </p>
           {detailHref && (
             <a
               href={detailHref}
-              className="mt-1 w-full rounded-full border-2 border-ink bg-surface py-2.5 text-center text-sm font-extrabold text-ink shadow-brutal-sm"
+              className={`${buttonClass('secondary', 'md')} mt-1 w-full`}
             >
               {t('viewDetail')}
             </a>
