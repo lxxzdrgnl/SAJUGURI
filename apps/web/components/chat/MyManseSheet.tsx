@@ -111,7 +111,7 @@ export default function MyManseSheet({
         role="dialog"
         aria-modal="true"
         aria-label={t('title')}
-        className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[640px] overflow-hidden rounded-t-lg border-2 border-ink bg-surface shadow-brutal-up"
+        className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[640px] overflow-hidden rounded-t-lg border-2 border-ink bg-surface text-ink shadow-brutal-up"
         style={{
           transform: visible ? 'translateY(0)' : 'translateY(100%)',
           opacity: visible ? 1 : 0,
@@ -133,7 +133,7 @@ export default function MyManseSheet({
             {t('title')}
           </p>
           <div className="relative flex items-center gap-3">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-surface shadow-gloss">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-surface text-ink shadow-gloss">
               <MascotTinted stem={manse.day_stem ?? null} width={30} height={30} />
             </span>
             <div className="min-w-0 flex-1">
@@ -153,7 +153,7 @@ export default function MyManseSheet({
         </div>
 
         {/* 정보 행 */}
-        <dl className="divide-y divide-border-soft border-b-2 border-ink bg-bg-base">
+        <dl className="divide-y divide-border-soft border-b-2 border-ink bg-bg-base text-ink">
           <div className="flex items-center justify-between px-4 py-2.5">
             <dt className="text-[12px] font-bold text-text-sub">{t('birth')}</dt>
             <dd className="font-mono text-[13px] font-bold tabular-nums text-ink">

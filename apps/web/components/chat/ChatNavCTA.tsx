@@ -17,7 +17,7 @@ export default function ChatNavCTA({ title, buttonLabel, href }: Props) {
   const router = useRouter()
 
   return (
-    <div className="rounded-lg border-2 border-ink bg-teal-tint p-3 shadow-brutal-sm">
+    <div className="rounded-lg border-2 border-ink bg-teal-tint text-ink p-3 shadow-brutal-sm">
       <p className="mb-2.5 text-[13px] font-extrabold text-ink leading-snug">
         {title}
       </p>

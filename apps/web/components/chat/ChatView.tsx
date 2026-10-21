@@ -400,7 +400,7 @@ export default function ChatView({ sessionId, initialTitle, profiles, partnerNam
       {/* 헤더 */}
       <div className="flex shrink-0 items-center gap-2 border-b-2 border-border-soft pb-3">
         <button
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 border-ink bg-surface shadow-brutal-sm transition-opacity hover:opacity-70"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 border-ink bg-surface text-ink shadow-brutal-sm transition-opacity hover:opacity-70"
           onClick={() => router.push('/chat')}
           aria-label="back"
         >
@@ -569,7 +569,7 @@ export default function ChatView({ sessionId, initialTitle, profiles, partnerNam
         <div className="flex items-center gap-2">
           {/* + 첨부 버튼 */}
           <button
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-surface text-lg font-extrabold shadow-brutal-sm transition-opacity hover:opacity-70"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-surface text-ink text-lg font-extrabold shadow-brutal-sm transition-opacity hover:opacity-70"
             onClick={() => setAttachOpen(true)}
             aria-label={t('attach.title')}
           >

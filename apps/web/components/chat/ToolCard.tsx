@@ -39,17 +39,17 @@ function DaeUnMini({ payload }: { payload: Record<string, unknown> }) {
           return (
             <div
               key={e.start_age}
-              className={`flex shrink-0 flex-col items-center gap-0.5 rounded-lg border-2 px-2.5 py-1.5 text-center ${
+              className={`flex shrink-0 flex-col items-center gap-0.5 rounded-lg border-2 px-2.5 py-1.5 text-center text-c-text ${
                 isCurrent
-                  ? 'border-orange bg-orange-tint font-extrabold'
-                  : 'border-border-soft bg-surface'
+                  ? 'border-c-oh-hwa bg-c-oh-hwa-tint font-extrabold'
+                  : 'border-c-line bg-c-surface'
               }`}
             >
-              <span className="text-[10px] text-text-sub">{e.start_age}세</span>
+              <span className="text-[10px] text-c-text-sub">{e.start_age}세</span>
               <span className="font-serif text-[15px] font-bold leading-none">
                 {e.stem ?? ''}{e.branch ?? ''}
               </span>
-              <span className="text-[10px] text-text-sub">{e.ganji_name ?? ''}</span>
+              <span className="text-[10px] text-c-text-sub">{e.ganji_name ?? ''}</span>
             </div>
           )
         })}
@@ -73,7 +73,7 @@ function UnMini({ payload, label }: { payload: Record<string, unknown>; label: s
         {entries.slice(0, 12).map((e, i) => (
           <div
             key={i}
-            className="flex shrink-0 flex-col items-center gap-0.5 rounded-lg border border-border-soft bg-surface px-1.5 py-1"
+            className="flex shrink-0 flex-col items-center gap-0.5 rounded-lg border border-border-soft bg-surface text-ink px-1.5 py-1"
           >
             {(e.month ?? e.year) !== undefined && (
               <span className="text-[9px] text-text-sub">{e.month ?? e.year}</span>
@@ -96,7 +96,7 @@ function FortuneScoreCard({ payload }: { payload: Record<string, unknown> }) {
   return (
     <div className="flex items-center gap-3">
       {score !== undefined && (
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border-2 border-ink bg-yellow text-[20px] font-extrabold">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border-2 border-ink bg-yellow text-ink text-[20px] font-extrabold">
           {score}
         </span>
       )}
@@ -140,7 +140,7 @@ function IlJinSummary({ payload }: { payload: Record<string, unknown> }) {
       {/* 오늘 일진 강조 */}
       {todayEntry && (
         <div className="flex items-center gap-3">
-          <span className="rounded-lg border-2 border-ink bg-yellow px-2 py-1 text-xs font-extrabold">{todayEntry.date}</span>
+          <span className="rounded-lg border-2 border-ink bg-yellow text-ink px-2 py-1 text-xs font-extrabold">{todayEntry.date}</span>
           <span className="font-serif text-xl font-extrabold">{todayEntry.stem}{todayEntry.branch}</span>
           {todayEntry.ganji_name && <span className="text-sm text-text-sub">{todayEntry.ganji_name}</span>}
           {todayEntry.solar_term && <span className="rounded-md bg-teal-tint px-1.5 py-0.5 text-[10px] font-extrabold text-teal-deep">{todayEntry.solar_term}</span>}
@@ -424,7 +424,7 @@ function TwelveUnSeongMini({ payload, t }: { payload: Record<string, unknown>; t
         {active.map(([key, label]) => {
           const p = pillarsWun[key]!
           return (
-            <div key={key} className="flex flex-1 flex-col items-center gap-0.5 rounded-lg border-[1.5px] border-border-soft bg-surface px-1.5 py-2 text-center">
+            <div key={key} className="flex flex-1 flex-col items-center gap-0.5 rounded-lg border-[1.5px] border-border-soft bg-surface text-ink px-1.5 py-2 text-center">
               <span className="text-[9px] font-bold text-text-sub">{label}주</span>
               <span className="font-serif text-base font-black leading-none text-ink">{p.stem}{p.branch}</span>
               <span className="mt-0.5 rounded-md bg-yellow-tint px-1.5 py-0.5 text-[10px] font-extrabold text-ink">{p.twelve_wun}</span>
@@ -510,7 +510,7 @@ function DayRelationCard({ payload }: { payload: Record<string, unknown> }) {
         <span className="text-[12px] font-bold text-text-sub">{nameB}</span>
       </div>
       {stemHap && (
-        <span className="self-center rounded-full border-2 border-ink bg-yellow px-2.5 py-0.5 text-[11px] font-extrabold">천간합 → {stemHap}</span>
+        <span className="self-center rounded-full border-2 border-ink bg-yellow text-ink px-2.5 py-0.5 text-[11px] font-extrabold">천간합 → {stemHap}</span>
       )}
       {synergy && <p className="text-center text-[13px] font-bold text-ink">{synergyText[synergy] ?? synergy}</p>}
       <div className="mt-1 flex flex-col gap-1 text-[12px] text-ink">
@@ -721,7 +721,7 @@ export default function ToolCard({ tool, payload }: Props) {
         : tool
 
   return (
-    <div className="w-full min-w-0 rounded-lg border-[1.5px] border-teal bg-teal-tint px-3 py-2.5 overflow-hidden">
+    <div className="w-full min-w-0 rounded-lg border-[1.5px] border-teal bg-teal-tint text-ink px-3 py-2.5 overflow-hidden">
       <p className="mb-1.5 text-[10px] font-extrabold uppercase tracking-widest text-teal-deep">
         {label}
       </p>

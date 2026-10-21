@@ -56,7 +56,7 @@ function DeleteModal({ sessionTitle, onConfirm, onClose, t }: DeleteModalProps) 
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="w-full max-w-[480px] rounded-t-lg border-2 border-ink bg-surface p-6 shadow-brutal-up sm:rounded-lg sm:shadow-brutal">
+      <div className="w-full max-w-[480px] rounded-t-lg border-2 border-ink bg-surface text-ink p-6 shadow-brutal-up sm:rounded-lg sm:shadow-brutal">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-[15px] font-extrabold text-ink">{t('deleteConfirm')}</h2>
           <button
@@ -192,7 +192,7 @@ export default function ChatListClient({ sessions: initialSessions, profiles, pr
                 </Link>
                 {editMode && (
                   <button
-                    className="shrink-0 rounded-lg border-2 border-ink bg-surface p-2 shadow-brutal-sm transition-opacity hover:opacity-70"
+                    className="shrink-0 rounded-lg border-2 border-ink bg-surface text-ink p-2 shadow-brutal-sm transition-opacity hover:opacity-70"
                     onClick={() => setDeletingSession(s)}
                     aria-label={t('deleteConfirm')}
                   >

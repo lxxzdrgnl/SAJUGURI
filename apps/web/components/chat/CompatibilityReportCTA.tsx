@@ -37,7 +37,7 @@ export default function CompatibilityReportCTA({ sessionId }: Props) {
   }
 
   return (
-    <div className="rounded-lg border-2 border-ink bg-teal-tint p-3 shadow-brutal-sm">
+    <div className="rounded-lg border-2 border-ink bg-teal-tint text-ink p-3 shadow-brutal-sm">
       <p className="mb-2.5 text-[13px] font-extrabold text-ink leading-snug">
         {t('compatibilityCta.title')}
       </p>

@@ -2,7 +2,7 @@ import { getTranslations } from 'next-intl/server'
 import { currentUser, serverAuthApi } from '@/lib/serverAuth'
 import { listSessions, listProfiles } from '@sajuguri/api-client'
 import type { ChatSession, ProfileResponse } from '@sajuguri/api-client'
-import BrutalCard from '@/components/ui/BrutalCard'
+import { buttonClass } from '@/components/ui/Button'
 import ChatListClient from '@/components/chat/ChatListClient'
 import PageHeading from '@/components/ui/PageHeading'
 import { firstParam, resolvePrefill } from '@/lib/chat/prefill'
@@ -31,18 +31,15 @@ export default async function ChatPage({ searchParams }: Props) {
         <div className="mb-4">
           <PageHeading title={t('title')} accent="teal" />
         </div>
-        <BrutalCard className="flex flex-col items-center gap-4 py-8 text-center">
+        <div className="flex flex-col items-center gap-4 rounded-card border border-c-line bg-c-surface px-4 py-8 text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/mascot.svg" alt="" width={72} height={72} />
-          <p className="text-[15px] font-extrabold">{t('loginRequired')}</p>
-          <p className="text-sm text-text-sub">{t('loginDesc')}</p>
-          <a
-            href={GOOGLE_LOGIN_URL}
-            className="w-full rounded-lg border-2 border-ink bg-yellow py-3 text-sm font-extrabold shadow-brutal text-center block"
-          >
+          <p className="text-[15px] font-extrabold text-c-text">{t('loginRequired')}</p>
+          <p className="text-sm text-c-text-sub">{t('loginDesc')}</p>
+          <a href={GOOGLE_LOGIN_URL} className={`${buttonClass('primary')} w-full`}>
             {t('loginWithGoogle')}
           </a>
-        </BrutalCard>
+        </div>
       </main>
     )
   }
