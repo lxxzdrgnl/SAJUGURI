@@ -16,6 +16,8 @@ import MascotTinted from '@/components/ui/MascotTinted'
 import MansePickerSheet, { type MansePick } from '@/components/manse/MansePickerSheet'
 import Markdown from '@/components/ui/Markdown'
 import { renderTextWithCharts } from '@/lib/chat/chartMarkers'
+import Card from '@/components/ui/Card'
+import Button from '@/components/ui/Button'
 import ShareModal from '@/components/ui/ShareModal'
 import { useShareModal } from '@/lib/hooks/useShareModal'
 
@@ -111,41 +113,38 @@ export default function QuestionPage() {
     )
 
     return (
-      <main className="flex flex-col gap-5">
-        <h1 className="text-lg font-black">{t('title')}</h1>
+      <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100vh-56px)] flex-col gap-5 bg-c-bg px-4 pb-8 pt-2">
+        <h1 className="font-display text-xl font-normal text-c-text">{t('title')}</h1>
 
-        <div className="rounded-lg border-2 border-teal bg-surface p-5 shadow-brutal">
-          <p className="mb-3 text-[11px] font-extrabold uppercase tracking-widest text-text-sub">
+        <Card tone="plain" className="p-5">
+          <p className="mb-3 text-[11px] font-extrabold uppercase tracking-widest text-c-text-sub">
             {t('resultLabel')}
           </p>
-          <p className="mb-2 text-[18px] font-black leading-snug text-ink">{result.headline}</p>
+          <p className="mb-2 text-[18px] font-black leading-snug text-c-text">{result.headline}</p>
           <div className="flex flex-col gap-3">
             {renderTextWithCharts(result.content, toolByName, 'q', {
               renderText: (seg, key) => (
-                <Markdown key={key} className="text-[14px] text-ink">{seg}</Markdown>
+                <Markdown key={key} className="text-[14px] text-c-text">{seg}</Markdown>
               ),
             })}
           </div>
-          <span className="mt-4 inline-block rounded-full border-[1.5px] border-ink bg-orange px-3 py-0.5 text-[11px] font-extrabold text-white">
+          <span className="mt-4 inline-block rounded-pill bg-c-surface-soft px-3 py-0.5 text-[11px] font-extrabold text-c-text-sub">
             {result.category}
           </span>
-        </div>
+        </Card>
 
         <div className="flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={handleShare}
-            disabled={sharing}
-            className="w-full rounded-lg border-2 border-ink bg-teal py-3 text-sm font-extrabold text-white shadow-brutal transition-opacity disabled:opacity-60 active:translate-x-[2px] active:translate-y-[2px] active:shadow-brutal-sm"
-          >
+          <Button type="button" variant="primary" onClick={handleShare} disabled={sharing} className="w-full disabled:opacity-60">
             {sharing ? t('sharing') : t('share')}
-          </button>
-          <button
-            className="w-full rounded-lg border-2 border-ink bg-yellow py-3 text-sm font-extrabold shadow-brutal active:translate-x-[2px] active:translate-y-[2px] active:shadow-brutal-sm"
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            className="w-full"
             onClick={() => { setResult(null); setQuestion(''); close() }}
           >
             {t('askAgain')}
-          </button>
+          </Button>
         </div>
 
         <ShareModal
@@ -159,12 +158,11 @@ export default function QuestionPage() {
   }
 
   return (
-    <main className="flex flex-col gap-5">
+    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100vh-56px)] flex-col gap-5 bg-c-bg px-4 pb-8 pt-2">
       <div>
-        <h1 className="text-[22px] font-black leading-tight text-ink">{t('title')}</h1>
-        <span className="mt-2 block h-1.5 w-12 rounded-full bg-teal" />
+        <h1 className="font-display text-2xl font-normal leading-tight text-c-text">{t('title')}</h1>
       </div>
-      <p className="text-[13px] text-text-sub">{t('desc')}</p>
+      <p className="text-[13px] text-c-text-sub">{t('desc')}</p>
 
       <MansePickerSheet
         open={sheetOpen}
@@ -176,32 +174,30 @@ export default function QuestionPage() {
 
       {/* 선택된 만세력 카드 */}
       <div className="flex flex-col gap-1.5">
-        <p className="text-[13px] font-extrabold">{t('birthLabel')}</p>
+        <p className="text-[13px] font-extrabold text-c-text">{t('birthLabel')}</p>
         {selectedInput ? (
-          <div className="flex items-center gap-3 rounded-lg border-2 border-ink bg-surface p-4 shadow-brutal">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border-2 border-ink bg-surface overflow-hidden">
+          <Card tone="plain" className="flex items-center gap-3 p-4">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-c-surface-soft">
               <MascotTinted stem={selectedInput.day_stem ?? null} width={38} height={38} />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-[14px] font-extrabold">{selectedLabel}</span>
-              <span className="block text-xs text-text-sub">{selectedInput.birth_date}</span>
+              <span className="block text-[14px] font-extrabold text-c-text">{selectedLabel}</span>
+              <span className="block text-xs text-c-text-sub">{selectedInput.birth_date}</span>
             </span>
-            <button
-              type="button"
-              className="shrink-0 rounded-lg border-[1.5px] border-border-soft px-3 py-1.5 text-[12px] font-extrabold text-text-sub hover:border-ink hover:text-ink transition-colors"
-              onClick={() => setSheetOpen(true)}
-            >
+            <Button type="button" variant="secondary" size="sm" className="shrink-0" onClick={() => setSheetOpen(true)}>
               {t('changeBirth')}
-            </button>
-          </div>
+            </Button>
+          </Card>
         ) : (
           <button
             type="button"
-            className="flex w-full items-center gap-3 rounded-lg border-2 border-ink bg-yellow p-4 text-left shadow-brutal transition-opacity hover:opacity-80"
+            className="flex w-full items-center gap-3 rounded-card bg-c-surface-soft p-4 text-left text-c-text transition-transform active:scale-[0.99]"
             onClick={() => setSheetOpen(true)}
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border-2 border-ink bg-surface text-lg font-extrabold">
-              +
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-c-accent text-c-on-accent">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <path d="M12 5 V19 M5 12 H19" />
+              </svg>
             </span>
             <span className="text-[14px] font-extrabold">{t('selectBirth')}</span>
           </button>
@@ -212,7 +208,7 @@ export default function QuestionPage() {
       {selectedInput && (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="question" className="text-[13px] font-extrabold">
+            <label htmlFor="question" className="text-[13px] font-extrabold text-c-text">
               {t('questionLabel', { name: selectedLabel })}
             </label>
             <textarea
@@ -220,27 +216,23 @@ export default function QuestionPage() {
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder={t('questionPlaceholder')}
-              className="w-full resize-none rounded-lg border-2 border-ink bg-surface px-4 py-3 text-sm leading-relaxed shadow-brutal"
+              className="w-full resize-none rounded-card border border-c-line bg-c-surface px-4 py-3 text-sm leading-relaxed text-c-text placeholder:text-c-text-sub focus:outline-none focus:ring-2 focus:ring-c-accent"
               rows={3}
               minLength={10}
               maxLength={200}
             />
-            <p className="text-right text-[11px] text-text-sub">{question.length}/200</p>
+            <p className="text-right text-[11px] text-c-text-sub">{question.length}/200</p>
           </div>
 
           {error && (
-            <p className="rounded-lg border-[1.5px] border-orange bg-orange-tint px-4 py-3 text-[13px] font-bold text-orange">
+            <p className="rounded-card border border-c-danger px-4 py-3 text-[13px] font-bold text-c-danger">
               {error}
             </p>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg border-2 border-ink bg-orange py-3.5 text-sm font-extrabold text-white shadow-brutal transition-opacity disabled:opacity-60 active:translate-x-[2px] active:translate-y-[2px] active:shadow-brutal-sm"
-          >
+          <Button type="submit" variant="primary" disabled={loading} className="w-full disabled:opacity-60">
             {loading ? t('submitting') : t('submit')}
-          </button>
+          </Button>
         </form>
       )}
     </main>
