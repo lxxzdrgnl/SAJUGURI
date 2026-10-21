@@ -2,7 +2,7 @@ import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import RecentList from '@/components/manse/RecentList'
 import SavedList from '@/components/manse/SavedList'
-import PageHeading from '@/components/ui/PageHeading'
+import { buttonClass } from '@/components/ui/Button'
 import { currentUser, serverAuthApi } from '@/lib/serverAuth'
 import { listProfiles, type ProfileResponse } from '@sajuguri/api-client'
 
@@ -25,20 +25,15 @@ export default async function ManseIndex() {
   }
 
   return (
-    <main>
-      <div className="mb-4">
-        <PageHeading title={t('title')} accent="yellow" />
-      </div>
-      <Link
-        href="/manse/new"
-        className="mb-4 block rounded-lg border-2 border-ink bg-yellow py-3.5 text-center text-[15px] font-black text-ink shadow-brutal"
-      >
+    <main className="-mx-4 -mb-8 -mt-2 min-h-[calc(100dvh-3.5rem)] bg-c-bg px-4 pb-10 pt-4 text-c-text">
+      <h1 className="mb-4 font-display text-2xl font-normal leading-tight">{t('title')}</h1>
+      <Link href="/manse/new" className={`${buttonClass('primary', 'md')} mb-6 w-full`}>
         {t('new')}
       </Link>
 
       {user && (
         <section className="mb-6">
-          <h2 className="mb-3 text-[15px] font-extrabold">{ts('title')}</h2>
+          <h2 className="mb-3 text-sm font-extrabold text-c-text-sub">{ts('title')}</h2>
           <SavedList profiles={profiles} />
         </section>
       )}

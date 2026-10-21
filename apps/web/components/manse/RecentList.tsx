@@ -8,7 +8,8 @@ import { loadRecentInputs, removeRecentInput, type RecentBirthInput } from '@saj
 import { webStorage } from '@/lib/storage'
 import { createProfile } from '@sajuguri/api-client'
 import { api } from '@/lib/api'
-import BrutalCard from '@/components/ui/BrutalCard'
+import { buttonClass } from '@/components/ui/Button'
+import Card from '@/components/ui/Card'
 import MascotTinted from '@/components/ui/MascotTinted'
 import { manseNavQuery } from '@/lib/manse/query'
 
@@ -145,7 +146,7 @@ export default function RecentList({
 
   return (
     <div className="flex flex-col gap-3">
-      <h2 className="text-[15px] font-extrabold">{t('recent')}</h2>
+      <h2 className="text-sm font-extrabold text-c-text-sub">{t('recent')}</h2>
       {visibleItems.map((i) => {
         const key = itemKey(i)
         const state = getItemState(key)
@@ -159,41 +160,41 @@ export default function RecentList({
         return (
           <div key={key} className="relative">
             <Link href={`/manse/result?${manseNavQuery(i)}`}>
-              <BrutalCard className="flex items-center gap-3 pr-24">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border-2 border-ink bg-surface overflow-hidden">
+              <Card className="flex items-center gap-3 p-4 pr-28">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-c-line bg-c-surface-soft overflow-hidden">
                   <MascotTinted stem={i.day_stem} width={40} height={40} />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-[15px] font-extrabold">{i.name}</span>
-                  <span className="block text-xs text-text-sub">
+                  <span className="block text-xs text-c-text-sub">
                     {i.birth_date} · {i.birth_time ?? tf('timeUnknown')} · {i.gender === 'male' ? tf('male') : tf('female')}
                   </span>
                 </span>
-              </BrutalCard>
+              </Card>
             </Link>
 
             {/* 액션 버튼 — 카드 우측 */}
             {state.confirmDelete ? (
               // 삭제 확인 — 카드 전체를 덮는 오버레이 (이름·생일과 겹치지 않게)
               <div
-                className="absolute inset-0 flex items-center justify-between gap-2 rounded-lg border-2 border-ink bg-surface px-4"
+                className="absolute inset-0 flex items-center justify-between gap-2 rounded-card border border-c-line bg-c-surface px-4"
                 onClick={(e) => e.preventDefault()}
               >
-                <span className="min-w-0 truncate text-[13px] font-extrabold text-ink">
+                <span className="min-w-0 truncate text-[13px] font-extrabold text-c-text">
                   {t('recentDeleteConfirm')}
                 </span>
                 <div className="flex shrink-0 items-center gap-1.5">
                   <button
                     type="button"
                     onClick={(e) => handleDelete(e, i)}
-                    className="rounded-lg border-2 border-ink bg-orange px-3 py-1 text-[12px] font-extrabold text-white shadow-brutal-sm"
+                    className="rounded-pill bg-c-danger px-3 py-1 text-[12px] font-extrabold text-c-bg"
                   >
                     {t('recentDeleteConfirmYes')}
                   </button>
                   <button
                     type="button"
                     onClick={(e) => { e.preventDefault(); patchItemState(key, { confirmDelete: false }) }}
-                    className="rounded-lg border-2 border-ink bg-surface px-3 py-1 text-[12px] font-extrabold text-ink shadow-brutal-sm"
+                    className="rounded-pill border border-c-line bg-c-surface px-3 py-1 text-[12px] font-extrabold text-c-text"
                   >
                     {t('recentDeleteConfirmCancel')}
                   </button>
@@ -209,7 +210,7 @@ export default function RecentList({
                     type="button"
                     disabled={state.saveState === 'busy' || state.saveState === 'done'}
                     onClick={(e) => handleSave(e, i)}
-                    className="flex items-center gap-1 rounded-lg border-2 border-ink bg-yellow px-2 py-1 text-[11px] font-extrabold text-ink shadow-brutal-sm disabled:opacity-50"
+                    className="flex items-center gap-1 rounded-pill bg-c-accent px-2.5 py-1 text-[11px] font-extrabold text-c-on-accent disabled:opacity-50"
                   >
                     <SaveIcon className="h-3 w-3 shrink-0" />
                     <span>{saveLabel}</span>
@@ -218,7 +219,7 @@ export default function RecentList({
                   <button
                     type="button"
                     onClick={(e) => { e.preventDefault(); setLoginPrompt(true) }}
-                    className="flex items-center gap-1 rounded-lg border-2 border-ink bg-yellow px-2 py-1 text-[11px] font-extrabold text-ink shadow-brutal-sm"
+                    className="flex items-center gap-1 rounded-pill bg-c-accent px-2.5 py-1 text-[11px] font-extrabold text-c-on-accent"
                   >
                     <SaveIcon className="h-3 w-3 shrink-0" />
                     <span>{t('recentSave')}</span>
@@ -228,9 +229,9 @@ export default function RecentList({
                   type="button"
                   onClick={(e) => { e.preventDefault(); patchItemState(key, { confirmDelete: true }) }}
                   title={t('recentDelete')}
-                  className="flex items-center justify-center rounded-lg border-2 border-ink bg-surface p-1.5 shadow-brutal-sm"
+                  className="flex items-center justify-center rounded-pill border border-c-line bg-c-surface p-1.5"
                 >
-                  <TrashIcon className="h-4 w-4 text-ink" />
+                  <TrashIcon className="h-4 w-4 text-c-text" />
                 </button>
               </div>
             )}
@@ -244,23 +245,23 @@ export default function RecentList({
           className="fixed inset-0 z-50 flex items-center justify-center px-6"
           onClick={() => setLoginPrompt(false)}
         >
-          <div className="absolute inset-0 bg-ink/40" aria-hidden="true" />
+          <div className="absolute inset-0 bg-c-scrim" aria-hidden="true" />
           <div
-            className="relative w-full max-w-[320px] rounded-lg border-2 border-ink bg-surface p-5 text-center shadow-brutal"
+            className="relative w-full max-w-[320px] rounded-card border border-c-line bg-c-surface p-5 text-center"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="mb-1 text-[16px] font-extrabold text-ink">{t('recentLoginTitle')}</p>
-            <p className="mb-4 text-[13px] text-text-sub">{t('loginHint')}</p>
+            <p className="mb-1 text-[16px] font-extrabold text-c-text">{t('recentLoginTitle')}</p>
+            <p className="mb-4 text-[13px] text-c-text-sub">{t('loginHint')}</p>
             <a
               href={GOOGLE_LOGIN_URL}
-              className="block w-full rounded-lg border-2 border-ink bg-yellow py-3 text-sm font-extrabold text-ink shadow-brutal"
+              className={`${buttonClass('primary', 'md')} w-full`}
             >
               {t('recentLoginCta')}
             </a>
             <button
               type="button"
               onClick={() => setLoginPrompt(false)}
-              className="mt-2 w-full py-2 text-[13px] font-bold text-text-sub"
+              className="mt-2 w-full py-2 text-[13px] font-bold text-c-text-sub"
             >
               {t('recentLoginClose')}
             </button>

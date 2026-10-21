@@ -140,7 +140,7 @@ export default function MansePickerSheet({
     <>
       {/* 백드롭 */}
       <div
-        className="fixed inset-0 z-40 bg-ink/40"
+        className="fixed inset-0 z-40 bg-c-scrim"
         style={{
           opacity: visible ? 1 : 0,
           transitionProperty: 'opacity',
@@ -153,7 +153,7 @@ export default function MansePickerSheet({
 
       {/* 시트 */}
       <div
-        className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[640px] rounded-t-lg border-2 border-ink bg-surface shadow-brutal-up"
+        className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[640px] rounded-t-card border border-b-0 border-c-line bg-c-surface text-c-text"
         style={{
           transform: visible ? 'translateY(0)' : 'translateY(100%)',
           opacity: visible ? 1 : 0,
@@ -168,18 +168,18 @@ export default function MansePickerSheet({
       >
         {/* 핸들 */}
         <div className="flex justify-center pt-3 pb-1">
-          <div className="h-1 w-10 rounded-full bg-border-soft" />
+          <div className="h-1 w-10 rounded-full bg-c-line" />
         </div>
 
         <div className="max-h-[80dvh] overflow-y-auto px-5 pb-8 pt-3">
-          <h2 className="mb-4 text-[17px] font-extrabold text-ink">{title}</h2>
+          <h2 className="mb-4 font-display text-xl font-normal text-c-text">{title}</h2>
 
           {showForm ? (
             <>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="mb-4 text-[13px] font-bold text-text-sub hover:text-ink"
+                className="mb-4 text-[13px] font-bold text-c-text-sub hover:text-c-text"
               >
                 ← {t('backToList')}
               </button>
@@ -194,7 +194,7 @@ export default function MansePickerSheet({
               {/* 저장된 만세력 */}
               {profiles.length > 0 && (
                 <section className="mb-4">
-                  <p className="mb-2 text-[12px] font-extrabold uppercase tracking-widest text-text-sub">
+                  <p className="mb-2 text-[12px] font-extrabold uppercase tracking-widest text-c-text-sub">
                     {t('savedTitle')}
                   </p>
                   <ul className="flex flex-col gap-2">
@@ -202,22 +202,22 @@ export default function MansePickerSheet({
                       <li key={p.id}>
                         <button
                           type="button"
-                          className="flex w-full items-center gap-3 rounded-lg border-2 border-ink bg-surface p-4 text-left shadow-brutal transition-opacity hover:opacity-80"
+                          className="flex w-full items-center gap-3 rounded-card border border-c-line bg-c-surface p-4 text-left transition-colors hover:bg-c-surface-soft"
                           onClick={() => pickFromProfile(p)}
                         >
-                          <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border-2 border-ink bg-surface">
+                          <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-c-line bg-c-surface-soft">
                             <MascotTinted stem={p.day_stem} width={38} height={38} />
                           </span>
                           <span className="min-w-0 flex-1">
                             <span className="flex items-center gap-2">
                               <span className="truncate text-[14px] font-extrabold">{p.name}</span>
                               {p.is_representative && (
-                                <span className="shrink-0 rounded-full border-[1.5px] border-ink bg-orange px-2 py-0.5 text-[10px] font-extrabold text-white">
+                                <span className="shrink-0 rounded-full bg-c-accent px-2 py-0.5 text-[10px] font-extrabold text-c-on-accent">
                                   {t('repBadge')}
                                 </span>
                               )}
                             </span>
-                            <span className="block text-xs text-text-sub">
+                            <span className="block text-xs text-c-text-sub">
                               {p.birth_date}
                               {p.birth_time ? ` · ${p.birth_time}` : ''}
                             </span>
@@ -232,7 +232,7 @@ export default function MansePickerSheet({
               {/* 최근 본 만세력 */}
               {filteredRecent.length > 0 && (
                 <section className="mb-4">
-                  <p className="mb-2 text-[12px] font-extrabold uppercase tracking-widest text-text-sub">
+                  <p className="mb-2 text-[12px] font-extrabold uppercase tracking-widest text-c-text-sub">
                     {t('recentTitle')}
                   </p>
                   <ul className="flex flex-col gap-2">
@@ -240,17 +240,17 @@ export default function MansePickerSheet({
                       <li key={`${r.birth_date}|${r.birth_time ?? ''}|${r.gender}`}>
                         <button
                           type="button"
-                          className="flex w-full items-center gap-3 rounded-lg border-2 border-ink bg-surface p-4 text-left shadow-brutal transition-opacity hover:opacity-80"
+                          className="flex w-full items-center gap-3 rounded-card border border-c-line bg-c-surface p-4 text-left transition-colors hover:bg-c-surface-soft"
                           onClick={() => pickFromRecent(r)}
                         >
-                          <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border-2 border-ink bg-surface">
+                          <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-c-line bg-c-surface-soft">
                             <MascotTinted stem={r.day_stem} width={38} height={38} />
                           </span>
                           <span className="min-w-0 flex-1">
                             <span className="block truncate text-[14px] font-extrabold">
                               {r.name || t('unknownName')}
                             </span>
-                            <span className="block text-xs text-text-sub">
+                            <span className="block text-xs text-c-text-sub">
                               {r.birth_date}
                               {r.birth_time ? ` · ${r.birth_time}` : ''}
                             </span>
@@ -265,10 +265,10 @@ export default function MansePickerSheet({
               {/* 만세력 추가하기 */}
               <button
                 type="button"
-                className="flex w-full items-center gap-3 rounded-lg border-2 border-ink bg-yellow p-4 text-left shadow-brutal font-extrabold transition-opacity hover:opacity-80"
+                className="flex w-full items-center gap-3 rounded-card bg-c-accent p-4 text-left font-extrabold text-c-on-accent transition-transform active:scale-[0.98]"
                 onClick={() => setShowForm(true)}
               >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border-2 border-ink bg-surface text-lg">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-c-surface text-lg">
                   +
                 </span>
                 <span className="text-[14px] font-extrabold">{t('directInput')}</span>
