@@ -20,6 +20,7 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import ShareModal from '@/components/ui/ShareModal'
 import { useShareModal } from '@/lib/hooks/useShareModal'
+import ScreenShell from '@/components/ui/ScreenShell'
 
 // ── 메인 페이지 ──────────────────────────────────────────────────────────────
 
@@ -113,7 +114,7 @@ export default function QuestionPage() {
     )
 
     return (
-      <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100vh-56px)] flex-col gap-5 px-4 pb-8 pt-2">
+      <ScreenShell className="flex flex-col gap-5">
         <h1 className="font-display text-xl font-normal text-c-text">{t('title')}</h1>
 
         <Card tone="plain" className="p-5">
@@ -153,12 +154,12 @@ export default function QuestionPage() {
           title={t('share')}
           onClose={close}
         />
-      </main>
+      </ScreenShell>
     )
   }
 
   return (
-    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100vh-56px)] flex-col gap-5 px-4 pb-8 pt-2">
+    <ScreenShell className="flex flex-col gap-5">
       <div>
         <h1 className="font-display text-2xl font-normal leading-tight text-c-text">{t('title')}</h1>
       </div>
@@ -235,6 +236,6 @@ export default function QuestionPage() {
           </Button>
         </form>
       )}
-    </main>
+    </ScreenShell>
   )
 }

@@ -9,9 +9,7 @@ import ResultView from '@/components/manse/ResultView'
 import RecentEnricher from '@/components/manse/RecentEnricher'
 import { manseNavQuery } from '@/lib/manse/query'
 import { buttonClass } from '@/components/ui/Button'
-
-// 레이아웃 패딩을 상쇄하는 셸 — 배경은 body(--c-bg)가 칠한다
-const SHELL = '-mx-4 -mb-8 -mt-2 min-h-[calc(100dvh-3.5rem)] px-4 pb-10 pt-2 text-c-text'
+import ScreenShell from '@/components/ui/ScreenShell'
 
 export default async function ManseResult({
   searchParams,
@@ -36,7 +34,7 @@ export default async function ManseResult({
   } catch {
     data = null
   }
-  if (!data) return <main className={SHELL}><p className="pt-10 text-center text-sm font-bold text-c-text-sub">{t('error')}</p></main>
+  if (!data) return <ScreenShell><p className="pt-10 text-center text-sm font-bold text-c-text-sub">{t('error')}</p></ScreenShell>
 
   // 로그인 상태에서만 저장 버튼 노출. 저장 스키마는 longitude(진태양시)를 쓴다.
   const user = await currentUser()
@@ -74,7 +72,7 @@ export default async function ManseResult({
   const birthQuery = manseNavQuery(p)
 
   return (
-    <main className={`${SHELL} flex flex-col gap-4`}>
+    <ScreenShell className="flex flex-col gap-4">
       {/* 게스트 최근 입력에 일간 보강 — 너구리 아바타 일간색 틴팅용 (클라 마운트 시 localStorage 갱신) */}
       <RecentEnricher
         birth_date={p.birth_date ?? ''}
@@ -104,6 +102,6 @@ export default async function ManseResult({
       <ShareButton calcSnapshot={data} birthInput={shareBirthInput} />
 
       {saveInput && <SaveButton input={saveInput} />}
-    </main>
+    </ScreenShell>
   )
 }

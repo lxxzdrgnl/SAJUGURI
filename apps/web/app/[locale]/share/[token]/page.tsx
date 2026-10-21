@@ -9,6 +9,7 @@ import { buttonClass } from '@/components/ui/Button'
 import ResultView from '@/components/manse/ResultView'
 import SaveToMyButton from '@/components/manse/SaveToMyButton'
 import { currentUser } from '@/lib/serverAuth'
+import ScreenShell from '@/components/ui/ScreenShell'
 
 export const dynamic = 'force-dynamic'
 
@@ -65,15 +66,15 @@ export default async function SharedMansePage({
 
   if (!shared) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 min-h-[calc(100vh-56px)] px-4 pb-8 pt-16 text-center">
+      <ScreenShell className="pt-14 text-center">
         <p className="text-[15px] font-extrabold text-c-text-sub">{t('notFoundTitle')}</p>
         <p className="mt-2 text-[13px] text-c-text-sub">{t('notFoundBody')}</p>
-      </main>
+      </ScreenShell>
     )
   }
 
   return (
-    <main className="-mx-4 -mt-2 -mb-8 min-h-[calc(100vh-56px)] px-4 pb-8 flex flex-col gap-3 pt-2">
+    <ScreenShell className="flex flex-col gap-3">
       <ResultView data={shared.calc_snapshot} />
 
       {/* 내 만세력에 추가하기 */}
@@ -95,6 +96,6 @@ export default async function SharedMansePage({
           {t('ctaButton')}
         </Link>
       </Card>
-    </main>
+    </ScreenShell>
   )
 }

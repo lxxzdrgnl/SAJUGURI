@@ -4,6 +4,7 @@ import { getReport } from '@sajuguri/api-client'
 import ReportView from '@/components/report/ReportView'
 import MascotTinted from '@/components/ui/MascotTinted'
 import Card from '@/components/ui/Card'
+import ScreenShell from '@/components/ui/ScreenShell'
 
 export default async function ReportDetailPage({
   params,
@@ -24,9 +25,9 @@ export default async function ReportDetailPage({
 
   if (!report) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 min-h-[calc(100dvh-3.5rem)] px-4 pt-16 text-center">
+      <ScreenShell className="pt-14 text-center">
         <p className="text-[15px] font-extrabold text-c-text-sub">{t('errorFallback')}</p>
-      </main>
+      </ScreenShell>
     )
   }
 
@@ -40,7 +41,7 @@ export default async function ReportDetailPage({
     .join(' · ')
 
   return (
-    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] flex-col gap-4 px-4 pb-8 pt-4">
+    <ScreenShell className="flex flex-col gap-4 pt-2">
       {/* 원국 한 줄 요약 — 마스코트 아바타 포함 */}
       <Card tone="soft" className="flex items-center gap-3 p-3">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-c-surface">
@@ -53,6 +54,6 @@ export default async function ReportDetailPage({
 
       {/* 안내 — 콘텐츠 하단으로 이동 */}
       <p className="pb-2 text-center text-[13px] text-c-text-sub">{t('page.guideText')}</p>
-    </main>
+    </ScreenShell>
   )
 }

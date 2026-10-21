@@ -12,6 +12,7 @@ import Card from '@/components/ui/Card'
 import { buttonClass } from '@/components/ui/Button'
 import PersonSlotPicker, { type PersonPick } from '@/components/compatibility/PersonSlotPicker'
 import GoogleLoginLink from '@/components/auth/GoogleLoginLink'
+import ScreenShell from '@/components/ui/ScreenShell'
 
 export default function CompatibilityNewPage() {
   const t = useTranslations('compatibility')
@@ -96,27 +97,27 @@ export default function CompatibilityNewPage() {
   // 로딩 중 화면
   if (loading) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 px-4 pb-8 pt-4 flex min-h-[70vh] flex-col items-center justify-center gap-6 text-center">
+      <ScreenShell center className="pt-2 flex-col gap-6 text-center">
         <Image src="/mascot.svg" alt="" width={72} height={72} className="animate-bounce" priority />
         <p className="text-[15px] font-extrabold text-c-text">{loadingPhrases[phraseIdx]}</p>
         <p className="text-[13px] text-c-text-sub">{t('new.loadingNote')}</p>
-      </main>
+      </ScreenShell>
     )
   }
 
   // 로그인 확인 중
   if (isLoggedIn === null) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 px-4 pb-8 pt-4 flex min-h-[60vh] items-center justify-center">
+      <ScreenShell center className="pt-2">
         <p className="text-sm text-c-text-sub">{t('new.checking')}</p>
-      </main>
+      </ScreenShell>
     )
   }
 
   // 비로그인
   if (!isLoggedIn) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 px-4 pb-8 pt-4 flex flex-col gap-5">
+      <ScreenShell className="pt-2 flex flex-col gap-5">
         <h1 className="text-lg font-black text-c-text">{t('new.title')}</h1>
         <Card className="flex flex-col items-center gap-4 p-6 text-center">
           <Image src="/mascot.svg" alt="" width={56} height={56} />
@@ -129,13 +130,13 @@ export default function CompatibilityNewPage() {
             {t('new.loginWithGoogle')}
           </GoogleLoginLink>
         </Card>
-      </main>
+      </ScreenShell>
     )
   }
 
   // 로그인 상태 — 슬롯 선택 + 요청 주제
   return (
-    <main className="-mx-4 -mt-2 -mb-8 px-4 pb-8 pt-4 flex flex-col gap-5">
+    <ScreenShell className="pt-2 flex flex-col gap-5">
       <div>
         <h1 className="text-[22px] font-black leading-tight text-c-text">{t('new.title')}</h1>
       </div>
@@ -165,6 +166,6 @@ export default function CompatibilityNewPage() {
       )}
 
       <PersonSlotPicker profiles={profiles} onComplete={handleComplete} />
-    </main>
+    </ScreenShell>
   )
 }

@@ -5,6 +5,7 @@ import { getSharedCompatibilityReport } from '@sajuguri/api-client'
 import Card from '@/components/ui/Card'
 import { buttonClass } from '@/components/ui/Button'
 import CompatibilityView from '@/components/compatibility/CompatibilityView'
+import ScreenShell from '@/components/ui/ScreenShell'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,15 +57,15 @@ export default async function SharedCompatibilityPage({
 
   if (!detail) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 px-4 pb-8 pt-4 text-center">
+      <ScreenShell className="pt-2 text-center">
         <p className="text-[15px] font-extrabold text-c-text-sub">{t('share.notFoundTitle')}</p>
         <p className="mt-2 text-[13px] text-c-text-sub">{t('share.notFoundDesc')}</p>
-      </main>
+      </ScreenShell>
     )
   }
 
   return (
-    <main className="-mx-4 -mt-2 -mb-8 px-4 pb-8 pt-4 flex flex-col gap-4">
+    <ScreenShell className="pt-2 flex flex-col gap-4">
       <p className="text-[13px] text-c-text-sub">{t('view.guideText')}</p>
 
       {/* 공유 모드 — 공유/재생성 CTA 없음, 저장 스냅샷 */}
@@ -81,6 +82,6 @@ export default async function SharedCompatibilityPage({
           {t('share.ctaBtn')}
         </a>
       </Card>
-    </main>
+    </ScreenShell>
   )
 }

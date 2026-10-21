@@ -396,7 +396,7 @@ export default function ChatView({ sessionId, initialTitle, profiles, partnerNam
   }
 
   return (
-    <div className="-mx-4 -mb-8 -mt-2 px-4 pb-8 pt-2 text-c-text">
+    <div className="text-c-text">
     <div className="flex flex-col" style={{ height: 'calc(100dvh - 96px - env(safe-area-inset-top))' }}>
       {/* 헤더 */}
       <div className="flex shrink-0 items-center gap-2 border-b border-c-line pb-3">

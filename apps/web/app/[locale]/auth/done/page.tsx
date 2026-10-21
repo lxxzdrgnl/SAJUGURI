@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { consumeReturnTo } from '@/lib/loginReturn'
+import ScreenShell from '@/components/ui/ScreenShell'
 
 /**
  * OAuth 콜백 착지 페이지. 백엔드가 httpOnly 쿠키를 심고 여기로 리다이렉트한다.
@@ -15,8 +16,8 @@ export default function AuthDone() {
     window.location.replace(consumeReturnTo() ?? '/')
   }, [])
   return (
-    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100vh-56px)] items-center justify-center px-4">
+    <ScreenShell center>
       <p className="text-sm font-extrabold text-c-text-sub">{t('signingIn')}</p>
-    </main>
+    </ScreenShell>
   )
 }

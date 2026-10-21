@@ -22,6 +22,7 @@ import ProductLink from '@/components/home/ProductLink'
 import { posterTone } from '@/lib/products/posterTone'
 import { isCategory } from '@/lib/products/category'
 import { HomeViewerProvider } from '@/components/home/HomeViewer'
+import ScreenShell from '@/components/ui/ScreenShell'
 
 /** 히어로 2~3번째 장 — 오늘의 운세 뒤에 붙는 추천 상품 */
 const HERO_PROMOS: ProductId[] = ['saju_report', 'compatibility']
@@ -67,18 +68,16 @@ export default async function Home({
   }
   const repProfile = profiles.find((p) => p.is_representative) ?? null
 
-  // 흰 바탕 진열대 — 레이아웃 래퍼의 여백까지 덮는다 (가로 폭은 래퍼와 같다)
-  const shell = '-mx-4 -mb-8 -mt-2 min-h-[calc(100dvh-3.5rem)] px-4 pb-10'
 
   if (isCategory(cat)) {
     return (
       <HomeViewerProvider profiles={profiles} isLoggedIn={!!user}>
-        <main className={shell}>
+        <ScreenShell className="-mt-2 pb-2">
           <CategoryTabs active={cat} />
           <div className="pt-5">
             <ProductGrid products={productsInCategory(cat)} />
           </div>
-        </main>
+        </ScreenShell>
       </HomeViewerProvider>
     )
   }
@@ -94,7 +93,7 @@ export default async function Home({
 
   return (
     <HomeViewerProvider profiles={profiles} isLoggedIn={!!user}>
-      <main className={shell}>
+      <ScreenShell className="-mt-2 pb-2">
         <CategoryTabs active="all" />
         <div className="flex flex-col gap-8 pt-5">
           <div className="flex flex-col gap-3">
@@ -105,7 +104,7 @@ export default async function Home({
           <ProductShelf shelf={curatedShelf(dayStem)} stem={stemLabel} />
           <RankList ids={curatedRanking()} />
         </div>
-      </main>
+      </ScreenShell>
     </HomeViewerProvider>
   )
 }

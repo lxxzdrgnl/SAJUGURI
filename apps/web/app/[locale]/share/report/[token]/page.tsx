@@ -5,6 +5,7 @@ import { getSharedReport } from '@sajuguri/api-client'
 import ReportView from '@/components/report/ReportView'
 import Card from '@/components/ui/Card'
 import { buttonClass } from '@/components/ui/Button'
+import ScreenShell from '@/components/ui/ScreenShell'
 
 export const dynamic = 'force-dynamic'
 
@@ -59,10 +60,10 @@ export default async function SharedReportPage({
 
   if (!report) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 min-h-[calc(100dvh-3.5rem)] px-4 pt-16 text-center">
+      <ScreenShell className="pt-14 text-center">
         <p className="text-[15px] font-extrabold text-c-text-sub">{t('notFoundTitle')}</p>
         <p className="mt-2 text-[13px] text-c-text-sub">{t('notFoundDesc')}</p>
-      </main>
+      </ScreenShell>
     )
   }
 
@@ -76,7 +77,7 @@ export default async function SharedReportPage({
     .join(' · ')
 
   return (
-    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] flex-col gap-4 px-4 pb-8 pt-4">
+    <ScreenShell className="flex flex-col gap-4 pt-2">
       <Card tone="soft" className="p-3 text-[14px] font-bold">
         {summaryLine}
       </Card>
@@ -98,6 +99,6 @@ export default async function SharedReportPage({
           {t('ctaBtn')}
         </a>
       </Card>
-    </main>
+    </ScreenShell>
   )
 }
