@@ -23,18 +23,16 @@ const iconBtn =
 
 /**
  * 앱 헤더 — 홈은 로고·일간 칩·검색·메뉴, 하위 화면은 뒤로·로고·메뉴.
- * 운세 스토리 오버레이(z-50)보다 낮은 z-10.
+ * 운세 스토리 오버레이(z-50)보다 낮고 본문(z-10)보다 높은 z-30.
  * onSearch: Task 10의 SearchSheet 연결 자리 (없으면 검색 버튼을 숨긴다).
  */
 export default function AppHeader({
   user,
   repProfile,
-  profiles = [],
   onSearch,
 }: {
   user: MeResponse | null
   repProfile: ProfileResponse | null
-  profiles?: ProfileResponse[]
   onSearch?: () => void
 }) {
   const t = useTranslations('nav')
@@ -50,13 +48,13 @@ export default function AppHeader({
 
   const logo = (
     <Link href="/" className="font-display text-lg font-black text-c-text">
-      사주구리
+      {t('logo')}
     </Link>
   )
 
   return (
     <>
-    <header className="sticky top-0 z-10 mx-auto w-full max-w-[640px] bg-c-bg pt-[env(safe-area-inset-top)]">
+    <header className="sticky top-0 z-30 mx-auto w-full max-w-[640px] bg-c-bg pt-[env(safe-area-inset-top)]">
       <div className="flex h-14 items-center gap-2 px-3">
         {home ? (
           <>
@@ -90,8 +88,8 @@ export default function AppHeader({
         </button>
       </div>
     </header>
-    {/* 헤더(z-10) 쌓임 맥락 밖에 둔다 — 본문 z-10 요소 위로 올라오도록 */}
-    <Drawer open={menuOpen} onClose={() => setMenuOpen(false)} user={user} profiles={profiles} />
+    {/* 헤더(z-30) 쌓임 맥락 밖에 둔다 — 본문 z-10 요소 위로 올라오도록 */}
+    <Drawer open={menuOpen} onClose={() => setMenuOpen(false)} user={user} />
     </>
   )
 }

@@ -7,7 +7,7 @@ import { logout } from '@sajuguri/api-client'
 import { api } from '@/lib/api'
 
 /** 로그아웃 — 서버 쿠키 폐기 후 새로고침으로 서버 컴포넌트 재평가. */
-export default function LogoutButton() {
+export default function LogoutButton({ onDone }: { onDone?: () => void } = {}) {
   const t = useTranslations('my')
   const router = useRouter()
   const [busy, setBusy] = useState(false)
@@ -16,6 +16,7 @@ export default function LogoutButton() {
     if (busy) return
     setBusy(true)
     await logout(api)
+    onDone?.()
     router.refresh()
   }
 

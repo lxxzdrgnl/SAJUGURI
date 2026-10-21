@@ -45,6 +45,11 @@ export const viewport: Viewport = {
   themeColor: 'var(--bg-base)',
 }
 
+/** 헤더용 호출이 백엔드 지연으로 모든 페이지를 붙잡지 않도록 2초 제한 */
+function withTimeout<T>(p: Promise<T>, fallback: T, ms = 2000): Promise<T> {
+  return Promise.race([p, new Promise<T>((r) => setTimeout(() => r(fallback), ms))])
+}
+
 export default async function LocaleLayout({
   children,
   params,
@@ -58,8 +63,8 @@ export default async function LocaleLayout({
   let user: MeResponse | null = null
   let profiles: ProfileResponse[] = []
   try {
-    user = await currentUser()
-    if (user) profiles = await listProfiles(await serverAuthApi())
+    user = await withTimeout(currentUser(), null)
+    if (user) profiles = await withTimeout(serverAuthApi().then(listProfiles), [])
   } catch {
     user = null
     profiles = []
@@ -72,7 +77,7 @@ export default async function LocaleLayout({
           {/* 저장된 언어 선택을 부팅 시 강제 (영어 기기여도 한국어 유지) */}
           <LocaleBoot />
           {/* 모바일 단일 컬럼 — design.md §7 */}
-          <AppHeader user={user} repProfile={repProfile} profiles={profiles} />
+          <AppHeader user={user} repProfile={repProfile} />
           <div className="mx-auto max-w-[640px] px-4 pb-8 pt-2">{children}</div>
         </NextIntlClientProvider>
       </body>

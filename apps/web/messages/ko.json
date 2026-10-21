@@ -828,7 +828,8 @@
     "back": "뒤로",
     "search": "검색",
     "findIlgan": "내 일간 찾기",
-    "ilganChip": "{hanja} {name} · {stem} 일간"
+    "ilganChip": "{hanja} {name} · {stem} 일간",
+    "logo": "사주구리"
   },
   "drawer": {
     "login": "로그인",

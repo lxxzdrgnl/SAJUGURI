@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
-import type { MeResponse, ProfileResponse } from '@sajuguri/api-client'
+import type { MeResponse } from '@sajuguri/api-client'
 import { Link, usePathname } from '@/i18n/navigation'
 import LanguageToggleInline from '@/components/my/LanguageToggleInline'
 import LogoutButton from '@/components/my/LogoutButton'
@@ -22,9 +22,9 @@ export default function Drawer({
   open: boolean
   onClose: () => void
   user: MeResponse | null
-  profiles?: ProfileResponse[]
 }) {
   const t = useTranslations('drawer')
+  const tNav = useTranslations('nav')
   const pathname = usePathname()
   const { mounted, visible, onTransitionEnd } = useSheetTransition(open)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -43,12 +43,27 @@ export default function Drawer({
     return () => prev?.focus?.()
   }, [open, visible])
 
-  function onKeyDown(e: React.KeyboardEvent) {
-    if (e.key === 'Escape') {
-      e.stopPropagation()
-      onClose()
-      return
+  // Esc는 포커스 위치와 무관하게 document에서 받는다
+  useEffect(() => {
+    if (!open) return
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
     }
+    document.addEventListener('keydown', onEsc)
+    return () => document.removeEventListener('keydown', onEsc)
+  }, [open, onClose])
+
+  // 열려 있는 동안 배경 스크롤 잠금
+  useEffect(() => {
+    if (!mounted) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [mounted])
+
+  function onKeyDown(e: React.KeyboardEvent) {
     if (e.key !== 'Tab') return
     const els = panelRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE)
     if (!els || els.length === 0) return
@@ -74,7 +89,7 @@ export default function Drawer({
         aria-hidden="true"
         onClick={onClose}
         onTransitionEnd={onTransitionEnd}
-        className={`absolute inset-0 bg-c-text/40 transition-opacity duration-(--motion-duration-fade) ${
+        className={`absolute inset-0 bg-c-scrim transition-opacity duration-(--motion-duration-fade) ${
           visible ? 'opacity-100' : 'opacity-0'
         }`}
       />
@@ -82,7 +97,7 @@ export default function Drawer({
         ref={panelRef}
         role="dialog"
         aria-modal="true"
-        aria-label={t('profile')}
+        aria-label={tNav('menu')}
         className={`absolute inset-y-0 right-0 z-50 flex w-[min(80vw,320px)] flex-col gap-1 overflow-y-auto bg-c-bg px-3 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-[calc(0.75rem+env(safe-area-inset-top))] transition-transform duration-(--motion-duration-sheet) ease-(--motion-ease-out) ${
           visible ? 'translate-x-0' : 'translate-x-full'
         }`}
@@ -110,7 +125,7 @@ export default function Drawer({
         </div>
         {user && (
           <div className="mt-2 px-1">
-            <LogoutButton />
+            <LogoutButton onDone={onClose} />
           </div>
         )}
       </div>

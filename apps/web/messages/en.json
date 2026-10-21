@@ -828,7 +828,8 @@
     "back": "Back",
     "search": "Search",
     "findIlgan": "Find my Day Master",
-    "ilganChip": "{hanja} {name} · {stem} Day Master"
+    "ilganChip": "{hanja} {name} · Day Master",
+    "logo": "SajuGuri"
   },
   "drawer": {
     "login": "Sign in",

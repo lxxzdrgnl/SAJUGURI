@@ -1,4 +1,5 @@
 // 서버 컴포넌트 전용 — 요청 쿠키를 백엔드로 포워딩하는 인증 헬퍼.
+import { cache } from 'react'
 import { cookies } from 'next/headers'
 import { ApiClient, getMe, type MeResponse } from '@sajuguri/api-client'
 
@@ -12,6 +13,6 @@ export async function serverAuthApi(): Promise<ApiClient> {
 }
 
 /** 현재 로그인 유저 (비로그인 → null). */
-export async function currentUser(): Promise<MeResponse | null> {
+export const currentUser = cache(async (): Promise<MeResponse | null> => {
   return getMe(await serverAuthApi())
-}
+})
