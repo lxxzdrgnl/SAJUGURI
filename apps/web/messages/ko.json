@@ -112,6 +112,59 @@
         "title": "궁합 리포트",
         "desc": "두 사람 사주로 보는 케미"
       }
+    },
+    "hero": {
+      "freeDaily": "오늘의 운세 무료",
+      "unseen": "아직 안 봤어",
+      "cta": "오늘 운세 보기",
+      "seenTitle": "오늘 운세 확인했어",
+      "again": "다시 보기",
+      "toCounsel": "구리구리랑 얘기하기",
+      "bubble": "오늘 뭐 할 거야?"
+    },
+    "counsel": {
+      "title": "구리구리랑 바로 얘기해 봐",
+      "desc": "고민이 뭐든 편하게 말해 봐. 네 사주로 같이 풀어볼게.",
+      "cta": "상담 시작하기"
+    },
+    "situation": {
+      "title": "요즘 어떤 고민이야?",
+      "some": {
+        "title": "썸 타는 중이에요",
+        "desc": "그 사람 마음이 궁금해"
+      },
+      "breakup": {
+        "title": "헤어졌어요",
+        "desc": "다시 만날 수 있을까"
+      },
+      "quit": {
+        "title": "회사 그만둘까",
+        "desc": "지금 나가도 될까"
+      },
+      "money": {
+        "title": "돈이 안 모여요",
+        "desc": "올해 재물 흐름은"
+      }
+    },
+    "shelf": {
+      "ilgan": "{stem} 일간에게 추천",
+      "popular": "처음이라면 이것부터",
+      "more": "더 보기"
+    },
+    "ranking": {
+      "title": "구리구리 추천"
+    },
+    "soon": {
+      "badge": "곧 나와요",
+      "title": "곧 나와요",
+      "body": "준비 중이에요. 지금은 이 고민 구리구리한테 먼저 얘기해 볼래?",
+      "cta": "구리구리한테 얘기하기",
+      "close": "닫기"
+    },
+    "search": {
+      "placeholder": "어떤 고민이 있어?",
+      "empty": "찾는 결과가 없어",
+      "toCounsel": "구리구리한테 직접 물어보기"
     }
   },
   "manse": {
@@ -724,5 +777,76 @@
       "share": "공유",
       "close": "닫기"
     }
+  },
+  "products": {
+    "daily_fortune": {
+      "title": "오늘의 운세",
+      "desc": "오늘 하루 어떻게 흘러갈지 한 장씩 넘겨봐"
+    },
+    "guriguri_counsel": {
+      "title": "구리구리 상담",
+      "desc": "고민을 편하게 털어놓고 내 사주로 풀어봐"
+    },
+    "saju_report": {
+      "title": "AI 사주 리포트",
+      "desc": "타고난 성향부터 대운까지 10개 탭으로 깊이 있게 풀어드려요"
+    },
+    "compatibility": {
+      "title": "궁합 리포트",
+      "desc": "두 사람의 사주가 어떻게 맞물리는지 살펴봐요"
+    },
+    "question": {
+      "title": "한 번 물어보기",
+      "desc": "궁금한 한 가지를 짧고 정확하게 물어봐요"
+    },
+    "some_heart": {
+      "title": "썸 상대 마음",
+      "desc": "그 사람 마음이 어떤지, 사주로 흐름을 짚어봐요",
+      "counselPrompt": "썸 타는 사람이 있는데 그 사람 마음이 궁금해"
+    },
+    "reunion": {
+      "title": "재회 흐름",
+      "desc": "다시 만날 수 있을지, 두 사람의 흐름을 살펴봐요",
+      "counselPrompt": "헤어진 사람이랑 다시 만날 수 있을지 궁금해"
+    },
+    "career_move": {
+      "title": "퇴사·이직 타이밍",
+      "desc": "지금 움직여도 되는지, 때를 짚어봐요",
+      "counselPrompt": "회사를 그만둘까 고민 중인데 지금 나가도 될까?"
+    },
+    "money_flow": {
+      "title": "올해 돈 흐름",
+      "desc": "올해 재물 흐름과 조심할 시기를 살펴봐요",
+      "counselPrompt": "돈이 잘 안 모이는데 올해 재물 흐름은 어때?"
+    }
+  },
+  "categories": {
+    "all": "전체",
+    "fortune": "운세",
+    "love": "연애",
+    "reunion": "재회",
+    "compat": "궁합",
+    "career": "직장",
+    "money": "재물"
+  },
+  "nav": {
+    "menu": "메뉴",
+    "back": "뒤로",
+    "search": "검색",
+    "findIlgan": "내 일간 찾기",
+    "ilganChip": "{hanja} {name} · {stem} 일간"
+  },
+  "drawer": {
+    "login": "로그인",
+    "profile": "내 정보",
+    "manse": "만세력",
+    "archive": "보관함",
+    "language": "언어",
+    "theme": "화면 모드",
+    "themeLight": "라이트",
+    "themeDark": "다크",
+    "themeSystem": "시스템",
+    "logout": "로그아웃",
+    "close": "닫기"
   }
 }

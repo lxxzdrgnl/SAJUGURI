@@ -112,6 +112,59 @@
         "title": "Compatibility",
         "desc": "Chemistry of two charts"
       }
+    },
+    "hero": {
+      "freeDaily": "Today's fortune is free",
+      "unseen": "Not checked yet",
+      "cta": "See today's fortune",
+      "seenTitle": "You've checked today",
+      "again": "View again",
+      "toCounsel": "Talk to Guriguri",
+      "bubble": "What's on your plate today?"
+    },
+    "counsel": {
+      "title": "Talk to Guriguri right now",
+      "desc": "Whatever's on your mind, just say it. We'll work through it with your chart.",
+      "cta": "Start chatting"
+    },
+    "situation": {
+      "title": "What's on your mind lately?",
+      "some": {
+        "title": "I'm seeing someone",
+        "desc": "I wonder how they feel"
+      },
+      "breakup": {
+        "title": "We broke up",
+        "desc": "Could we get back together?"
+      },
+      "quit": {
+        "title": "Should I quit?",
+        "desc": "Is now a good time to go?"
+      },
+      "money": {
+        "title": "I can't save money",
+        "desc": "What's my wealth flow this year?"
+      }
+    },
+    "shelf": {
+      "ilgan": "Picks for {stem} Day Masters",
+      "popular": "Start here",
+      "more": "See more"
+    },
+    "ranking": {
+      "title": "Guriguri's picks"
+    },
+    "soon": {
+      "badge": "Coming soon",
+      "title": "Coming soon",
+      "body": "This one's still in the works. Want to tell Guriguri about it in the meantime?",
+      "cta": "Talk to Guriguri",
+      "close": "Close"
+    },
+    "search": {
+      "placeholder": "What's on your mind?",
+      "empty": "No results found",
+      "toCounsel": "Ask Guriguri directly"
     }
   },
   "manse": {
@@ -724,5 +777,76 @@
       "share": "Share",
       "close": "Close"
     }
+  },
+  "products": {
+    "daily_fortune": {
+      "title": "Today's Fortune",
+      "desc": "Flip through how your day is shaping up"
+    },
+    "guriguri_counsel": {
+      "title": "Guriguri Chat",
+      "desc": "Talk it out freely and let your chart help you sort it"
+    },
+    "saju_report": {
+      "title": "AI Saju Report",
+      "desc": "A deep 10-tab reading, from your innate nature to your Daeun (luck pillars)"
+    },
+    "compatibility": {
+      "title": "Compatibility Report",
+      "desc": "See how your two charts fit together"
+    },
+    "question": {
+      "title": "Ask Once",
+      "desc": "Ask the one thing you're wondering about, short and precise"
+    },
+    "some_heart": {
+      "title": "What They Feel",
+      "desc": "Read the flow of how your crush may feel through your chart",
+      "counselPrompt": "There's someone I'm seeing and I wonder how they really feel"
+    },
+    "reunion": {
+      "title": "Reunion Outlook",
+      "desc": "See whether the two of you could get back together",
+      "counselPrompt": "I broke up with someone and I wonder if we could get back together"
+    },
+    "career_move": {
+      "title": "Quit or Switch Timing",
+      "desc": "Find out if it's the right time to make a move",
+      "counselPrompt": "I'm thinking about quitting my job. Is now a good time to leave?"
+    },
+    "money_flow": {
+      "title": "Money Flow This Year",
+      "desc": "Look at this year's wealth flow and the times to be careful",
+      "counselPrompt": "I can't seem to save money. How does my wealth flow look this year?"
+    }
+  },
+  "categories": {
+    "all": "All",
+    "fortune": "Fortune",
+    "love": "Love",
+    "reunion": "Reunion",
+    "compat": "Compatibility",
+    "career": "Career",
+    "money": "Money"
+  },
+  "nav": {
+    "menu": "Menu",
+    "back": "Back",
+    "search": "Search",
+    "findIlgan": "Find my Day Master",
+    "ilganChip": "{hanja} {name} · {stem} Day Master"
+  },
+  "drawer": {
+    "login": "Sign in",
+    "profile": "My info",
+    "manse": "Saju Chart",
+    "archive": "Saved",
+    "language": "Language",
+    "theme": "Appearance",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "logout": "Sign out",
+    "close": "Close"
   }
 }
