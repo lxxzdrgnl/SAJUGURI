@@ -253,3 +253,23 @@ class DeviceToken(Base):
     __table_args__ = (
         UniqueConstraint("user_id", "token", name="uq_device_tokens_user_token"),
     )
+
+
+class ProductView(Base):
+    """상품 열람 기록 — 홈 카탈로그 인기/추천 집계용."""
+
+    __tablename__ = "product_views"
+
+    id:         Mapped[int]        = mapped_column(Integer, primary_key=True)
+    product_id: Mapped[str]        = mapped_column(String(40), nullable=False)
+    user_id:    Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    day_stem:   Mapped[str | None] = mapped_column(String(2), nullable=True)
+    age_band:   Mapped[str | None] = mapped_column(String(8), nullable=True)
+    gender:     Mapped[str | None] = mapped_column(String(10), nullable=True)
+    created_at: Mapped[datetime]   = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+    __table_args__ = (
+        Index("ix_product_views_product_created", "product_id", "created_at"),
+    )
