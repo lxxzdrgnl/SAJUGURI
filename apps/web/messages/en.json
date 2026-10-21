@@ -114,7 +114,8 @@
       "seenTitle": "You've checked today",
       "again": "View again",
       "toCounsel": "Talk to Guriguri",
-      "bubble": "What's on your plate today?"
+      "bubble": "What's on your plate today?",
+      "open": "See today's fortune"
     },
     "counsel": {
       "title": "Talk to Guriguri right now",

@@ -5,6 +5,7 @@
  * 서버 컴포넌트(home page.tsx)에서 profiles를 내려받아 클라이언트 시트에 전달.
  */
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import type { ProfileResponse } from '@sajuguri/api-client'
 import FortuneEntrySheet from '@/components/fortune/FortuneEntrySheet'
 
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export default function FortuneBannerClient({ profiles, isLoggedIn, children }: Props) {
+  const t = useTranslations('home.hero')
   const [sheetOpen, setSheetOpen] = useState(false)
 
   // ?fortune=1 진입(공유 페이지의 "나도 내 운세 보기" CTA 등) → 만세력 선택 시트 자동 오픈.
@@ -30,9 +32,10 @@ export default function FortuneBannerClient({ profiles, isLoggedIn, children }: 
   return (
     <>
       <button
+        type="button"
         className="block w-full cursor-pointer text-left"
         onClick={() => setSheetOpen(true)}
-        aria-label="오늘의 운세 보기"
+        aria-label={t('open')}
       >
         {children}
       </button>
