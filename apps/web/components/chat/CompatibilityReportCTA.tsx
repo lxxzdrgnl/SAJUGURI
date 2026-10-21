@@ -10,6 +10,8 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { createCompatibilityJobFromSession } from '@sajuguri/api-client'
 import { api } from '@/lib/api'
+import Card from '@/components/ui/Card'
+import Button from '@/components/ui/Button'
 import { useGenerationJob } from '@/lib/hooks/useGenerationJob'
 
 interface Props {
@@ -37,22 +39,22 @@ export default function CompatibilityReportCTA({ sessionId }: Props) {
   }
 
   return (
-    <div className="rounded-lg border-2 border-ink bg-teal-tint p-3 shadow-brutal-sm">
-      <p className="mb-2.5 text-[13px] font-extrabold text-ink leading-snug">
+    <Card tone="soft" className="p-4">
+      <p className="mb-3 text-[13px] font-extrabold leading-snug text-c-text">
         {t('compatibilityCta.title')}
       </p>
-      <button
-        className="w-full rounded-lg border-2 border-ink bg-teal py-2 text-sm font-extrabold text-surface shadow-brutal-sm transition-opacity hover:opacity-80 disabled:opacity-40"
+      <Button
+        className="w-full disabled:opacity-40"
         onClick={handleClick}
         disabled={busy}
       >
         {busy ? '…' : t('compatibilityCta.action')}
-      </button>
+      </Button>
       {error && (
-        <p className="mt-1.5 text-[11px] font-semibold text-orange">
+        <p className="mt-1.5 text-[11px] font-semibold text-c-danger">
           {error}
         </p>
       )}
-    </div>
+    </Card>
   )
 }

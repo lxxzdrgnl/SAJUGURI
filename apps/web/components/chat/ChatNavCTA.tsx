@@ -6,6 +6,8 @@
  * (사주 풀 리포트 / 운세 등)
  */
 import { useRouter } from 'next/navigation'
+import Card from '@/components/ui/Card'
+import Button from '@/components/ui/Button'
 
 interface Props {
   title: string
@@ -17,16 +19,16 @@ export default function ChatNavCTA({ title, buttonLabel, href }: Props) {
   const router = useRouter()
 
   return (
-    <div className="rounded-lg border-2 border-ink bg-teal-tint p-3 shadow-brutal-sm">
-      <p className="mb-2.5 text-[13px] font-extrabold text-ink leading-snug">
+    <Card tone="soft" className="p-4">
+      <p className="mb-3 text-[13px] font-extrabold leading-snug text-c-text">
         {title}
       </p>
-      <button
-        className="w-full rounded-lg border-2 border-ink bg-ink py-2 text-sm font-extrabold text-surface shadow-brutal-sm transition-opacity hover:opacity-80"
+      <Button
+        className="w-full"
         onClick={() => router.push(href)}
       >
         {buttonLabel}
-      </button>
-    </div>
+      </Button>
+    </Card>
   )
 }
