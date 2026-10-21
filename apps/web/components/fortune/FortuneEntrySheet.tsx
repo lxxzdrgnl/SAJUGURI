@@ -109,7 +109,7 @@ export default function FortuneEntrySheet({ open, onClose, profiles, isLoggedIn 
     <>
       {/* 백드롭 */}
       <div
-        className="fixed inset-0 z-40 bg-ink/40"
+        className="fixed inset-0 z-40 bg-c-scrim"
         style={{
           opacity: visible ? 1 : 0,
           transitionProperty: 'opacity',
@@ -122,7 +122,7 @@ export default function FortuneEntrySheet({ open, onClose, profiles, isLoggedIn 
 
       {/* 시트 */}
       <div
-        className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[640px] rounded-t-lg border-2 border-ink bg-surface shadow-brutal-up"
+        className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[640px] rounded-t-[28px] border border-b-0 border-c-line bg-c-bg text-c-text"
         style={{
           transform: visible ? 'translateY(0)' : 'translateY(100%)',
           opacity: visible ? 1 : 0,
@@ -137,18 +137,18 @@ export default function FortuneEntrySheet({ open, onClose, profiles, isLoggedIn 
       >
         {/* 핸들 */}
         <div className="flex justify-center pt-3 pb-1">
-          <div className="h-1 w-10 rounded-full bg-border-soft" />
+          <div className="h-1 w-10 rounded-pill bg-c-line" />
         </div>
 
         <div className="max-h-[75dvh] overflow-y-auto px-5 pb-8 pt-3">
-          <h2 className="mb-4 text-[17px] font-extrabold text-ink">{t('pickSheet')}</h2>
+          <h2 className="mb-4 break-keep font-display text-xl font-normal text-c-text">{t('pickSheet')}</h2>
 
           {showForm ? (
             <>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="mb-4 text-[13px] font-bold text-text-sub hover:text-ink"
+                className="mb-4 text-[13px] font-bold text-c-text-sub hover:text-c-text"
               >
                 ← {tp('backToList')}
               </button>
@@ -159,7 +159,7 @@ export default function FortuneEntrySheet({ open, onClose, profiles, isLoggedIn 
           {/* 저장된 만세력 (로그인 시) */}
           {isLoggedIn && profiles.length > 0 && (
             <section className="mb-4">
-              <p className="mb-2 text-[12px] font-extrabold uppercase tracking-widest text-text-sub">
+              <p className="mb-2 text-xs font-bold text-c-text-sub">
                 {t('savedTitle')}
               </p>
               <ul className="flex flex-col gap-2">
@@ -169,27 +169,27 @@ export default function FortuneEntrySheet({ open, onClose, profiles, isLoggedIn 
                   return (
                     <li key={p.id}>
                       <button
-                        className="flex w-full items-center gap-3 rounded-lg border-2 border-ink bg-surface p-4 text-left shadow-brutal transition-opacity hover:opacity-80"
+                        className="flex w-full items-center gap-3 rounded-card border border-c-line bg-c-surface p-4 text-left transition-colors hover:bg-c-surface-soft"
                         onClick={() => goFortune(manseNavQuery(profileToManseSource(p)))}
                       >
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border-2 border-ink bg-surface overflow-hidden">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-c-line bg-c-surface-soft overflow-hidden">
                           <MascotTinted stem={p.day_stem} width={38} height={38} />
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center gap-2">
-                            <span className="truncate text-[14px] font-extrabold">{p.name}</span>
+                            <span className="truncate text-[14px] font-bold">{p.name}</span>
                             {p.is_representative && (
-                              <span className="shrink-0 rounded-full border-[1.5px] border-ink bg-yellow px-2 py-0.5 text-[10px] font-extrabold">
+                              <span className="shrink-0 rounded-pill bg-c-accent px-2 py-0.5 text-[10px] font-bold text-c-on-accent">
                                 대표
                               </span>
                             )}
                             {seen && (
-                              <span className="shrink-0 rounded-full border-[1.5px] border-teal px-2 py-0.5 text-[10px] font-extrabold text-teal">
+                              <span className="shrink-0 rounded-pill bg-c-surface-soft px-2 py-0.5 text-[10px] font-bold text-c-text-sub">
                                 {t('seenToday')}
                               </span>
                             )}
                           </span>
-                          <span className="block text-xs text-text-sub">
+                          <span className="block text-xs text-c-text-sub">
                             {p.birth_date}
                             {p.birth_time ? ` · ${p.birth_time}` : ''}
                           </span>
@@ -205,7 +205,7 @@ export default function FortuneEntrySheet({ open, onClose, profiles, isLoggedIn 
           {/* 최근 입력 (저장 만세력과 중복되지 않는 항목만 표시) */}
           {filteredRecent.length > 0 && (
             <section className="mb-4">
-              <p className="mb-2 text-[12px] font-extrabold uppercase tracking-widest text-text-sub">
+              <p className="mb-2 text-xs font-bold text-c-text-sub">
                 {t('recentTitle')}
               </p>
               <ul className="flex flex-col gap-2">
@@ -216,22 +216,22 @@ export default function FortuneEntrySheet({ open, onClose, profiles, isLoggedIn 
                   return (
                     <li key={q}>
                       <button
-                        className="flex w-full items-center gap-3 rounded-lg border-[1.5px] border-border-soft bg-surface p-4 text-left hover:border-ink hover:shadow-brutal-sm transition-all"
+                        className="flex w-full items-center gap-3 rounded-card border border-c-line bg-c-surface p-4 text-left transition-colors hover:bg-c-surface-soft"
                         onClick={() => goFortune(q)}
                       >
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border-2 border-ink bg-surface overflow-hidden">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-c-line bg-c-surface-soft overflow-hidden">
                           <MascotTinted stem={r.day_stem} width={38} height={38} />
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center gap-2">
-                            <span className="truncate text-[14px] font-extrabold">{r.name}</span>
+                            <span className="truncate text-[14px] font-bold">{r.name}</span>
                             {seen && (
-                              <span className="shrink-0 rounded-full border-[1.5px] border-teal px-2 py-0.5 text-[10px] font-extrabold text-teal">
+                              <span className="shrink-0 rounded-pill bg-c-surface-soft px-2 py-0.5 text-[10px] font-bold text-c-text-sub">
                                 {t('seenToday')}
                               </span>
                             )}
                           </span>
-                          <span className="block text-xs text-text-sub">
+                          <span className="block text-xs text-c-text-sub">
                             {r.birth_date}
                             {r.birth_time ? ` · ${r.birth_time}` : ` · ${tf('timeUnknown')}`}
                             {' · '}{r.gender === 'male' ? tf('male') : tf('female')}
@@ -247,13 +247,13 @@ export default function FortuneEntrySheet({ open, onClose, profiles, isLoggedIn 
 
           {/* 직접 입력하기 — 모달 내 폼 */}
           <button
-            className="flex w-full items-center gap-3 rounded-lg border-2 border-ink bg-yellow p-4 text-left shadow-brutal font-extrabold transition-opacity hover:opacity-80"
+            className="flex w-full items-center gap-3 rounded-card bg-c-accent p-4 text-left font-bold text-c-on-accent transition-opacity hover:opacity-90"
             onClick={() => setShowForm(true)}
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border-2 border-ink bg-surface text-lg">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-c-surface text-lg">
               +
             </span>
-            <span className="text-[14px] font-extrabold">{t('directInput')}</span>
+            <span className="text-[14px] font-bold">{t('directInput')}</span>
           </button>
           </>
           )}
