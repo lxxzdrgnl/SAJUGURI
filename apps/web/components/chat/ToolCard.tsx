@@ -10,7 +10,7 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { Pillar, SinSal, DayMasterStrength, YongSin } from '@sajuguri/api-client'
-import { ohaengColor, ohaengTintColor } from '@/lib/ohaeng'
+import { ohaengTintVar, ohaengVar } from '@/lib/ohaeng'
 import { toPercent, judge, balanceScore, balanceLabel, WUXING_ORDER } from '@/lib/manse/wuxing'
 import { groupSummary, dominantGroups } from '@/lib/manse/tenGods'
 
@@ -238,7 +238,7 @@ function WuxingMini({ payload }: { payload: Record<string, unknown> }) {
         </label>
       )}
       {WUXING_ORDER.map((el) => {
-        const color = ohaengColor(el)
+        const color = ohaengVar(el)
         const v = judge(pct[el])
         return (
           <div key={el} className="mt-1 flex items-center gap-2 text-xs">
@@ -319,13 +319,13 @@ function PillarMini({ pillar, isDay }: { pillar?: Pillar | null; isDay?: boolean
       {(['stem', 'branch'] as const).map((kind) => {
         const kor = kind === 'stem' ? pillar.stem : pillar.branch
         const element = kind === 'stem' ? pillar.stem_element : pillar.branch_element
-        const color = ohaengColor(element)
+        const color = ohaengVar(element)
         const border = isDay && kind === 'stem' ? 'border-c-text' : 'border-c-line'
         return (
           <div
             key={kind}
             className={`rounded-xl border-2 ${border} px-1 py-1 text-center`}
-            style={{ background: ohaengTintColor(element) }}
+            style={{ background: ohaengTintVar(element) }}
           >
             <span className="font-serif text-[16px] font-black leading-none" style={{ color }}>{kor}</span>
             <span className="ml-0.5 text-[9px] font-bold" style={{ color }}>{element}</span>
@@ -364,9 +364,9 @@ function StrengthMini({ payload, t }: { payload: Record<string, unknown>; t: Ret
   const score = s ? Math.max(0, Math.min(100, s.score)) : undefined
 
   function ElPill({ el }: { el: string }) {
-    const color = ohaengColor(el)
+    const color = ohaengVar(el)
     return (
-      <span className="inline-flex items-center gap-1 rounded-md border border-c-line px-1.5 py-0.5 text-[11px] font-extrabold" style={{ background: `${color}1A` }}>
+      <span className="inline-flex items-center gap-1 rounded-md border border-c-line px-1.5 py-0.5 text-[11px] font-extrabold" style={{ background: `color-mix(in srgb, ${color} 10%, transparent)` }}>
         <span className="h-2 w-2 rounded-full" style={{ background: color }} />
         <span style={{ color }}>{el}</span>
       </span>
