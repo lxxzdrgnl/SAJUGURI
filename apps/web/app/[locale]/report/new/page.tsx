@@ -9,6 +9,8 @@ import { createReportJob } from '@sajuguri/api-client'
 import { useGenerationJob } from '@/lib/hooks/useGenerationJob'
 import type { SajuCalcRequest } from '@sajuguri/api-client'
 import PageHeading from '@/components/ui/PageHeading'
+import Card from '@/components/ui/Card'
+import Button, { buttonClass } from '@/components/ui/Button'
 
 const LOADING_PHRASES = [
   '사주를 읽고 있어요...',
@@ -104,10 +106,10 @@ export default function ReportNewPage() {
   // 로딩 중 화면
   if (loading) {
     return (
-      <main className="flex min-h-[70vh] flex-col items-center justify-center gap-6 px-4 text-center">
+      <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] flex-col items-center justify-center gap-6 bg-c-bg px-4 text-center">
         <Image src="/mascot.svg" alt="" width={72} height={72} className="animate-bounce" priority />
-        <p className="text-[15px] font-extrabold text-ink">{LOADING_PHRASES[phraseIdx]}</p>
-        <p className="text-[13px] text-text-sub">{t('loadingNote')}</p>
+        <p className="text-[15px] font-extrabold text-c-text">{LOADING_PHRASES[phraseIdx]}</p>
+        <p className="text-[13px] text-c-text-sub">{t('loadingNote')}</p>
       </main>
     )
   }
@@ -115,8 +117,8 @@ export default function ReportNewPage() {
   // 로그인 확인 중
   if (isLoggedIn === null) {
     return (
-      <main className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-sm text-text-sub">{t('checking')}</p>
+      <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] items-center justify-center bg-c-bg px-4">
+        <p className="text-sm text-c-text-sub">{t('checking')}</p>
       </main>
     )
   }
@@ -124,33 +126,33 @@ export default function ReportNewPage() {
   // 비로그인
   if (!isLoggedIn) {
     return (
-      <main className="flex flex-col gap-5">
-        <h1 className="text-lg font-black">{t('title')}</h1>
-        <div className="flex flex-col items-center gap-4 rounded-lg border-2 border-ink bg-surface p-6 text-center shadow-brutal">
+      <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] flex-col gap-5 bg-c-bg px-4 pb-8 pt-4">
+        <h1 className="text-lg font-black text-c-text">{t('title')}</h1>
+        <Card className="flex flex-col items-center gap-4 p-6 text-center">
           <Image src="/mascot.svg" alt="" width={56} height={56} />
-          <p className="text-[15px] font-extrabold">{t('loginRequired')}</p>
-          <p className="text-[13px] text-text-sub">{t('loginDesc')}</p>
+          <p className="text-[15px] font-extrabold text-c-text">{t('loginRequired')}</p>
+          <p className="text-[13px] text-c-text-sub">{t('loginDesc')}</p>
           <a
             href={GOOGLE_LOGIN_URL}
-            className="w-full rounded-lg border-2 border-ink bg-yellow py-3 text-sm font-extrabold shadow-brutal"
+            className={`${buttonClass('primary', 'md')} w-full`}
           >
             {t('loginWithGoogle')}
           </a>
-        </div>
+        </Card>
       </main>
     )
   }
 
   // 로그인 상태 — 생성 폼
   return (
-    <main className="flex flex-col gap-5">
+    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] flex-col gap-5 bg-c-bg px-4 pb-8 pt-4">
       <PageHeading title={t('title')} accent="orange" />
 
-      <p className="text-[13px] leading-relaxed text-text-sub">{t('guideline')}</p>
+      <p className="text-[13px] leading-relaxed text-c-text-sub">{t('guideline')}</p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-[13px] font-extrabold" htmlFor="topics">
+          <label className="text-[13px] font-extrabold text-c-text" htmlFor="topics">
             {t('topicsLabel')}
           </label>
           <input
@@ -159,24 +161,21 @@ export default function ReportNewPage() {
             value={topics}
             onChange={e => setTopics(e.target.value)}
             placeholder={t('topicsPlaceholder')}
-            className="w-full rounded-lg border-2 border-ink bg-surface px-4 py-3 text-sm shadow-brutal"
+            className="h-12 w-full rounded-card border border-c-line bg-c-surface px-4 text-sm text-c-text placeholder:text-c-text-sub"
             maxLength={100}
           />
-          <p className="text-[12px] text-text-sub">{t('topicsHint')}</p>
+          <p className="text-[12px] text-c-text-sub">{t('topicsHint')}</p>
         </div>
 
         {error && (
-          <p className="rounded-lg border-[1.5px] border-orange-tint bg-orange-tint px-4 py-3 text-[13px] font-bold text-orange">
+          <p role="alert" className="rounded-card bg-c-surface-soft px-4 py-3 text-[13px] font-bold text-c-danger">
             {error}
           </p>
         )}
 
-        <button
-          type="submit"
-          className="w-full rounded-lg border-2 border-ink bg-orange py-3.5 text-sm font-extrabold text-white shadow-brutal active:translate-x-[2px] active:translate-y-[2px] active:shadow-brutal-sm"
-        >
+        <Button type="submit" className="w-full">
           {t('submit')}
-        </button>
+        </Button>
       </form>
     </main>
   )

@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { serverApi } from '@/lib/api'
 import { getSharedReport } from '@sajuguri/api-client'
 import ReportView from '@/components/report/ReportView'
+import Card from '@/components/ui/Card'
+import { buttonClass } from '@/components/ui/Button'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,9 +55,9 @@ export default async function SharedReportPage({
 
   if (!report) {
     return (
-      <main className="pt-16 text-center">
-        <p className="text-[15px] font-extrabold text-text-sub">공유 링크를 찾을 수 없어요.</p>
-        <p className="mt-2 text-[13px] text-text-sub">링크가 만료됐거나 잘못된 주소예요.</p>
+      <main className="-mx-4 -mt-2 -mb-8 min-h-[calc(100dvh-3.5rem)] bg-c-bg px-4 pt-16 text-center">
+        <p className="text-[15px] font-extrabold text-c-text-sub">공유 링크를 찾을 수 없어요.</p>
+        <p className="mt-2 text-[13px] text-c-text-sub">링크가 만료됐거나 잘못된 주소예요.</p>
       </main>
     )
   }
@@ -70,28 +72,28 @@ export default async function SharedReportPage({
     .join(' · ')
 
   return (
-    <main className="flex flex-col gap-4">
-      <div className="rounded-lg border-2 border-ink bg-surface p-3 text-[14px] font-bold text-ink shadow-brutal">
+    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] flex-col gap-4 bg-c-bg px-4 pb-8 pt-4">
+      <Card tone="soft" className="p-3 text-[14px] font-bold">
         {summaryLine}
-      </div>
+      </Card>
 
       {/* 공유 모드 — CTA 없음 */}
       <ReportView report={report} reportId={0} shareMode />
 
       {/* 안내 — 하단 */}
-      <p className="pb-2 text-center text-[13px] text-text-sub">각 제목을 클릭하면 해설이 펼쳐져요</p>
+      <p className="pb-2 text-center text-[13px] text-c-text-sub">각 제목을 클릭하면 해설이 펼쳐져요</p>
 
       {/* 나도 확인 CTA */}
-      <div className="mt-2 rounded-lg border-2 border-ink bg-surface p-4 shadow-brutal">
-        <p className="mb-1 text-[14px] font-extrabold text-ink">나도 내 사주가 궁금하다면?</p>
-        <p className="mb-3 text-[13px] text-text-sub">생년월일시만 입력하면 무료로 만세력을 확인할 수 있어요.</p>
+      <Card className="mt-2 p-5">
+        <p className="mb-1 text-[14px] font-extrabold">나도 내 사주가 궁금하다면?</p>
+        <p className="mb-3 text-[13px] text-c-text-sub">생년월일시만 입력하면 무료로 만세력을 확인할 수 있어요.</p>
         <a
           href="/"
-          className="block w-full rounded-lg border-2 border-ink bg-yellow py-3 text-center text-sm font-extrabold shadow-brutal"
+          className={`${buttonClass('primary', 'md')} w-full`}
         >
           나도 확인해보기
         </a>
-      </div>
+      </Card>
     </main>
   )
 }
