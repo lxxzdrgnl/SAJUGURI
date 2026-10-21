@@ -1,17 +1,18 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { api } from '@/lib/api'
 import type { IlJinEntry } from '@sajuguri/api-client'
 import { calendarGrid, dateKey, prevMonth, nextMonth } from '@/lib/manse/ilJin'
 
-const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
-const MONTH_NAMES = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월']
 
 /** 일진 달력 — 월 달력 + 간지·음력·절기 (IlJinCalendar.vue 이식). 그리드 로직은 lib/manse/ilJin */
 export default function IlJinCalendar() {
   const t = useTranslations('manse.charts.ilJin')
+  const locale = useLocale()
+  // 2023-01-01은 일요일 — 일~토 순으로 로케일 요일 약칭 생성
+  const weekdays = Array.from({ length: 7 }, (_, i) => new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(new Date(2023, 0, 1 + i)))
   const now = new Date()
   const todayStr = dateKey(now.getFullYear(), now.getMonth() + 1, now.getDate())
 
@@ -32,6 +33,7 @@ export default function IlJinCalendar() {
     return () => { alive = false }
   }, [year, month])
 
+  const monthLabel = new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'long' }).format(new Date(year, month - 1, 1))
   const grid = calendarGrid(year, month, entries)
   const go = (fn: typeof prevMonth) => { const n = fn(year, month); setYear(n.year); setMonth(n.month) }
 
@@ -41,7 +43,7 @@ export default function IlJinCalendar() {
         <h3 className="text-[15px] font-extrabold">{t('title')}</h3>
         <div className="flex items-center gap-2">
           <button type="button" onClick={() => go(prevMonth)} className="flex h-8 w-8 items-center justify-center rounded-pill border border-c-line bg-c-surface text-sm font-black">‹</button>
-          <span className="min-w-[88px] text-center text-sm font-extrabold">{year} {MONTH_NAMES[month - 1]}</span>
+          <span className="min-w-[88px] text-center text-sm font-extrabold">{monthLabel}</span>
           <button type="button" onClick={() => go(nextMonth)} className="flex h-8 w-8 items-center justify-center rounded-pill border border-c-line bg-c-surface text-sm font-black">›</button>
         </div>
       </div>
@@ -53,8 +55,8 @@ export default function IlJinCalendar() {
       ) : (
         <>
           <div className="grid grid-cols-7 gap-1">
-            {WEEKDAYS.map((wd, i) => (
-              <div key={wd} className={`py-1 text-center text-[12px] font-bold ${i === 0 ? 'text-c-danger' : i === 6 ? 'text-c-oh-su' : 'text-c-text-sub'}`}>{wd}</div>
+            {weekdays.map((wd, i) => (
+              <div key={i} className={`py-1 text-center text-[12px] font-bold ${i === 0 ? 'text-c-danger' : i === 6 ? 'text-c-oh-su' : 'text-c-text-sub'}`}>{wd}</div>
             ))}
           </div>
           <div className="grid grid-cols-7 gap-1">
@@ -68,7 +70,7 @@ export default function IlJinCalendar() {
                   {cell.day && (
                     <>
                       <div className={`text-[13px] font-bold ${isToday ? 'text-c-text' : idx % 7 === 0 ? 'text-c-danger' : idx % 7 === 6 ? 'text-c-oh-su' : 'text-c-text'}`}>{cell.day}</div>
-                      {cell.entry?.solar_term && <div className="text-[11px] font-semibold text-c-oh-to">{cell.entry.solar_term}</div>}
+                      {cell.entry?.solar_term && <div className="text-[11px] font-semibold text-c-text">{cell.entry.solar_term}</div>}
                       {cell.entry && <div className="text-[12px] font-semibold text-c-text-sub">{cell.entry.ganji_name}</div>}
                       {cell.entry && (
                         <div className={`text-[11px] ${cell.entry.is_leap_month ? 'text-c-oh-su' : 'text-c-text-sub'}`}>

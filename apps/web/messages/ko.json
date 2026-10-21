@@ -50,7 +50,6 @@
     },
     "history": {
       "title": "내 기록",
-      "back": "마이로",
       "loginRequired": "로그인이 필요해요",
       "loginWithGoogle": "구글로 로그인"
     },
@@ -220,7 +219,8 @@
         "saveToMyError": "저장에 실패했어요. 다시 시도해주세요",
         "saveToMyLoginHint": "저장하려면 로그인이 필요해요",
         "saveToMyLoginLink": "구글로 로그인"
-      }
+      },
+      "yongSinChip": "용신 {name}"
     },
     "charts": {
       "detail": {
@@ -310,7 +310,17 @@
         "title": "합충 분석",
         "empty": "해당하는 관계가 없어요",
         "broken": "충으로 합 파괴됨",
-        "gungSeongDesc": "기둥 위치에 따라 오행 작용력 가중치가 달라요. 월지 > 일간 > 시지·연주 > 천간 순서예요."
+        "gungSeongDesc": "기둥 위치에 따라 오행 작용력 가중치가 달라요. 월지 > 일간 > 시지·연주 > 천간 순서예요.",
+        "pillarYear": "연주",
+        "pillarMonth": "월주",
+        "pillarDay": "일주",
+        "pillarHour": "시주",
+        "transform": "→ {el}화(化)",
+        "elMok": "목",
+        "elHwa": "화",
+        "elTo": "토",
+        "elGeum": "금",
+        "elSu": "수"
       },
       "feature": {
         "title": "오행 특성 참고표",
@@ -320,7 +330,37 @@
         "colBody": "관련 신체",
         "colJobs": "어울리는 직업",
         "over": "과다",
-        "lack": "부족"
+        "lack": "부족",
+        "row_mok": {
+          "dir": "동 · 봄",
+          "traits": "창의·성장·인자함",
+          "body": "간·담·눈",
+          "jobs": "교육·의료·법"
+        },
+        "row_hwa": {
+          "dir": "남 · 여름",
+          "traits": "열정·표현·명랑함",
+          "body": "심장·소장·혀",
+          "jobs": "방송·영업·IT"
+        },
+        "row_to": {
+          "dir": "중앙 · 환절기",
+          "traits": "신뢰·중용·포용력",
+          "body": "위·비장·입",
+          "jobs": "부동산·금융·중개"
+        },
+        "row_geum": {
+          "dir": "서 · 가을",
+          "traits": "의리·결단·정의감",
+          "body": "폐·대장·코",
+          "jobs": "군경·기계·법조"
+        },
+        "row_su": {
+          "dir": "북 · 겨울",
+          "traits": "지혜·유연·통찰력",
+          "body": "신장·방광·귀",
+          "jobs": "철학·유통·무역"
+        }
       },
       "cta": {
         "report": "AI 리포트 생성",
@@ -425,8 +465,22 @@
     },
     "shared": {
       "notFound": "공유 링크를 찾을 수 없어요.",
-      "notFoundDesc": "링크가 만료됐거나 잘못된 주소예요."
-    }
+      "notFoundDesc": "링크가 만료됐거나 잘못된 주소예요.",
+      "notFoundTitle": "공유 링크를 찾을 수 없어요.",
+      "ctaTitle": "나도 내 사주가 궁금하다면?",
+      "ctaDesc": "생년월일시만 입력하면 무료로 만세력을 확인할 수 있어요.",
+      "ctaBtn": "나도 확인해보기",
+      "metaTitle": "{name}님의 사주 리포트 | {site}",
+      "metaTitleAnon": "{site} 사주 리포트",
+      "metaDescription": "{name}님의 AI 사주 리포트를 확인해보세요.",
+      "metaDescriptionAnon": "AI 사주 리포트를 확인해보세요. · {site}"
+    },
+    "loadingPhrase0": "사주를 읽고 있어요...",
+    "loadingPhrase1": "천간과 지지를 살피는 중이에요...",
+    "loadingPhrase2": "대운의 흐름을 분석하고 있어요...",
+    "loadingPhrase3": "오행의 균형을 파악하는 중이에요...",
+    "loadingPhrase4": "당신만의 해설을 작성하고 있어요...",
+    "loadingPhrase5": "거의 다 됐어요, 조금만 기다려 주세요..."
   },
   "chat": {
     "title": "AI 사주 상담",
@@ -592,7 +646,9 @@
       "notFoundBody": "링크가 만료됐거나 잘못된 주소예요.",
       "ctaTitle": "나도 한줄상담 받아볼까?",
       "ctaBody": "생년월일시와 고민만 입력하면 AI가 바로 답해줘요.",
-      "ctaButton": "나도 한줄상담 받기"
+      "ctaButton": "나도 한줄상담 받기",
+      "metaTitle": "{name}님의 한줄상담 · {headline} | {site}",
+      "metaTitleAnon": "{site} 한줄상담 · {headline}"
     }
   },
   "fortune": {
@@ -817,5 +873,8 @@
     "themeSystem": "시스템",
     "logout": "로그아웃",
     "close": "닫기"
+  },
+  "meta": {
+    "siteName": "사주구리"
   }
 }

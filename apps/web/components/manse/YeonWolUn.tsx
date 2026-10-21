@@ -1,16 +1,17 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { api } from '@/lib/api'
 import type { YeonUnEntry, WolUnEntry } from '@sajuguri/api-client'
 import GanjiColumn from '@/components/manse/GanjiColumn'
 
-const MONTH_NAMES = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월']
 
 /** 연운·월운 — 탭 + API 호출 (YeonUnSlider·WolUnSlider 이식). day_stem 기반 GET */
 export default function YeonWolUn({ dayStem }: { dayStem: string }) {
   const t = useTranslations('manse.charts.yeonWol')
+  const locale = useLocale()
+  const monthName = (m: number) => new Intl.DateTimeFormat(locale, { month: 'short' }).format(new Date(2023, m - 1, 1))
   const [tab, setTab] = useState<'yeon' | 'wol'>('yeon')
   const now = new Date()
   const currentYear = now.getFullYear()
@@ -70,7 +71,7 @@ export default function YeonWolUn({ dayStem }: { dayStem: string }) {
             : (wol ?? []).map((e) => (
                 <GanjiColumn
                   key={e.month}
-                  topLabel={MONTH_NAMES[e.month - 1]}
+                  topLabel={monthName(e.month)}
                   stem={e.stem} stemElement={e.stem_element}
                   branch={e.branch} branchElement={e.branch_element}
                   stemTenGod={e.stem_ten_god} branchTenGod={e.branch_ten_god} twelveWun={e.twelve_wun}

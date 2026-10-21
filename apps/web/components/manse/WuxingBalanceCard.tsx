@@ -125,7 +125,7 @@ export default function WuxingBalanceCard({ data }: { data: SajuCalcResponse }) 
 
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <span className="rounded-pill bg-c-text px-2.5 py-1 text-xs font-black text-c-bg">{score}/100</span>
-        <span className={`rounded-pill px-2.5 py-1 text-[11px] font-extrabold ${label.tone === 'good' ? 'bg-c-lucky-bg text-c-lucky-fg' : label.tone === 'mid' ? 'bg-c-oh-to-tint text-c-oh-to' : 'bg-c-unlucky-bg text-c-unlucky-fg'}`}>
+        <span className={`rounded-pill px-2.5 py-1 text-[11px] font-extrabold ${label.tone === 'good' ? 'bg-c-lucky-bg text-c-lucky-fg' : label.tone === 'mid' ? 'bg-c-oh-to-tint text-c-text' : 'bg-c-unlucky-bg text-c-unlucky-fg'}`}>
           {label.text}
         </span>
         <span className="text-[11px] text-c-text-sub">{summaryText}</span>

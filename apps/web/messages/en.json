@@ -50,7 +50,6 @@
     },
     "history": {
       "title": "My Records",
-      "back": "Back to My",
       "loginRequired": "Sign in to continue",
       "loginWithGoogle": "Sign in with Google"
     },
@@ -220,7 +219,8 @@
         "saveToMyError": "Save failed. Please try again",
         "saveToMyLoginHint": "Sign in to save this chart",
         "saveToMyLoginLink": "Sign in with Google"
-      }
+      },
+      "yongSinChip": "Yongsin {name}"
     },
     "charts": {
       "detail": {
@@ -310,7 +310,17 @@
         "title": "Combinations & Clashes",
         "empty": "No matching relations",
         "broken": "Combination broken by clash",
-        "gungSeongDesc": "Element weight varies by pillar position: month branch > day stem > hour/year > stems."
+        "gungSeongDesc": "Element weight varies by pillar position: month branch > day stem > hour/year > stems.",
+        "pillarYear": "Year Pillar",
+        "pillarMonth": "Month Pillar",
+        "pillarDay": "Day Pillar",
+        "pillarHour": "Hour Pillar",
+        "transform": "→ Becomes {el}",
+        "elMok": "Wood",
+        "elHwa": "Fire",
+        "elTo": "Earth",
+        "elGeum": "Metal",
+        "elSu": "Water"
       },
       "feature": {
         "title": "Five Elements Reference",
@@ -320,7 +330,37 @@
         "colBody": "Body",
         "colJobs": "Careers",
         "over": "Excess",
-        "lack": "Deficient"
+        "lack": "Deficient",
+        "row_mok": {
+          "dir": "East · Spring",
+          "traits": "Creativity · Growth · Benevolence",
+          "body": "Liver · Gallbladder · Eyes",
+          "jobs": "Education · Medicine · Law"
+        },
+        "row_hwa": {
+          "dir": "South · Summer",
+          "traits": "Passion · Expression · Cheerfulness",
+          "body": "Heart · Small intestine · Tongue",
+          "jobs": "Broadcasting · Sales · IT"
+        },
+        "row_to": {
+          "dir": "Center · Season transitions",
+          "traits": "Trust · Moderation · Tolerance",
+          "body": "Stomach · Spleen · Mouth",
+          "jobs": "Real estate · Finance · Brokerage"
+        },
+        "row_geum": {
+          "dir": "West · Autumn",
+          "traits": "Loyalty · Decisiveness · Justice",
+          "body": "Lungs · Large intestine · Nose",
+          "jobs": "Military/Police · Machinery · Legal"
+        },
+        "row_su": {
+          "dir": "North · Winter",
+          "traits": "Wisdom · Flexibility · Insight",
+          "body": "Kidneys · Bladder · Ears",
+          "jobs": "Philosophy · Distribution · Trade"
+        }
       },
       "cta": {
         "report": "Generate AI Report",
@@ -425,8 +465,22 @@
     },
     "shared": {
       "notFound": "Share link not found.",
-      "notFoundDesc": "The link may have expired or is invalid."
-    }
+      "notFoundDesc": "The link has expired or the address is invalid.",
+      "notFoundTitle": "Share link not found.",
+      "ctaTitle": "Curious about your own Saju?",
+      "ctaDesc": "Just enter your birth date and time to see your Saju chart for free.",
+      "ctaBtn": "Check mine too",
+      "metaTitle": "{name}'s Saju report | {site}",
+      "metaTitleAnon": "{site} Saju report",
+      "metaDescription": "Check out {name}'s AI Saju report.",
+      "metaDescriptionAnon": "Check out this AI Saju report. · {site}"
+    },
+    "loadingPhrase0": "Reading your Saju...",
+    "loadingPhrase1": "Examining your Heavenly Stems and Earthly Branches...",
+    "loadingPhrase2": "Analyzing the flow of your Daeun (luck pillars)...",
+    "loadingPhrase3": "Checking the balance of your Five Elements...",
+    "loadingPhrase4": "Writing your personal reading...",
+    "loadingPhrase5": "Almost there, just a moment..."
   },
   "question": {
     "title": "One-Line Reading",
@@ -463,7 +517,9 @@
       "notFoundBody": "The link may have expired or is invalid.",
       "ctaTitle": "Want your own quick reading?",
       "ctaBody": "Just enter your birth info and question. AI answers right away.",
-      "ctaButton": "Get my quick reading"
+      "ctaButton": "Get my quick reading",
+      "metaTitle": "{name}'s quick reading · {headline} | {site}",
+      "metaTitleAnon": "{site} quick reading · {headline}"
     }
   },
   "chat": {
@@ -817,5 +873,8 @@
     "themeSystem": "System",
     "logout": "Sign out",
     "close": "Close"
+  },
+  "meta": {
+    "siteName": "SajuGuri"
   }
 }

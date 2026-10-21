@@ -4,7 +4,10 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { SajuCalcResponse, Pillar } from '@sajuguri/api-client'
 import { ohaengVar, ohaengTintVar } from '@/lib/ohaeng'
-import { ALL_TABS, buildEntries, hasData, activePillars, PLABEL, type TabKey, type PillarKey } from '@/lib/manse/hapChung'
+import { ALL_TABS, buildEntries, hasData, activePillars, type TabKey, type PillarKey } from '@/lib/manse/hapChung'
+
+const PILLAR_KEY = { year: 'pillarYear', month: 'pillarMonth', day: 'pillarDay', hour: 'pillarHour' } as const
+const EL_KEY: Record<string, string> = { 목: 'elMok', 화: 'elHwa', 토: 'elTo', 금: 'elGeum', 수: 'elSu' }
 
 const PALACE_WEIGHTS: Record<PillarKey, { stem: string; branch: string }> = {
   hour: { stem: '×1.0', branch: '×0.8' },
@@ -50,7 +53,7 @@ export default function HapChungPanel({ data }: { data: SajuCalcResponse }) {
           const p = pillarOf(data, pk)
           return (
             <div key={pk} className="flex min-w-0 flex-col items-center gap-1">
-              <span className="text-[10px] text-c-text-sub">{PLABEL[pk]}주</span>
+              <span className="text-[10px] text-c-text-sub">{t(PILLAR_KEY[pk])}</span>
               <Box ch={p?.stem} on={stems.includes(pk)} weight={showWeight ? PALACE_WEIGHTS[pk].stem : undefined} />
               <Box ch={p?.branch} on={branches.includes(pk)} weight={showWeight ? PALACE_WEIGHTS[pk].branch : undefined} />
             </div>
@@ -103,7 +106,7 @@ export default function HapChungPanel({ data }: { data: SajuCalcResponse }) {
                 {e.broken && <span className="w-fit rounded-pill bg-c-unlucky-bg px-2.5 py-0.5 text-[11px] font-extrabold text-c-unlucky-fg">{t('broken')}</span>}
                 {e.resultEl && !e.broken && (
                   <span className="w-fit rounded-pill px-2.5 py-0.5 text-[11px] font-extrabold" style={{ color: ohaengVar(e.resultEl), background: ohaengTintVar(e.resultEl) }}>
-                    → {e.resultEl}화(化)
+                    {t('transform', { el: EL_KEY[e.resultEl] ? t(EL_KEY[e.resultEl]) : e.resultEl })}
                   </span>
                 )}
                 <MiniGrid stems={e.stems} branches={e.branches} />

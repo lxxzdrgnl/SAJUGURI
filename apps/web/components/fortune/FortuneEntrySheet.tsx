@@ -59,6 +59,7 @@ interface Props {
 export default function FortuneEntrySheet({ open, onClose, profiles, isLoggedIn }: Props) {
   const t = useTranslations('fortune.sheet')
   const tf = useTranslations('manse.form')
+  const tm = useTranslations('manse.saved')
   const tp = useTranslations('mansePicker')
   const router = useRouter()
   const [recentInputs, setRecentInputs] = useState<RecentBirthInput[]>([])
@@ -180,7 +181,7 @@ export default function FortuneEntrySheet({ open, onClose, profiles, isLoggedIn 
                             <span className="truncate text-[14px] font-bold">{p.name}</span>
                             {p.is_representative && (
                               <span className="shrink-0 rounded-pill bg-c-accent px-2 py-0.5 text-[10px] font-bold text-c-on-accent">
-                                대표
+                                {tm('representative')}
                               </span>
                             )}
                             {seen && (
