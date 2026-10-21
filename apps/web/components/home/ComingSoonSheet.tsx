@@ -76,7 +76,7 @@ export default function ComingSoonSheet({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={`absolute inset-x-0 bottom-0 z-50 mx-auto max-w-[640px] rounded-t-[28px] bg-c-bg px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-3 text-c-text transition-transform duration-(--motion-duration-sheet) ease-(--motion-ease-drawer) ${
+        className={`absolute inset-x-0 bottom-0 z-50 mx-auto max-w-[640px] rounded-t-card bg-c-bg px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-3 text-c-text transition-transform duration-(--motion-duration-sheet) ease-(--motion-ease-drawer) ${
           visible ? 'translate-y-0' : 'translate-y-full'
         }`}
       >

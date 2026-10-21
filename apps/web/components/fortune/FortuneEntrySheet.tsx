@@ -122,7 +122,7 @@ export default function FortuneEntrySheet({ open, onClose, profiles, isLoggedIn 
 
       {/* 시트 */}
       <div
-        className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[640px] rounded-t-[28px] border border-b-0 border-c-line bg-c-bg text-c-text"
+        className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[640px] rounded-t-card border border-b-0 border-c-line bg-c-bg text-c-text"
         style={{
           transform: visible ? 'translateY(0)' : 'translateY(100%)',
           opacity: visible ? 1 : 0,
