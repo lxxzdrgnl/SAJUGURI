@@ -25,10 +25,10 @@
 색은 **의미 토큰만** 쓴다. 컴포넌트에 임의 HEX 금지.
 원천은 `packages/design/src/tokens.ts`(`semantic`, `ohaengByTheme`, `ohaengTintByTheme`,
 `posterByTheme`), 웹은 `apps/web/app/globals.css`의 `--c-*` CSS 변수가 미러한다
-(라이트 = `:root`, 다크 = `:root[data-theme="dark"]`). Tailwind 유틸은 `@theme inline`의
+(라이트 = `:root`, 다크 = `:root[data-theme="dark"]` + 시스템 다크 미디어쿼리 블록 — §3). Tailwind 유틸은 `@theme inline`의
 `--color-c-*` 매핑으로 생긴다 (`bg-c-bg`, `text-c-text-sub` …).
 
-새 색이 필요하면 `--c-*` 토큰을 `:root` + `:root[data-theme="dark"]` + `@theme` 매핑 세 곳에
+새 색이 필요하면 `--c-*` 토큰을 `:root` + 다크 두 블록 + `@theme` 매핑 네 곳에
 함께 추가한다. 공유 값이면 `packages/design`에도 올린다.
 
 ### 2.1 의미 토큰
@@ -99,8 +99,11 @@
 
 - 라이트 / 다크 / 시스템, **기본 = 시스템**. 선택은 드로어에서 하고 쿠키에 저장해 SSR 깜빡임을 막는다.
 - 같은 구성, 색만 다르다. 라이트 = 흰 바탕 + 크림·파스텔 카드, 다크 = 검정에 가까운 바탕 + 깊은 포스터 카드.
-- **현재 상태: 다크 모드 전환 장치(Task 20)가 들어가기 전까지는 라이트 고정이다.**
-  다크 값은 `:root[data-theme="dark"]`에 정의돼 있지만 아직 아무것도 `data-theme`을 붙이지 않는다.
+- 구현: 쿠키 `theme`(`light`/`dark`/`system`, `lib/theme.ts`)을 `[locale]/layout.tsx`가 읽어
+  라이트·다크면 `<html data-theme>`을 SSR로 박고, 시스템이면 속성 없이 둔다. 다크 값은
+  `:root[data-theme="dark"]`와 `@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) }`
+  두 블록에 **같은 목록**으로 있다(`lib/theme.test.ts`가 일치 검사). 다크 토큰을 고치면 둘 다 고친다.
+  `theme-color`·`color-scheme`도 모드를 따른다(라이트 `#FFFFFF` / 다크 `#121212`).
 - 구리구리 상담실(다음 프로젝트)은 두 모드 모두 "밤의 상담실"(딥 틸 밤하늘). 밤하늘 톤은 상담실에서만 쓴다.
 
 ---

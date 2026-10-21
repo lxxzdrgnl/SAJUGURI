@@ -9,6 +9,8 @@ import { currentUser, serverAuthApi } from '@/lib/serverAuth'
 import { listProfiles } from '@sajuguri/api-client'
 import type { MeResponse, ProfileResponse } from '@sajuguri/api-client'
 import LocaleBoot from '@/components/LocaleBoot'
+import { cookies } from 'next/headers'
+import { parseThemePref, THEME_COLOR, THEME_COOKIE } from '@/lib/theme'
 import '../globals.css'
 
 // 간지(천간·지지) 명조체 — font-serif(--font-serif)에 한글·한자 세리프 글리프를 공급한다.
@@ -43,15 +45,25 @@ export const metadata = {
 // viewport-fit=cover — iOS 세이프에어리어(노치·홈인디케이터)까지 페이지가 칠해지게.
 // 이게 없으면 풀스크린 오버레이(운세 스토리)가 상하 세이프에어리어를 못 덮어
 // 기본 배경(청록)이 띠로 남는다. env(safe-area-inset-*)도 이 설정이 있어야 동작.
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  viewportFit: 'cover',
-  // SSR HTML에 theme-color 메타를 항상 심는다. iOS Safari는 JS로 '새로 생성'한
-  // theme-color는 크롬 틴트에 반영하지 않지만, '기존' 메타의 content 갱신은 반영한다.
-  // 운세 스토리(SPA 진입)가 이 메타를 카드 색으로 갱신해 상하 크롬을 맞춘다.
-  // 기본값은 앱 배경(크림) — 다른 페이지의 상태바/툴바를 청록 샘플링 대신 일관되게 한다.
-  themeColor: 'var(--bg-base)',
+//
+// theme-color 메타는 SSR HTML에 항상 심는다. iOS Safari는 JS로 '새로 생성'한
+// theme-color는 크롬 틴트에 반영하지 않지만, '기존' 메타의 content 갱신은 반영한다.
+// 값은 앱 배경(--c-bg)과 같게 — 고른 모드를 따르고, 시스템 모드면 미디어별로 둘 다 심는다.
+export async function generateViewport(): Promise<Viewport> {
+  const pref = parseThemePref((await cookies()).get(THEME_COOKIE)?.value)
+  return {
+    width: 'device-width',
+    initialScale: 1,
+    viewportFit: 'cover',
+    colorScheme: pref === 'system' ? 'light dark' : pref,
+    themeColor:
+      pref === 'system'
+        ? [
+            { media: '(prefers-color-scheme: light)', color: THEME_COLOR.light },
+            { media: '(prefers-color-scheme: dark)', color: THEME_COLOR.dark },
+          ]
+        : THEME_COLOR[pref],
+  }
 }
 
 /** 헤더용 호출이 백엔드 지연으로 모든 페이지를 붙잡지 않도록 2초 제한 */
@@ -79,8 +91,16 @@ export default async function LocaleLayout({
     profiles = []
   }
   const repProfile = profiles.find((p) => p.is_representative) ?? null
+  // 화면 모드 — 라이트/다크는 SSR에서 바로 박아 깜빡임이 없다. 시스템이면 속성 없이 CSS 미디어쿼리에 맡긴다.
+  // (ThemeToggle이 클라이언트에서 data-theme을 고치므로 html은 suppressHydrationWarning)
+  const themePref = parseThemePref((await cookies()).get(THEME_COOKIE)?.value)
   return (
-    <html lang={locale} className={`${notoSerifKR.variable} ${jua.variable}`}>
+    <html
+      lang={locale}
+      className={`${notoSerifKR.variable} ${jua.variable}`}
+      data-theme={themePref === 'system' ? undefined : themePref}
+      suppressHydrationWarning
+    >
       <body>
         <NextIntlClientProvider>
           {/* 저장된 언어 선택을 부팅 시 강제 (영어 기기여도 한국어 유지) */}

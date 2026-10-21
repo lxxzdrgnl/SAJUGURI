@@ -48,6 +48,7 @@
 }
 
 :root {
+  color-scheme: light;
   /* 시맨틱 토큰 — 원천: packages/design semantic (light) */
   --c-bg: #FFFFFF;
   --c-surface: #FFFFFF;
@@ -70,7 +71,11 @@
   --c-poster-mint: #DDF3EA;
 }
 
+/* 다크 값 — 두 군데에 같은 목록을 둔다. 반드시 함께 고칠 것(lib/theme.test.ts가 일치 검사).
+   1) data-theme="dark": 사용자가 다크를 고른 경우
+   2) 시스템 모드(data-theme 없음) + OS 다크 */
 :root[data-theme="dark"] {
+  color-scheme: dark;
   --c-bg: #121212;
   --c-surface: #1A1A1A;
   --c-surface-soft: #232323;
@@ -89,6 +94,52 @@
   --c-poster-peach: #3B281D;
   --c-poster-sky: #182A3B;
   --c-poster-mint: #17332A;
+  /* 오행 5색·기둥 틴트 (만세력 분석) */
+  --c-oh-mok: #2FD28F;
+  --c-oh-hwa: #FF8A3D;
+  --c-oh-to: #E5B820;
+  --c-oh-geum: #B6BCC8;
+  --c-oh-su: #5BB0F2;
+  --c-oh-mok-tint: #12261D;
+  --c-oh-hwa-tint: #2B1B10;
+  --c-oh-to-tint: #2A2410;
+  --c-oh-geum-tint: #222428;
+  --c-oh-su-tint: #12212E;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --c-bg: #121212;
+    --c-surface: #1A1A1A;
+    --c-surface-soft: #232323;
+    --c-line: #333333;
+    --c-text: #F5F5F5;
+    --c-text-sub: #A8ADB7;
+    --c-accent: #FFD900;
+    --c-on-accent: #14161C;
+    --c-danger: #FF6B5E;
+    --c-counsel-bg: #04332F;
+    --c-counsel-fg: #E9F4F1;
+    --c-scrim: rgba(0, 0, 0, 0.45);
+    --c-poster-butter: #3A3217;
+    --c-poster-rose: #3A2129;
+    --c-poster-lilac: #2A2540;
+    --c-poster-peach: #3B281D;
+    --c-poster-sky: #182A3B;
+    --c-poster-mint: #17332A;
+    /* 오행 5색·기둥 틴트 (만세력 분석) */
+    --c-oh-mok: #2FD28F;
+    --c-oh-hwa: #FF8A3D;
+    --c-oh-to: #E5B820;
+    --c-oh-geum: #B6BCC8;
+    --c-oh-su: #5BB0F2;
+    --c-oh-mok-tint: #12261D;
+    --c-oh-hwa-tint: #2B1B10;
+    --c-oh-to-tint: #2A2410;
+    --c-oh-geum-tint: #222428;
+    --c-oh-su-tint: #12212E;
+  }
 }
 
 /* ── 만세력 분석 토큰 (Task 13) ─────────────────────────────────────────────
@@ -107,18 +158,6 @@
   --c-oh-su-tint: #DCEFFB;
 }
 
-:root[data-theme="dark"] {
-  --c-oh-mok: #2FD28F;
-  --c-oh-hwa: #FF8A3D;
-  --c-oh-to: #E5B820;
-  --c-oh-geum: #B6BCC8;
-  --c-oh-su: #5BB0F2;
-  --c-oh-mok-tint: #12261D;
-  --c-oh-hwa-tint: #2B1B10;
-  --c-oh-to-tint: #2A2410;
-  --c-oh-geum-tint: #222428;
-  --c-oh-su-tint: #12212E;
-}
 
 :root {
   --c-lucky-bg: var(--c-oh-mok-tint);
@@ -226,8 +265,8 @@
 }
 
 body {
-  background: var(--bg-base);
-  color: var(--ink);
+  background: var(--c-bg);
+  color: var(--c-text);
 }
 
 /* 접근성 — 움직임 줄이기.
