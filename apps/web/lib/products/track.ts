@@ -19,9 +19,6 @@ export function buildViewBody(
 
 /** 상품 열람 기록 (fire-and-forget) — 실패해도 호출자에게 영향 없음. */
 export function trackProductView(productId: ProductId, profile: ProfileResponse | null): void {
-  try {
-    recordProductView(api, buildViewBody(productId, profile, new Date())).catch(() => {})
-  } catch {
-    // 기록 실패는 무시
-  }
+  // 기록 실패는 무시 — recordProductView는 async라 동기 throw 없이 reject로만 실패한다.
+  void recordProductView(api, buildViewBody(productId, profile, new Date())).catch(() => {})
 }
