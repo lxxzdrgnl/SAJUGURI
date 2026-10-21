@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { logout } from '@sajuguri/api-client'
 import { api } from '@/lib/api'
+import { buttonClass } from '@/components/ui/Button'
 
 /** 로그아웃 — 서버 쿠키 폐기 후 새로고침으로 서버 컴포넌트 재평가. */
 export default function LogoutButton({ onDone }: { onDone?: () => void } = {}) {
@@ -25,7 +26,7 @@ export default function LogoutButton({ onDone }: { onDone?: () => void } = {}) {
       type="button"
       onClick={onClick}
       disabled={busy}
-      className="w-full rounded-lg border-2 border-ink bg-surface py-3 text-sm font-extrabold shadow-brutal disabled:opacity-60"
+      className={`${buttonClass('secondary', 'md')} w-full disabled:opacity-60`}
     >
       {t('logout')}
     </button>

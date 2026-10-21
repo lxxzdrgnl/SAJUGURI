@@ -16,17 +16,17 @@ import type { Translate } from './registry'
 
 function TypeBadge({ label, tone }: { label: string; tone: string }) {
   return (
-    <span className={`inline-block shrink-0 self-start rounded-full border-[1.5px] border-ink px-2 py-0.5 text-[10px] font-extrabold ${tone}`}>
+    <span className={`inline-block shrink-0 self-start rounded-full px-2 py-0.5 text-[10px] font-extrabold text-c-text ${tone}`}>
       {label}
     </span>
   )
 }
 
-// ── 카드 셸 (브루탈 잉크 테두리, 회색 금지) ──────────────────────────────────────
+// ── 카드 셸 (1px 라인, 그림자 없음) ──────────────────────────────────────
 
 function CardShell({ badge, children }: { badge: ReactNode; children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-1.5 rounded-2xl border-2 border-ink bg-surface px-4 py-3 shadow-[3px_3px_0_#1A1A1A] transition-opacity hover:opacity-80">
+    <div className="flex flex-col gap-1.5 rounded-card border border-c-line bg-c-surface px-4 py-3 transition-opacity hover:opacity-80">
       {badge}
       {children}
     </div>
@@ -36,9 +36,9 @@ function CardShell({ badge, children }: { badge: ReactNode; children: ReactNode 
 export function SajuCard({ r, t }: { r: ReportSummary; t: Translate }) {
   return (
     <Link href={`/report/${r.id}`} className="block min-w-0">
-      <CardShell badge={<TypeBadge label={t('tabReports')} tone="bg-orange text-white" />}>
-        <p className="truncate text-[14px] font-extrabold leading-snug text-ink">{r.first_headline}</p>
-        <p className="text-[12px] text-text-sub">
+      <CardShell badge={<TypeBadge label={t('tabReports')} tone="bg-c-poster-peach" />}>
+        <p className="truncate text-[14px] font-extrabold leading-snug text-c-text">{r.first_headline}</p>
+        <p className="text-[12px] text-c-text-sub">
           {new Date(r.created_at).toLocaleDateString('ko-KR')}
           {r.request_topics && <span className="ml-1">· {r.request_topics}</span>}
         </p>
@@ -52,9 +52,9 @@ export function FortuneCard({ f, t }: { f: DailyRecordSummary; t: Translate }) {
   const title = f.profile_name ? `${f.profile_name} ${t('fortuneCardTitle')}` : t('fortuneCardTitle')
   return (
     <Link href={`/fortune?record=${f.id}`} className="block min-w-0">
-      <CardShell badge={<TypeBadge label={t('tabFortune')} tone="bg-yellow text-ink" />}>
-        <p className="truncate text-[14px] font-extrabold leading-snug text-ink">{title}</p>
-        <p className="text-[12px] text-text-sub">
+      <CardShell badge={<TypeBadge label={t('tabFortune')} tone="bg-c-poster-butter" />}>
+        <p className="truncate text-[14px] font-extrabold leading-snug text-c-text">{title}</p>
+        <p className="text-[12px] text-c-text-sub">
           {new Date(f.date).toLocaleDateString('ko-KR')}
           {f.keyword && <span className="ml-1">· {f.keyword}</span>}
         </p>
@@ -87,10 +87,10 @@ export function ConsultationCard({ c, t }: { c: ConsultationHistoryItem; t: Tran
 
   return (
     <button type="button" onClick={open} disabled={busy} className="block w-full min-w-0 text-left disabled:opacity-60">
-      <CardShell badge={<TypeBadge label={t('tabQuestion')} tone="bg-teal text-white" />}>
-        <p className="truncate text-[14px] font-extrabold leading-snug text-ink">{c.headline}</p>
-        <p className="truncate text-[12px] text-text-sub">{c.question}</p>
-        <p className="text-[12px] text-text-sub">{new Date(c.created_at).toLocaleDateString('ko-KR')}</p>
+      <CardShell badge={<TypeBadge label={t('tabQuestion')} tone="bg-c-poster-mint" />}>
+        <p className="truncate text-[14px] font-extrabold leading-snug text-c-text">{c.headline}</p>
+        <p className="truncate text-[12px] text-c-text-sub">{c.question}</p>
+        <p className="text-[12px] text-c-text-sub">{new Date(c.created_at).toLocaleDateString('ko-KR')}</p>
       </CardShell>
     </button>
   )
@@ -101,12 +101,12 @@ export function CompatibilityCard({ r, t }: { r: CompatibilityReportSummary; t: 
   const nameB = r.person_b_name || t('compatAnon')
   return (
     <Link href={`/compatibility/${r.id}`} className="block min-w-0">
-      <CardShell badge={<TypeBadge label={t('tabCompatibility')} tone="bg-sky text-white" />}>
-        <p className="truncate text-[14px] font-extrabold leading-snug text-ink">
-          {nameA} <span className="text-orange">♥</span> {nameB}
-          <span className="ml-1 text-text-sub">· {r.total_score}</span>
+      <CardShell badge={<TypeBadge label={t('tabCompatibility')} tone="bg-c-poster-sky" />}>
+        <p className="truncate text-[14px] font-extrabold leading-snug text-c-text">
+          {nameA} <span className="text-c-text-sub">&amp;</span> {nameB}
+          <span className="ml-1 text-c-text-sub">· {r.total_score}</span>
         </p>
-        <p className="text-[12px] text-text-sub">
+        <p className="text-[12px] text-c-text-sub">
           {new Date(r.created_at).toLocaleDateString('ko-KR')}
           {r.request_topics && <span className="ml-1">· {r.request_topics}</span>}
         </p>
