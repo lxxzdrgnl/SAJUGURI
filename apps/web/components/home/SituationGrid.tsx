@@ -1,11 +1,10 @@
 import { useTranslations } from 'next-intl'
 import { SITUATIONS, getProduct } from '@sajuguri/core'
-import type { ProfileResponse } from '@sajuguri/api-client'
 import ProductLink from './ProductLink'
 import { PRESS } from './cardStyles'
 
 /** "지금 내 상황은?" 2×2 — 각 칸은 해당 테마 상품으로 이어진다. */
-export default function SituationGrid({ profile = null }: { profile?: ProfileResponse | null }) {
+export default function SituationGrid() {
   const t = useTranslations('home.situation')
 
   return (
@@ -16,7 +15,7 @@ export default function SituationGrid({ profile = null }: { profile?: ProfileRes
           const product = getProduct(productId)
           return (
             <li key={key}>
-              <ProductLink product={product} profile={profile} className={`h-full ${PRESS}`}>
+              <ProductLink product={product} className={`h-full ${PRESS}`}>
                 <span className="flex h-full min-h-[112px] flex-col rounded-card border border-c-line bg-c-surface p-4">
                   <span className="block break-keep text-[15px] font-extrabold leading-snug text-c-text">
                     {t(`${key}.title`)}

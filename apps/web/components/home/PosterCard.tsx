@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl'
 import type { Product } from '@sajuguri/core'
-import { posterTone } from './cardStyles'
+import { posterTone } from '@/lib/products/posterTone'
 
 /** 3:4 포스터 카드 — 제목 왼쪽 위, 스티커 일러스트 아래 가운데. (span만 사용: 버튼 안에도 들어간다) */
 export default function PosterCard({ product }: { product: Product }) {

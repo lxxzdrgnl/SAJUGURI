@@ -8,7 +8,7 @@ import { Link } from '@/i18n/navigation'
 import { buttonClass } from '@/components/ui/Button'
 import { useSheetTransition } from '@/lib/hooks/useSheetTransition'
 import { trackProductView } from '@/lib/products/track'
-import { posterTone } from './cardStyles'
+import { posterTone } from '@/lib/products/posterTone'
 
 /** "곧 나와요" 안내 바텀시트 — 지금은 같은 고민을 구리구리 상담으로 넘긴다. */
 export default function ComingSoonSheet({

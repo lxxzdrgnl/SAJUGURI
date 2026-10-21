@@ -1,12 +1,10 @@
 import { getLocale, getTranslations } from 'next-intl/server'
 import {
-  CATEGORY_ORDER,
   STEM_HANJA,
   curatedRanking,
   curatedShelf,
   getProduct,
   productsInCategory,
-  type ProductCategory,
   type ProductId,
 } from '@sajuguri/core'
 import { listProfiles, type ProfileResponse } from '@sajuguri/api-client'
@@ -21,22 +19,20 @@ import ProductShelf from '@/components/home/ProductShelf'
 import RankList from '@/components/home/RankList'
 import ProductGrid from '@/components/home/ProductGrid'
 import ProductLink from '@/components/home/ProductLink'
-import { posterTone } from '@/components/home/cardStyles'
+import { posterTone } from '@/lib/products/posterTone'
+import { isCategory } from '@/lib/products/category'
+import { HomeViewerProvider } from '@/components/home/HomeViewer'
 
 /** 히어로 2~3번째 장 — 오늘의 운세 뒤에 붙는 추천 상품 */
 const HERO_PROMOS: ProductId[] = ['saju_report', 'compatibility']
 
-function isCategory(v: unknown): v is ProductCategory {
-  return typeof v === 'string' && (CATEGORY_ORDER as readonly string[]).includes(v)
-}
-
 /** 히어로 추천 슬라이드 — 상품 제목·설명·스티커 + 버튼 모양 */
-async function PromoSlide({ id, profile }: { id: ProductId; profile: ProfileResponse | null }) {
+async function PromoSlide({ id }: { id: ProductId }) {
   const product = getProduct(id)
   const tp = await getTranslations('products')
   const t = await getTranslations('home.hero')
   return (
-    <ProductLink product={product} profile={profile} className="h-full">
+    <ProductLink product={product} className="h-full">
       <span className={`flex h-full min-h-[168px] items-center gap-4 rounded-card p-5 text-c-text ${posterTone(product)}`}>
         <span className="min-w-0 flex-1">
           <span className="block break-keep font-display text-xl font-normal leading-snug">{tp(`${id}.title`)}</span>
@@ -76,12 +72,14 @@ export default async function Home({
 
   if (isCategory(cat)) {
     return (
-      <main className={shell}>
-        <CategoryTabs active={cat} />
-        <div className="pt-5">
-          <ProductGrid products={productsInCategory(cat)} profile={repProfile} />
-        </div>
-      </main>
+      <HomeViewerProvider profiles={profiles} isLoggedIn={!!user}>
+        <main className={shell}>
+          <CategoryTabs active={cat} />
+          <div className="pt-5">
+            <ProductGrid products={productsInCategory(cat)} />
+          </div>
+        </main>
+      </HomeViewerProvider>
     )
   }
 
@@ -91,21 +89,23 @@ export default async function Home({
 
   const slides = [
     <FortuneHeroCard key="fortune" profiles={profiles} isLoggedIn={!!user} />,
-    ...HERO_PROMOS.map((id) => <PromoSlide key={id} id={id} profile={repProfile} />),
+    ...HERO_PROMOS.map((id) => <PromoSlide key={id} id={id} />),
   ]
 
   return (
-    <main className={shell}>
-      <CategoryTabs active="all" />
-      <div className="flex flex-col gap-8 pt-5">
-        <div className="flex flex-col gap-3">
-          <HeroCarousel slides={slides} />
-          <CounselCard size="row" profile={repProfile} />
+    <HomeViewerProvider profiles={profiles} isLoggedIn={!!user}>
+      <main className={shell}>
+        <CategoryTabs active="all" />
+        <div className="flex flex-col gap-8 pt-5">
+          <div className="flex flex-col gap-3">
+            <HeroCarousel slides={slides} />
+            <CounselCard size="row" profile={repProfile} />
+          </div>
+          <SituationGrid />
+          <ProductShelf shelf={curatedShelf(dayStem)} stem={stemLabel} />
+          <RankList ids={curatedRanking()} />
         </div>
-        <SituationGrid profile={repProfile} />
-        <ProductShelf shelf={curatedShelf(dayStem)} stem={stemLabel} profile={repProfile} />
-        <RankList ids={curatedRanking()} profile={repProfile} />
-      </div>
-    </main>
+      </main>
+    </HomeViewerProvider>
   )
 }

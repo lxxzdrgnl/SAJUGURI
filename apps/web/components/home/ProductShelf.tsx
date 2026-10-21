@@ -1,6 +1,5 @@
 import { useTranslations } from 'next-intl'
 import { getProduct, type Shelf } from '@sajuguri/core'
-import type { ProfileResponse } from '@sajuguri/api-client'
 import PosterCard from './PosterCard'
 import ProductLink from './ProductLink'
 import { PRESS } from './cardStyles'
@@ -12,12 +11,10 @@ import { PRESS } from './cardStyles'
 export default function ProductShelf({
   shelf,
   stem,
-  profile = null,
 }: {
   shelf: Shelf
   /** 제목에 넣을 일간 표기 (ko: 한글, en: 한자) */
   stem: string | null
-  profile?: ProfileResponse | null
 }) {
   const t = useTranslations('home.shelf')
   const title = shelf.kind === 'ilgan' && stem ? t('ilgan', { stem }) : t('popular')
@@ -30,7 +27,7 @@ export default function ProductShelf({
           const product = getProduct(id)
           return (
             <li key={id} className="w-[44%] max-w-[200px] shrink-0 snap-start">
-              <ProductLink product={product} profile={profile} className={PRESS}>
+              <ProductLink product={product} className={PRESS}>
                 <PosterCard product={product} />
               </ProductLink>
             </li>

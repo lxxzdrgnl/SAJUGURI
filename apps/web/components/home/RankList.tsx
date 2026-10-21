@@ -1,16 +1,13 @@
 import { useTranslations } from 'next-intl'
 import { getProduct, type ProductId } from '@sajuguri/core'
-import type { ProfileResponse } from '@sajuguri/api-client'
 import ProductLink from './ProductLink'
-import { posterTone } from './cardStyles'
+import { posterTone } from '@/lib/products/posterTone'
 
 /** 랭킹 리스트 — 번호 · 58px 썸네일 · 제목 · 설명. 큐레이션 동안 제목은 "구리구리 추천". */
 export default function RankList({
   ids,
-  profile = null,
 }: {
   ids: ProductId[]
-  profile?: ProfileResponse | null
 }) {
   const t = useTranslations('home.ranking')
   const tp = useTranslations('products')
@@ -23,7 +20,7 @@ export default function RankList({
           const product = getProduct(id)
           return (
             <li key={id}>
-              <ProductLink product={product} profile={profile} className="transition-opacity active:opacity-60">
+              <ProductLink product={product} className="transition-opacity active:opacity-60">
                 <span className="flex items-center gap-3 py-3">
                   <span className="w-5 shrink-0 text-center font-display text-lg font-normal text-c-text">
                     {i + 1}
