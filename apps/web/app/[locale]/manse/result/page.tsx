@@ -10,8 +10,8 @@ import RecentEnricher from '@/components/manse/RecentEnricher'
 import { manseNavQuery } from '@/lib/manse/query'
 import { buttonClass } from '@/components/ui/Button'
 
-// 새 배경(bg-c-bg)을 레이아웃 패딩 밖까지 칠한다 — 홈과 같은 셸
-const SHELL = '-mx-4 -mb-8 -mt-2 min-h-[calc(100dvh-3.5rem)] bg-c-bg px-4 pb-10 pt-2 text-c-text'
+// 레이아웃 패딩을 상쇄하는 셸 — 배경은 body(--c-bg)가 칠한다
+const SHELL = '-mx-4 -mb-8 -mt-2 min-h-[calc(100dvh-3.5rem)] px-4 pb-10 pt-2 text-c-text'
 
 export default async function ManseResult({
   searchParams,

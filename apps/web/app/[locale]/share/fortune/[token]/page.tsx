@@ -90,7 +90,7 @@ export default async function SharedFortunePage({
   if (!story) {
     const t = await getTranslations('fortune.shared')
     return (
-      <main className="-mx-4 -mt-2 -mb-8 min-h-[calc(100vh-56px)] bg-c-bg px-4 pb-8 pt-16 text-center">
+      <main className="-mx-4 -mt-2 -mb-8 min-h-[calc(100vh-56px)] px-4 pb-8 pt-16 text-center">
         <p className="text-[15px] font-extrabold text-c-text-sub">{t('notFoundTitle')}</p>
         <p className="mt-2 text-[13px] text-c-text-sub">{t('notFoundBody')}</p>
       </main>

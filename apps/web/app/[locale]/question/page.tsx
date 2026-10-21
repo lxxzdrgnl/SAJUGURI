@@ -113,7 +113,7 @@ export default function QuestionPage() {
     )
 
     return (
-      <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100vh-56px)] flex-col gap-5 bg-c-bg px-4 pb-8 pt-2">
+      <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100vh-56px)] flex-col gap-5 px-4 pb-8 pt-2">
         <h1 className="font-display text-xl font-normal text-c-text">{t('title')}</h1>
 
         <Card tone="plain" className="p-5">
@@ -158,7 +158,7 @@ export default function QuestionPage() {
   }
 
   return (
-    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100vh-56px)] flex-col gap-5 bg-c-bg px-4 pb-8 pt-2">
+    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100vh-56px)] flex-col gap-5 px-4 pb-8 pt-2">
       <div>
         <h1 className="font-display text-2xl font-normal leading-tight text-c-text">{t('title')}</h1>
       </div>

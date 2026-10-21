@@ -6,7 +6,7 @@ import { buttonClass } from '@/components/ui/Button'
 export default async function NotFound() {
   const t = await getTranslations('notFound')
   return (
-    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100vh-56px)] flex-col items-center justify-center gap-5 bg-c-bg px-4 text-center">
+    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100vh-56px)] flex-col items-center justify-center gap-5 px-4 text-center">
       <div className="flex h-24 w-24 items-center justify-center rounded-card bg-c-surface-soft">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/mascot.svg" alt="" width={64} height={64} />

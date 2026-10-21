@@ -23,7 +23,7 @@ export default async function ReportDetailPage({
 
   if (!report) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 min-h-[calc(100dvh-3.5rem)] bg-c-bg px-4 pt-16 text-center">
+      <main className="-mx-4 -mt-2 -mb-8 min-h-[calc(100dvh-3.5rem)] px-4 pt-16 text-center">
         <p className="text-[15px] font-extrabold text-c-text-sub">{t('errorFallback')}</p>
       </main>
     )
@@ -39,7 +39,7 @@ export default async function ReportDetailPage({
     .join(' · ')
 
   return (
-    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] flex-col gap-4 bg-c-bg px-4 pb-8 pt-4">
+    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] flex-col gap-4 px-4 pb-8 pt-4">
       {/* 원국 한 줄 요약 — 마스코트 아바타 포함 */}
       <Card tone="soft" className="flex items-center gap-3 p-3">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-c-surface">

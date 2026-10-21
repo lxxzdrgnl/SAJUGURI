@@ -98,7 +98,7 @@ export default function CompatibilityNewPage() {
   // 로딩 중 화면
   if (loading) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 bg-c-bg px-4 pb-8 pt-4 shadow-[0_0_0_100vmax_var(--c-bg)] [clip-path:inset(0_-100vmax_-100vmax)] flex min-h-[70vh] flex-col items-center justify-center gap-6 text-center">
+      <main className="-mx-4 -mt-2 -mb-8 px-4 pb-8 pt-4 flex min-h-[70vh] flex-col items-center justify-center gap-6 text-center">
         <Image src="/mascot.svg" alt="" width={72} height={72} className="animate-bounce" priority />
         <p className="text-[15px] font-extrabold text-c-text">{loadingPhrases[phraseIdx]}</p>
         <p className="text-[13px] text-c-text-sub">{t('new.loadingNote')}</p>
@@ -109,7 +109,7 @@ export default function CompatibilityNewPage() {
   // 로그인 확인 중
   if (isLoggedIn === null) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 bg-c-bg px-4 pb-8 pt-4 shadow-[0_0_0_100vmax_var(--c-bg)] [clip-path:inset(0_-100vmax_-100vmax)] flex min-h-[60vh] items-center justify-center">
+      <main className="-mx-4 -mt-2 -mb-8 px-4 pb-8 pt-4 flex min-h-[60vh] items-center justify-center">
         <p className="text-sm text-c-text-sub">{t('new.checking')}</p>
       </main>
     )
@@ -118,7 +118,7 @@ export default function CompatibilityNewPage() {
   // 비로그인
   if (!isLoggedIn) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 bg-c-bg px-4 pb-8 pt-4 shadow-[0_0_0_100vmax_var(--c-bg)] [clip-path:inset(0_-100vmax_-100vmax)] flex flex-col gap-5">
+      <main className="-mx-4 -mt-2 -mb-8 px-4 pb-8 pt-4 flex flex-col gap-5">
         <h1 className="text-lg font-black text-c-text">{t('new.title')}</h1>
         <Card className="flex flex-col items-center gap-4 p-6 text-center">
           <Image src="/mascot.svg" alt="" width={56} height={56} />
@@ -137,7 +137,7 @@ export default function CompatibilityNewPage() {
 
   // 로그인 상태 — 슬롯 선택 + 요청 주제
   return (
-    <main className="-mx-4 -mt-2 -mb-8 bg-c-bg px-4 pb-8 pt-4 shadow-[0_0_0_100vmax_var(--c-bg)] [clip-path:inset(0_-100vmax_-100vmax)] flex flex-col gap-5">
+    <main className="-mx-4 -mt-2 -mb-8 px-4 pb-8 pt-4 flex flex-col gap-5">
       <div>
         <h1 className="text-[22px] font-black leading-tight text-c-text">{t('new.title')}</h1>
       </div>

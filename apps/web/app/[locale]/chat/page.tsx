@@ -28,7 +28,7 @@ export default async function ChatPage({ searchParams }: Props) {
 
   if (!user) {
     return (
-      <main className="-mx-4 -mb-8 -mt-2 min-h-[calc(100dvh-3.5rem)] bg-c-bg px-4 pb-10 pt-4">
+      <main className="-mx-4 -mb-8 -mt-2 min-h-[calc(100dvh-3.5rem)] px-4 pb-10 pt-4">
         <div className="mb-4">
           <PageHeading title={t('title')} accent="teal" />
         </div>
@@ -60,7 +60,7 @@ export default async function ChatPage({ searchParams }: Props) {
   ])
 
   return (
-    <main className="-mx-4 -mb-8 -mt-2 min-h-[calc(100dvh-3.5rem)] bg-c-bg px-4 pb-10 pt-4">
+    <main className="-mx-4 -mb-8 -mt-2 min-h-[calc(100dvh-3.5rem)] px-4 pb-10 pt-4">
       <ChatListClient sessions={sessions} profiles={profiles} prefill={prefill} />
     </main>
   )

@@ -65,7 +65,7 @@ export default async function SharedConsultationPage({
 
   if (!detail) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 min-h-[calc(100vh-56px)] bg-c-bg px-4 pb-8 pt-16 text-center">
+      <main className="-mx-4 -mt-2 -mb-8 min-h-[calc(100vh-56px)] px-4 pb-8 pt-16 text-center">
         <p className="text-[15px] font-extrabold text-c-text">{t('notFoundTitle')}</p>
         <p className="mt-2 text-[13px] text-c-text-sub">{t('notFoundBody')}</p>
       </main>
@@ -75,7 +75,7 @@ export default async function SharedConsultationPage({
   const tq = await getTranslations('question')
 
   return (
-    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100vh-56px)] flex-col gap-5 bg-c-bg px-4 pb-8 pt-2">
+    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100vh-56px)] flex-col gap-5 px-4 pb-8 pt-2">
       <h1 className="font-display text-xl font-normal text-c-text">{tq('title')}</h1>
 
       {/* 질문 */}
