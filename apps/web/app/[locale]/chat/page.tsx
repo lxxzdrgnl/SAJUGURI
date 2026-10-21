@@ -7,10 +7,9 @@ import { buttonClass } from '@/components/ui/Button'
 import ChatListClient from '@/components/chat/ChatListClient'
 import PageHeading from '@/components/ui/PageHeading'
 import { firstParam, resolvePrefill } from '@/lib/chat/prefill'
+import GoogleLoginLink from '@/components/auth/GoogleLoginLink'
 
 // 백엔드 직결 URL — 서버 컴포넌트는 next.config rewrites를 안 탄다
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
-const GOOGLE_LOGIN_URL = `${API_URL}/api/auth/google?client=web`
 
 interface Props {
   searchParams: Promise<{ topic?: string | string[]; q?: string | string[] }>
@@ -37,12 +36,12 @@ export default async function ChatPage({ searchParams }: Props) {
           <img src="/mascot.svg" alt="" width={72} height={72} />
           <p className="text-[15px] font-extrabold">{t('loginRequired')}</p>
           <p className="text-sm text-c-text-sub">{t('loginDesc')}</p>
-          <a
-            href={GOOGLE_LOGIN_URL}
+          <GoogleLoginLink
+            
             className={`${buttonClass('primary', 'md')} w-full`}
           >
             {t('loginWithGoogle')}
-          </a>
+          </GoogleLoginLink>
         </Card>
       </main>
     )

@@ -9,10 +9,9 @@ import MyRecordsClient from '@/components/my/MyRecordsClient'
 import { listProfiles } from '@sajuguri/api-client'
 import type { ProfileResponse } from '@sajuguri/api-client'
 import { fetchAllRecords } from '@/lib/records/registry'
+import GoogleLoginLink from '@/components/auth/GoogleLoginLink'
 
 // 브라우저가 직접 여는 풀 URL — next.config rewrites를 타지 않도록 백엔드 절대 주소 사용.
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
-const GOOGLE_LOGIN_URL = `${API_URL}/api/auth/google?client=web`
 
 /** 날짜 문자열(YYYY-MM-DD) → 한국식 날짜 표기 */
 function formatDate(date: string): string {
@@ -34,12 +33,12 @@ export default async function MyPage() {
         <Card className="flex flex-col items-center gap-4 py-8 text-center">
           <MascotTinted width={72} height={72} />
           <p className="text-[15px] font-extrabold text-c-text">{t('loginRequired')}</p>
-          <a
-            href={GOOGLE_LOGIN_URL}
+          <GoogleLoginLink
+            
             className={`${buttonClass('primary', 'md')} w-full`}
           >
             {t('loginWithGoogle')}
-          </a>
+          </GoogleLoginLink>
         </Card>
       </main>
     )

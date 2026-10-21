@@ -5,9 +5,7 @@ import { buttonClass } from '@/components/ui/Button'
 import MascotTinted from '@/components/ui/MascotTinted'
 import HistoryFeedClient from '@/components/my/HistoryFeedClient'
 import { fetchAllRecords } from '@/lib/records/registry'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
-const GOOGLE_LOGIN_URL = `${API_URL}/api/auth/google?client=web`
+import GoogleLoginLink from '@/components/auth/GoogleLoginLink'
 
 export default async function HistoryPage({
   searchParams,
@@ -25,12 +23,12 @@ export default async function HistoryPage({
         <Card className="flex flex-col items-center gap-4 py-8 text-center">
           <MascotTinted width={72} height={72} />
           <p className="text-[15px] font-extrabold">{t('history.loginRequired')}</p>
-          <a
-            href={GOOGLE_LOGIN_URL}
+          <GoogleLoginLink
+            
             className={`${buttonClass('primary', 'md')} w-full`}
           >
             {t('history.loginWithGoogle')}
-          </a>
+          </GoogleLoginLink>
         </Card>
       </main>
     )

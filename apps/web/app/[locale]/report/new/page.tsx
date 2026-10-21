@@ -11,6 +11,7 @@ import type { SajuCalcRequest } from '@sajuguri/api-client'
 import PageHeading from '@/components/ui/PageHeading'
 import Card from '@/components/ui/Card'
 import Button, { buttonClass } from '@/components/ui/Button'
+import GoogleLoginLink from '@/components/auth/GoogleLoginLink'
 
 const LOADING_PHRASES = [
   '사주를 읽고 있어요...',
@@ -35,9 +36,6 @@ export default function ReportNewPage() {
   const [error, setError] = useState('')
   const [phraseIdx, setPhraseIdx] = useState(0)
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
-
-  const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
-  const GOOGLE_LOGIN_URL = `${API_URL}/api/auth/google?client=web`
 
   // 로그인 상태 확인
   useEffect(() => {
@@ -132,12 +130,12 @@ export default function ReportNewPage() {
           <Image src="/mascot.svg" alt="" width={56} height={56} />
           <p className="text-[15px] font-extrabold text-c-text">{t('loginRequired')}</p>
           <p className="text-[13px] text-c-text-sub">{t('loginDesc')}</p>
-          <a
-            href={GOOGLE_LOGIN_URL}
+          <GoogleLoginLink
+            
             className={`${buttonClass('primary', 'md')} w-full`}
           >
             {t('loginWithGoogle')}
-          </a>
+          </GoogleLoginLink>
         </Card>
       </main>
     )

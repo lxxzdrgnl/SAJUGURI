@@ -52,8 +52,6 @@ export async function generateMetadata({
   }
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
-const GOOGLE_LOGIN_URL = `${API_URL}/api/auth/google?client=web`
 
 export default async function SharedMansePage({
   params,
@@ -83,7 +81,6 @@ export default async function SharedMansePage({
         <SaveToMyButton
           birthInput={shared.birth_input}
           isLoggedIn={!!user}
-          googleLoginUrl={GOOGLE_LOGIN_URL}
         />
       )}
 

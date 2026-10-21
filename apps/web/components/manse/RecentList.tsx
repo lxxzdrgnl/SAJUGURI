@@ -12,9 +12,7 @@ import { buttonClass } from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import MascotTinted from '@/components/ui/MascotTinted'
 import { manseNavQuery } from '@/lib/manse/query'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
-const GOOGLE_LOGIN_URL = `${API_URL}/api/auth/google?client=web`
+import GoogleLoginLink from '@/components/auth/GoogleLoginLink'
 
 function TrashIcon({ className }: { className?: string }) {
   return (
@@ -252,12 +250,12 @@ export default function RecentList({
           >
             <p className="mb-1 text-[16px] font-extrabold text-c-text">{t('recentLoginTitle')}</p>
             <p className="mb-4 text-[13px] text-c-text-sub">{t('loginHint')}</p>
-            <a
-              href={GOOGLE_LOGIN_URL}
+            <GoogleLoginLink
+              
               className={`${buttonClass('primary', 'md')} w-full`}
             >
               {t('recentLoginCta')}
-            </a>
+            </GoogleLoginLink>
             <button
               type="button"
               onClick={() => setLoginPrompt(false)}

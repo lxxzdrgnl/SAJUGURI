@@ -5,15 +5,15 @@ import { useTranslations } from 'next-intl'
 import { ApiClient, createProfile } from '@sajuguri/api-client'
 import type { SajuCalcRequest } from '@sajuguri/api-client'
 import Card from '@/components/ui/Card'
+import GoogleLoginLink from '@/components/auth/GoogleLoginLink'
 import Button, { buttonClass } from '@/components/ui/Button'
 
 interface Props {
   birthInput: SajuCalcRequest
   isLoggedIn: boolean
-  googleLoginUrl: string
 }
 
-export default function SaveToMyButton({ birthInput, isLoggedIn, googleLoginUrl }: Props) {
+export default function SaveToMyButton({ birthInput, isLoggedIn }: Props) {
   const t = useTranslations('manse.result.shared')
   const [state, setState] = useState<'idle' | 'busy' | 'done' | 'error'>('idle')
 
@@ -42,9 +42,9 @@ export default function SaveToMyButton({ birthInput, isLoggedIn, googleLoginUrl 
     return (
       <Card className="mt-2 flex flex-col gap-3 p-4">
         <p className="text-[13px] text-c-text-sub">{t('saveToMyLoginHint')}</p>
-        <a href={googleLoginUrl} className={`${buttonClass('secondary', 'md')} w-full`}>
+        <GoogleLoginLink className={`${buttonClass('secondary', 'md')} w-full`}>
           {t('saveToMyLoginLink')}
-        </a>
+        </GoogleLoginLink>
       </Card>
     )
   }

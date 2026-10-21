@@ -7,8 +7,6 @@ import { currentUser, serverAuthApi } from '@/lib/serverAuth'
 import { listProfiles, type ProfileResponse } from '@sajuguri/api-client'
 
 // 브라우저가 직접 여는 풀 URL — next.config rewrites를 타지 않도록 백엔드 절대 주소 사용.
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
-const GOOGLE_LOGIN_URL = `${API_URL}/api/auth/google?client=web`
 
 export default async function ManseIndex() {
   const t = await getTranslations('manse.index')

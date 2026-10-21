@@ -8,9 +8,7 @@ import LanguageToggleInline from '@/components/my/LanguageToggleInline'
 import LogoutButton from '@/components/my/LogoutButton'
 import ThemeToggle from '@/components/nav/ThemeToggle'
 import { useSheetTransition } from '@/lib/hooks/useSheetTransition'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
-const GOOGLE_LOGIN_URL = `${API_URL}/api/auth/google?client=web`
+import GoogleLoginLink from '@/components/auth/GoogleLoginLink'
 
 const FOCUSABLE = 'a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])'
 
@@ -117,7 +115,7 @@ export default function Drawer({
         {user ? (
           <Link href="/my" className={itemClass}>{t('profile')}</Link>
         ) : (
-          <a href={GOOGLE_LOGIN_URL} className={itemClass}>{t('login')}</a>
+          <GoogleLoginLink  className={itemClass}>{t('login')}</GoogleLoginLink>
         )}
         <Link href="/manse" className={itemClass}>{t('manse')}</Link>
         <Link href="/my/history" className={itemClass}>{t('archive')}</Link>

@@ -11,6 +11,7 @@ import { useGenerationJob } from '@/lib/hooks/useGenerationJob'
 import Card from '@/components/ui/Card'
 import { buttonClass } from '@/components/ui/Button'
 import PersonSlotPicker, { type PersonPick } from '@/components/compatibility/PersonSlotPicker'
+import GoogleLoginLink from '@/components/auth/GoogleLoginLink'
 
 export default function CompatibilityNewPage() {
   const t = useTranslations('compatibility')
@@ -26,9 +27,6 @@ export default function CompatibilityNewPage() {
   const { loading, error: jobError, start } = useGenerationJob((_type, resultId) => {
     router.replace(`/compatibility/${resultId}`)
   })
-
-  const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
-  const GOOGLE_LOGIN_URL = `${API_URL}/api/auth/google?client=web`
 
   const loadingPhrases = [
     t('new.loading.0'),
@@ -124,12 +122,12 @@ export default function CompatibilityNewPage() {
           <Image src="/mascot.svg" alt="" width={56} height={56} />
           <p className="text-[15px] font-extrabold">{t('new.loginRequired')}</p>
           <p className="text-[13px] text-c-text-sub">{t('new.loginDesc')}</p>
-          <a
-            href={GOOGLE_LOGIN_URL}
+          <GoogleLoginLink
+            
             className={`${buttonClass('primary', 'md')} w-full`}
           >
             {t('new.loginWithGoogle')}
-          </a>
+          </GoogleLoginLink>
         </Card>
       </main>
     )
