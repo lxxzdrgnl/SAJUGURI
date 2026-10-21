@@ -60,6 +60,7 @@
   --c-danger: #D92D20;
   --c-counsel-bg: #04332F;
   --c-counsel-fg: #E9F4F1;
+  --c-scrim: rgba(0, 0, 0, 0.45);
 }
 
 :root[data-theme="dark"] {
@@ -74,6 +75,7 @@
   --c-danger: #FF6B5E;
   --c-counsel-bg: #04332F;
   --c-counsel-fg: #E9F4F1;
+  --c-scrim: rgba(0, 0, 0, 0.45);
 }
 
 @theme inline {
@@ -88,6 +90,7 @@
   --color-c-danger: var(--c-danger);
   --color-c-counsel-bg: var(--c-counsel-bg);
   --color-c-counsel-fg: var(--c-counsel-fg);
+  --color-c-scrim: var(--c-scrim);
   --font-display: var(--font-sans);
   --radius-card: 20px;
   --radius-pill: 999px;
