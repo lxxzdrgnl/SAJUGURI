@@ -148,7 +148,7 @@
     },
     "shelf": {
       "ilgan": "Picks for {stem} Day Masters",
-      "popular": "Guriguri's picks",
+      "popular": "Start here",
       "more": "See more"
     },
     "ranking": {
@@ -789,7 +789,7 @@
     },
     "saju_report": {
       "title": "AI Saju Report",
-      "desc": "A deep 10-tab reading, from your innate nature to your Luck Cycles"
+      "desc": "A deep 10-tab reading, from your innate nature to your Daeun (luck pillars)"
     },
     "compatibility": {
       "title": "Compatibility Report",
