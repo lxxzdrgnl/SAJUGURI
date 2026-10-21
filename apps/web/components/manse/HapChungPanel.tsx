@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { SajuCalcResponse, Pillar } from '@sajuguri/api-client'
-import { ohaengColor } from '@/lib/ohaeng'
+import { ohaengVar, ohaengTintVar } from '@/lib/ohaeng'
 import { ALL_TABS, buildEntries, hasData, activePillars, PLABEL, type TabKey, type PillarKey } from '@/lib/manse/hapChung'
 
 const PALACE_WEIGHTS: Record<PillarKey, { stem: string; branch: string }> = {
@@ -28,15 +28,15 @@ export default function HapChungPanel({ data }: { data: SajuCalcResponse }) {
   function Box({ ch, on, weight }: { ch?: string; on: boolean; weight?: string }) {
     return (
       <div
-        className={`flex h-14 w-full flex-col items-center justify-center rounded-lg border-2 ${
-          on ? 'border-orange bg-orange' : 'border-ink bg-surface'
+        className={`flex h-14 w-full flex-col items-center justify-center rounded-xl border ${
+          on ? 'border-c-text bg-c-text' : 'border-c-line bg-c-surface'
         }`}
       >
-        <span className={`font-serif text-xl font-black leading-none ${on ? 'text-white' : 'text-ink'}`}>
+        <span className={`font-serif text-xl font-black leading-none ${on ? 'text-c-bg' : 'text-c-text'}`}>
           {ch ?? '—'}
         </span>
         {/* 가중치 영역 고정 — 없으면 빈 문자열로 유지해 높이 보장 */}
-        <span className={`mt-0.5 h-[14px] text-[9px] font-bold leading-none ${on ? 'text-white/70' : 'text-text-sub'}`}>
+        <span className={`mt-0.5 h-[14px] text-[9px] font-bold leading-none ${on ? 'text-c-bg opacity-70' : 'text-c-text-sub'}`}>
           {weight ?? ''}
         </span>
       </div>
@@ -50,7 +50,7 @@ export default function HapChungPanel({ data }: { data: SajuCalcResponse }) {
           const p = pillarOf(data, pk)
           return (
             <div key={pk} className="flex min-w-0 flex-col items-center gap-1">
-              <span className="text-[10px] text-text-sub">{PLABEL[pk]}주</span>
+              <span className="text-[10px] text-c-text-sub">{PLABEL[pk]}주</span>
               <Box ch={p?.stem} on={stems.includes(pk)} weight={showWeight ? PALACE_WEIGHTS[pk].stem : undefined} />
               <Box ch={p?.branch} on={branches.includes(pk)} weight={showWeight ? PALACE_WEIGHTS[pk].branch : undefined} />
             </div>
@@ -61,10 +61,10 @@ export default function HapChungPanel({ data }: { data: SajuCalcResponse }) {
   }
 
   return (
-    <section className="overflow-hidden rounded-lg border-2 border-ink bg-surface shadow-brutal">
-      <h3 className="px-4 pt-4 text-[15px] font-extrabold">{t('title')}</h3>
+    <section className="overflow-hidden rounded-card border border-c-line bg-c-surface text-c-text">
+      <h3 className="px-5 pt-5 text-[15px] font-extrabold">{t('title')}</h3>
 
-      <div className="flex flex-wrap gap-1.5 px-4 py-3">
+      <div className="flex flex-wrap gap-1.5 px-5 py-3">
         {ALL_TABS.map((tabDef) => {
           const has = hasData(data, tabDef.key)
           const isActive = tab === tabDef.key
@@ -73,12 +73,12 @@ export default function HapChungPanel({ data }: { data: SajuCalcResponse }) {
               key={tabDef.key}
               type="button"
               onClick={() => setTab(tabDef.key)}
-              className={`rounded-full border-2 px-2.5 py-0.5 text-[11px] font-extrabold ${
+              className={`rounded-pill border px-2.5 py-1 text-[11px] font-extrabold ${
                 isActive
-                  ? 'border-ink bg-yellow text-ink shadow-brutal-sm'
+                  ? 'border-transparent bg-c-accent text-c-on-accent'
                   : has
-                    ? 'border-ink bg-surface text-ink shadow-brutal-sm'
-                    : 'border-ink bg-surface text-text-sub'
+                    ? 'border-c-text bg-c-surface text-c-text'
+                    : 'border-c-line bg-c-surface text-c-text-sub'
               }`}
             >
               {tabDef.label}
@@ -87,22 +87,22 @@ export default function HapChungPanel({ data }: { data: SajuCalcResponse }) {
         })}
       </div>
 
-      <div className="border-t-2 border-ink px-4 py-3">
+      <div className="border-t border-c-line px-5 py-4">
         {showWeight ? (
           <>
-            <p className="mb-2 text-xs leading-relaxed text-text-sub">{t('gungSeongDesc')}</p>
+            <p className="mb-2 text-xs leading-relaxed text-c-text-sub">{t('gungSeongDesc')}</p>
             <MiniGrid stems={[]} branches={[]} />
           </>
         ) : entries.length === 0 ? (
-          <p className="py-2 text-sm text-text-sub">{t('empty')}</p>
+          <p className="py-2 text-sm text-c-text-sub">{t('empty')}</p>
         ) : (
           <div className="flex flex-col gap-5">
             {entries.map((e, i) => (
               <div key={i} className="flex flex-col gap-1.5">
-                <p className="text-sm leading-snug text-ink [&_b]:font-black [&_b]:text-orange" dangerouslySetInnerHTML={{ __html: e.text }} />
-                {e.broken && <span className="w-fit rounded-lg border-2 border-ink bg-orange-tint px-2 py-0.5 text-[11px] font-extrabold text-[#B34800] shadow-brutal-sm">{t('broken')}</span>}
+                <p className="text-sm leading-snug text-c-text [&_b]:font-black [&_b]:text-c-chart-accent" dangerouslySetInnerHTML={{ __html: e.text }} />
+                {e.broken && <span className="w-fit rounded-pill bg-c-unlucky-bg px-2.5 py-0.5 text-[11px] font-extrabold text-c-unlucky-fg">{t('broken')}</span>}
                 {e.resultEl && !e.broken && (
-                  <span className="w-fit rounded-lg border-2 border-ink px-2 py-0.5 text-[11px] font-extrabold shadow-brutal-sm" style={{ color: ohaengColor(e.resultEl), background: `${ohaengColor(e.resultEl)}1A` }}>
+                  <span className="w-fit rounded-pill px-2.5 py-0.5 text-[11px] font-extrabold" style={{ color: ohaengVar(e.resultEl), background: ohaengTintVar(e.resultEl) }}>
                     → {e.resultEl}화(化)
                   </span>
                 )}

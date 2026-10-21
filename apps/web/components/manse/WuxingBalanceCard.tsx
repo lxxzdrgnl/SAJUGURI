@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { SajuCalcResponse } from '@sajuguri/api-client'
-import { ohaengColor } from '@/lib/ohaeng'
+import { ohaengVar } from '@/lib/ohaeng'
 import {
   selectWuxingPercent, judge, balanceScore, balanceLabel, balanceSummary,
   pentagramVertices, nodeRadius, pctLabelPos, arrowPath, linePath,
@@ -12,16 +12,16 @@ import {
 
 function ToggleCheck({ checked, onToggle, label }: { checked: boolean; onToggle: () => void; label: string }) {
   return (
-    <label className="flex cursor-pointer select-none items-center gap-1.5 text-[11px] font-bold text-text-sub">
+    <label className="flex cursor-pointer select-none items-center gap-1.5 text-[11px] font-bold text-c-text-sub">
       <button
         type="button"
         onClick={onToggle}
-        className={`flex h-4 w-4 items-center justify-center rounded border-2 border-ink ${checked ? 'bg-yellow' : 'bg-surface'}`}
+        className={`flex h-4 w-4 items-center justify-center rounded border ${checked ? 'border-transparent bg-c-accent' : 'border-c-text-sub bg-c-surface'}`}
         aria-pressed={checked}
       >
         {checked && (
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-            <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="var(--ink)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="var(--c-on-accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
       </button>
@@ -31,21 +31,21 @@ function ToggleCheck({ checked, onToggle, label }: { checked: boolean; onToggle:
 }
 
 function verdictChip(v: Verdict): string {
-  if (v === '과다') return 'bg-orange-tint text-[#B34800]'
-  if (v === '부족') return 'bg-teal-tint text-[#00665F]'
-  return 'bg-border-soft text-text-sub'
+  if (v === '과다') return 'bg-c-unlucky-bg text-c-unlucky-fg'
+  if (v === '부족') return 'bg-c-lucky-bg text-c-lucky-fg'
+  return 'bg-c-surface-soft text-c-text-sub'
 }
 
 function ElementBar({ name, pct, verdict, vLabel }: { name: string; pct: number; verdict: Verdict; vLabel: string }) {
-  const color = ohaengColor(name)
+  const color = ohaengVar(name)
   return (
     <div className="mt-2 flex items-center gap-2 text-sm">
       <span className="w-5 font-black" style={{ color }}>{name}</span>
-      <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-border-soft">
+      <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-c-line">
         <i className="block h-full rounded-full" style={{ width: `${Math.min(pct, 100)}%`, background: color }} />
       </div>
-      <span className="w-10 text-right text-xs font-bold text-text-sub">{pct}%</span>
-      <span className={`w-10 rounded-md py-0.5 text-center text-[10px] font-extrabold ${verdictChip(verdict)}`}>{vLabel}</span>
+      <span className="w-10 text-right text-xs font-bold text-c-text-sub">{pct}%</span>
+      <span className={`w-10 rounded-pill py-0.5 text-center text-[10px] font-extrabold ${verdictChip(verdict)}`}>{vLabel}</span>
     </div>
   )
 }
@@ -58,21 +58,21 @@ function Pentagram({ pct, dayElement, t }: { pct: Record<string, number>; dayEle
       <svg viewBox="0 0 300 300" className="w-full max-w-[280px]" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <marker id="wx-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L8,3 z" fill="#00C2B8" opacity="0.7" />
+            <path d="M0,0 L0,6 L8,3 z" fill="var(--c-chart-saeng)" opacity="0.7" />
           </marker>
         </defs>
-        <polygon points={polygon} fill="none" stroke="var(--border-soft)" strokeWidth="1.5" strokeDasharray="4,3" />
+        <polygon points={polygon} fill="none" stroke="var(--c-line)" strokeWidth="1.5" strokeDasharray="4,3" />
         {SANG_GEUK_PAIRS.map(([fi, ti], idx) => (
-          <path key={`geuk-${idx}`} d={linePath(v, fi, ti)} stroke="#FF6B00" strokeWidth="1" strokeDasharray="4,3" opacity="0.25" fill="none" />
+          <path key={`geuk-${idx}`} d={linePath(v, fi, ti)} stroke="var(--c-chart-accent)" strokeWidth="1" strokeDasharray="4,3" opacity="0.25" fill="none" />
         ))}
         {SANG_SAENG_PAIRS.map(([fi, ti], idx) => (
-          <path key={`saeng-${idx}`} d={arrowPath(v, pct, fi, ti)} stroke="#00C2B8" strokeWidth="1.5" opacity="0.5" fill="none" markerEnd="url(#wx-arrow)" />
+          <path key={`saeng-${idx}`} d={arrowPath(v, pct, fi, ti)} stroke="var(--c-chart-saeng)" strokeWidth="1.5" opacity="0.5" fill="none" markerEnd="url(#wx-arrow)" />
         ))}
-        <circle cx="150" cy="150" r="24" fill="var(--bg-base)" stroke="var(--ink)" strokeWidth="1.5" />
-        <text x="150" y="145" textAnchor="middle" fontSize="9" fill="var(--text-sub)">{t('dayLabel')}</text>
-        <text x="150" y="162" textAnchor="middle" fontSize="15" fontWeight="bold" fill={ohaengColor(dayElement)}>{dayElement}</text>
+        <circle cx="150" cy="150" r="24" fill="var(--c-surface-soft)" stroke="var(--c-line)" strokeWidth="1.5" />
+        <text x="150" y="145" textAnchor="middle" fontSize="9" fill="var(--c-text-sub)">{t('dayLabel')}</text>
+        <text x="150" y="162" textAnchor="middle" fontSize="15" fontWeight="bold" fill={ohaengVar(dayElement)}>{dayElement}</text>
         {WUXING_ORDER.map((el, i) => {
-          const color = ohaengColor(el)
+          const color = ohaengVar(el)
           const lp = pctLabelPos(v, pct, i)
           return (
             <g key={el}>
@@ -83,9 +83,9 @@ function Pentagram({ pct, dayElement, t }: { pct: Record<string, number>; dayEle
           )
         })}
       </svg>
-      <div className="mt-1 flex gap-5 text-[11px] text-text-sub">
-        <span className="flex items-center gap-1.5"><span className="inline-block h-0.5 w-5 bg-teal" />{t('saeng')}</span>
-        <span className="flex items-center gap-1.5"><span className="inline-block h-0 w-5 border-t-[1.5px] border-dashed border-orange" />{t('geuk')}</span>
+      <div className="mt-1 flex gap-5 text-[11px] text-c-text-sub">
+        <span className="flex items-center gap-1.5"><span className="inline-block h-0.5 w-5 bg-c-chart-saeng" />{t('saeng')}</span>
+        <span className="flex items-center gap-1.5"><span className="inline-block h-0 w-5 border-t-[1.5px] border-dashed border-c-chart-accent" />{t('geuk')}</span>
       </div>
     </div>
   )
@@ -111,10 +111,10 @@ export default function WuxingBalanceCard({ data }: { data: SajuCalcResponse }) 
       : t('balanced')
 
   const tabBtn = (key: 'bar' | 'penta') =>
-    `rounded-lg border-2 border-ink px-3 py-1 text-xs font-extrabold ${tab === key ? 'bg-yellow text-ink shadow-brutal-sm' : 'bg-surface text-text-sub'}`
+    `rounded-pill border px-3 py-1 text-xs font-extrabold ${tab === key ? 'border-transparent bg-c-accent text-c-on-accent' : 'border-c-line bg-c-surface text-c-text-sub'}`
 
   return (
-    <section className="rounded-lg border-2 border-ink bg-surface p-4 shadow-brutal">
+    <section className="rounded-card border border-c-line bg-c-surface p-5 text-c-text">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-[15px] font-extrabold">{t('title')}</h3>
         <div className="flex gap-1.5">
@@ -124,11 +124,11 @@ export default function WuxingBalanceCard({ data }: { data: SajuCalcResponse }) 
       </div>
 
       <div className="mb-3 flex flex-wrap items-center gap-2">
-        <span className="rounded-lg bg-ink px-2.5 py-1 text-xs font-black text-yellow">{score}/100</span>
-        <span className={`rounded-md px-2 py-1 text-[11px] font-extrabold ${label.tone === 'good' ? 'bg-teal-tint text-[#00665F]' : label.tone === 'mid' ? 'bg-yellow-tint text-[#6b5500]' : 'bg-orange-tint text-[#B34800]'}`}>
+        <span className="rounded-pill bg-c-text px-2.5 py-1 text-xs font-black text-c-bg">{score}/100</span>
+        <span className={`rounded-pill px-2.5 py-1 text-[11px] font-extrabold ${label.tone === 'good' ? 'bg-c-lucky-bg text-c-lucky-fg' : label.tone === 'mid' ? 'bg-c-oh-to-tint text-c-oh-to' : 'bg-c-unlucky-bg text-c-unlucky-fg'}`}>
           {label.text}
         </span>
-        <span className="text-[11px] text-text-sub">{summaryText}</span>
+        <span className="text-[11px] text-c-text-sub">{summaryText}</span>
       </div>
 
       {/* 보정 토글 — 레거시 기능 보존 (G3) */}

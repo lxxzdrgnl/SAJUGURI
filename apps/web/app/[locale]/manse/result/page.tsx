@@ -8,6 +8,10 @@ import ShareButton from '@/components/manse/ShareButton'
 import ResultView from '@/components/manse/ResultView'
 import RecentEnricher from '@/components/manse/RecentEnricher'
 import { manseNavQuery } from '@/lib/manse/query'
+import { buttonClass } from '@/components/ui/Button'
+
+// 새 배경(bg-c-bg)을 레이아웃 패딩 밖까지 칠한다 — 홈과 같은 셸
+const SHELL = '-mx-4 -mb-8 -mt-2 min-h-[calc(100dvh-3.5rem)] bg-c-bg px-4 pb-10 pt-2 text-c-text'
 
 export default async function ManseResult({
   searchParams,
@@ -32,7 +36,7 @@ export default async function ManseResult({
   } catch {
     data = null
   }
-  if (!data) return <main className="pt-10 text-center text-sm font-bold text-text-sub">{t('error')}</main>
+  if (!data) return <main className={SHELL}><p className="pt-10 text-center text-sm font-bold text-c-text-sub">{t('error')}</p></main>
 
   // 로그인 상태에서만 저장 버튼 노출. 저장 스키마는 longitude(진태양시)를 쓴다.
   const user = await currentUser()
@@ -70,7 +74,7 @@ export default async function ManseResult({
   const birthQuery = manseNavQuery(p)
 
   return (
-    <main className="flex flex-col gap-3">
+    <main className={`${SHELL} flex flex-col gap-4`}>
       {/* 게스트 최근 입력에 일간 보강 — 너구리 아바타 일간색 틴팅용 (클라 마운트 시 localStorage 갱신) */}
       <RecentEnricher
         birth_date={p.birth_date ?? ''}
@@ -85,13 +89,13 @@ export default async function ManseResult({
       <div className="mt-1 flex gap-2">
         <Link
           href={`/report/new?${birthQuery}`}
-          className="flex-1 rounded-lg border-2 border-ink bg-orange py-3 text-center text-sm font-extrabold text-white shadow-brutal"
+          className={`${buttonClass('primary')} flex-1`}
         >
           {tc('report')}
         </Link>
         <Link
           href="/chat"
-          className="flex-1 rounded-lg border-2 border-teal bg-teal-tint py-3 text-center text-sm font-extrabold text-teal-deep shadow-brutal"
+          className={`${buttonClass('secondary')} flex-1`}
         >
           {tc('chat')}
         </Link>

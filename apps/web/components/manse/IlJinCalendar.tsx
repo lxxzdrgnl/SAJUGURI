@@ -36,25 +36,25 @@ export default function IlJinCalendar() {
   const go = (fn: typeof prevMonth) => { const n = fn(year, month); setYear(n.year); setMonth(n.month) }
 
   return (
-    <section className="rounded-lg border-2 border-ink bg-surface p-4 shadow-brutal">
+    <section className="rounded-card border border-c-line bg-c-surface p-5 text-c-text">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-[15px] font-extrabold">{t('title')}</h3>
         <div className="flex items-center gap-2">
-          <button type="button" onClick={() => go(prevMonth)} className="rounded-lg border-2 border-ink bg-surface px-2 py-1 text-sm font-black shadow-brutal-sm">‹</button>
+          <button type="button" onClick={() => go(prevMonth)} className="flex h-8 w-8 items-center justify-center rounded-pill border border-c-line bg-c-surface text-sm font-black">‹</button>
           <span className="min-w-[88px] text-center text-sm font-extrabold">{year} {MONTH_NAMES[month - 1]}</span>
-          <button type="button" onClick={() => go(nextMonth)} className="rounded-lg border-2 border-ink bg-surface px-2 py-1 text-sm font-black shadow-brutal-sm">›</button>
+          <button type="button" onClick={() => go(nextMonth)} className="flex h-8 w-8 items-center justify-center rounded-pill border border-c-line bg-c-surface text-sm font-black">›</button>
         </div>
       </div>
 
       {error ? (
-        <p className="py-6 text-center text-sm text-text-sub">{t('error')}</p>
+        <p className="py-6 text-center text-sm text-c-text-sub">{t('error')}</p>
       ) : loading ? (
-        <p className="py-6 text-center text-sm text-text-sub">{t('loading')}</p>
+        <p className="py-6 text-center text-sm text-c-text-sub">{t('loading')}</p>
       ) : (
         <>
           <div className="grid grid-cols-7 gap-1">
             {WEEKDAYS.map((wd, i) => (
-              <div key={wd} className={`py-1 text-center text-[12px] font-bold ${i === 0 ? 'text-orange' : i === 6 ? 'text-[#0090A8]' : 'text-text-sub'}`}>{wd}</div>
+              <div key={wd} className={`py-1 text-center text-[12px] font-bold ${i === 0 ? 'text-c-danger' : i === 6 ? 'text-c-oh-su' : 'text-c-text-sub'}`}>{wd}</div>
             ))}
           </div>
           <div className="grid grid-cols-7 gap-1">
@@ -63,15 +63,15 @@ export default function IlJinCalendar() {
               return (
                 <div
                   key={idx}
-                  className={`min-h-[72px] rounded-lg p-1 ${isToday ? 'border-2 border-ink bg-yellow-tint' : cell.entry?.solar_term ? 'bg-[#FBF3D9]' : ''}`}
+                  className={`min-h-[72px] rounded-lg p-1 ${isToday ? 'border-[1.5px] border-c-text bg-c-surface-soft' : cell.entry?.solar_term ? 'bg-c-oh-to-tint' : ''}`}
                 >
                   {cell.day && (
                     <>
-                      <div className={`text-[13px] font-bold ${isToday ? 'text-ink' : idx % 7 === 0 ? 'text-orange' : idx % 7 === 6 ? 'text-[#0090A8]' : 'text-ink'}`}>{cell.day}</div>
-                      {cell.entry?.solar_term && <div className="text-[11px] font-semibold text-[#B07A00]">{cell.entry.solar_term}</div>}
-                      {cell.entry && <div className="text-[12px] font-semibold text-text-sub">{cell.entry.ganji_name}</div>}
+                      <div className={`text-[13px] font-bold ${isToday ? 'text-c-text' : idx % 7 === 0 ? 'text-c-danger' : idx % 7 === 6 ? 'text-c-oh-su' : 'text-c-text'}`}>{cell.day}</div>
+                      {cell.entry?.solar_term && <div className="text-[11px] font-semibold text-c-oh-to">{cell.entry.solar_term}</div>}
+                      {cell.entry && <div className="text-[12px] font-semibold text-c-text-sub">{cell.entry.ganji_name}</div>}
                       {cell.entry && (
-                        <div className={`text-[11px] ${cell.entry.is_leap_month ? 'text-[#0090A8]' : 'text-text-sub'}`}>
+                        <div className={`text-[11px] ${cell.entry.is_leap_month ? 'text-c-oh-su' : 'text-c-text-sub'}`}>
                           {cell.entry.is_leap_month ? t('leapMark') : ''}{cell.entry.lunar_month}/{cell.entry.lunar_day}
                         </div>
                       )}
@@ -81,10 +81,10 @@ export default function IlJinCalendar() {
               )
             })}
           </div>
-          <div className="mt-2 flex flex-wrap gap-3 border-t-2 border-ink pt-2 text-[11px] text-text-sub">
-            <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded border-2 border-ink bg-yellow-tint" />{t('today')}</span>
-            <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded bg-[#FBF3D9]" />{t('solarTerm')}</span>
-            <span className="flex items-center gap-1"><span className="text-[#0090A8]">{t('leapMark')}</span>{t('leap')}</span>
+          <div className="mt-2 flex flex-wrap gap-3 border-t border-c-line pt-3 text-[11px] text-c-text-sub">
+            <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded border-[1.5px] border-c-text bg-c-surface-soft" />{t('today')}</span>
+            <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded bg-c-oh-to-tint" />{t('solarTerm')}</span>
+            <span className="flex items-center gap-1"><span className="text-c-oh-su">{t('leapMark')}</span>{t('leap')}</span>
           </div>
         </>
       )}
