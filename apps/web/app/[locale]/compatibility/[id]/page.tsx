@@ -22,7 +22,7 @@ export default async function CompatibilityDetailPage({
 
   if (!detail) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 bg-c-bg px-4 pb-8 pt-4 shadow-[0_0_0_100vmax_var(--c-bg)] [clip-path:inset(0_-100vmax_-100vmax)] text-center">
+      <main className="-mx-4 -mt-2 -mb-8 px-4 pb-8 pt-4 text-center">
         <p className="text-[15px] font-extrabold text-c-text-sub">{t('view.errorFallback')}</p>
       </main>
     )
@@ -32,7 +32,7 @@ export default async function CompatibilityDetailPage({
   const nameB = detail.person_b.name ?? t('scoreOverview.personB')
 
   return (
-    <main className="-mx-4 -mt-2 -mb-8 bg-c-bg px-4 pb-8 pt-4 shadow-[0_0_0_100vmax_var(--c-bg)] [clip-path:inset(0_-100vmax_-100vmax)] flex flex-col gap-4">
+    <main className="-mx-4 -mt-2 -mb-8 px-4 pb-8 pt-4 flex flex-col gap-4">
       {/* 두 사람 요약 헤더 */}
       <Card className="flex items-center gap-2 px-4 py-3">
         <div className="flex flex-1 flex-col min-w-0">

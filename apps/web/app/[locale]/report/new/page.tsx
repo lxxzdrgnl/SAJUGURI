@@ -106,7 +106,7 @@ export default function ReportNewPage() {
   // 로딩 중 화면
   if (loading) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] flex-col items-center justify-center gap-6 bg-c-bg px-4 text-center">
+      <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] flex-col items-center justify-center gap-6 px-4 text-center">
         <Image src="/mascot.svg" alt="" width={72} height={72} className="animate-bounce" priority />
         <p className="text-[15px] font-extrabold text-c-text">{LOADING_PHRASES[phraseIdx]}</p>
         <p className="text-[13px] text-c-text-sub">{t('loadingNote')}</p>
@@ -117,7 +117,7 @@ export default function ReportNewPage() {
   // 로그인 확인 중
   if (isLoggedIn === null) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] items-center justify-center bg-c-bg px-4">
+      <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] items-center justify-center px-4">
         <p className="text-sm text-c-text-sub">{t('checking')}</p>
       </main>
     )
@@ -126,7 +126,7 @@ export default function ReportNewPage() {
   // 비로그인
   if (!isLoggedIn) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] flex-col gap-5 bg-c-bg px-4 pb-8 pt-4">
+      <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] flex-col gap-5 px-4 pb-8 pt-4">
         <h1 className="text-lg font-black text-c-text">{t('title')}</h1>
         <Card className="flex flex-col items-center gap-4 p-6 text-center">
           <Image src="/mascot.svg" alt="" width={56} height={56} />
@@ -145,7 +145,7 @@ export default function ReportNewPage() {
 
   // 로그인 상태 — 생성 폼
   return (
-    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] flex-col gap-5 bg-c-bg px-4 pb-8 pt-4">
+    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] flex-col gap-5 px-4 pb-8 pt-4">
       <PageHeading title={t('title')} accent="orange" />
 
       <p className="text-[13px] leading-relaxed text-c-text-sub">{t('guideline')}</p>

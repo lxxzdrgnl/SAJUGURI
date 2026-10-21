@@ -55,7 +55,7 @@ export default async function SharedReportPage({
 
   if (!report) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 min-h-[calc(100dvh-3.5rem)] bg-c-bg px-4 pt-16 text-center">
+      <main className="-mx-4 -mt-2 -mb-8 min-h-[calc(100dvh-3.5rem)] px-4 pt-16 text-center">
         <p className="text-[15px] font-extrabold text-c-text-sub">공유 링크를 찾을 수 없어요.</p>
         <p className="mt-2 text-[13px] text-c-text-sub">링크가 만료됐거나 잘못된 주소예요.</p>
       </main>
@@ -72,7 +72,7 @@ export default async function SharedReportPage({
     .join(' · ')
 
   return (
-    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] flex-col gap-4 bg-c-bg px-4 pb-8 pt-4">
+    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] flex-col gap-4 px-4 pb-8 pt-4">
       <Card tone="soft" className="p-3 text-[14px] font-bold">
         {summaryLine}
       </Card>

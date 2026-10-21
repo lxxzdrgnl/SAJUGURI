@@ -20,7 +20,7 @@ export default async function HistoryPage({
 
   if (!user) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 bg-c-bg px-4 pb-8 pt-4 shadow-[0_0_0_100vmax_var(--c-bg)] [clip-path:inset(0_-100vmax_-100vmax)] flex flex-col gap-4">
+      <main className="-mx-4 -mt-2 -mb-8 px-4 pb-8 pt-4 flex flex-col gap-4">
         <h1 className="font-display text-xl font-normal text-c-text">{t('history.title')}</h1>
         <Card className="flex flex-col items-center gap-4 py-8 text-center">
           <MascotTinted width={72} height={72} />
@@ -40,7 +40,7 @@ export default async function HistoryPage({
   const records = await fetchAllRecords(authApi)
 
   return (
-    <main className="-mx-4 -mt-2 -mb-8 bg-c-bg px-4 pb-8 pt-4 shadow-[0_0_0_100vmax_var(--c-bg)] [clip-path:inset(0_-100vmax_-100vmax)] flex flex-col gap-4">
+    <main className="-mx-4 -mt-2 -mb-8 px-4 pb-8 pt-4 flex flex-col gap-4">
       <h1 className="font-display text-xl font-normal text-c-text">{t('history.title')}</h1>
 
       <HistoryFeedClient records={records} initialType={type} />

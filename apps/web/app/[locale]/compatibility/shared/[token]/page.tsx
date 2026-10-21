@@ -56,7 +56,7 @@ export default async function SharedCompatibilityPage({
 
   if (!detail) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 bg-c-bg px-4 pb-8 pt-4 shadow-[0_0_0_100vmax_var(--c-bg)] [clip-path:inset(0_-100vmax_-100vmax)] text-center">
+      <main className="-mx-4 -mt-2 -mb-8 px-4 pb-8 pt-4 text-center">
         <p className="text-[15px] font-extrabold text-c-text-sub">{t('share.notFoundTitle')}</p>
         <p className="mt-2 text-[13px] text-c-text-sub">{t('share.notFoundDesc')}</p>
       </main>
@@ -64,7 +64,7 @@ export default async function SharedCompatibilityPage({
   }
 
   return (
-    <main className="-mx-4 -mt-2 -mb-8 bg-c-bg px-4 pb-8 pt-4 shadow-[0_0_0_100vmax_var(--c-bg)] [clip-path:inset(0_-100vmax_-100vmax)] flex flex-col gap-4">
+    <main className="-mx-4 -mt-2 -mb-8 px-4 pb-8 pt-4 flex flex-col gap-4">
       <p className="text-[13px] text-c-text-sub">{t('view.guideText')}</p>
 
       {/* 공유 모드 — 공유/재생성 CTA 없음, 저장 스냅샷 */}

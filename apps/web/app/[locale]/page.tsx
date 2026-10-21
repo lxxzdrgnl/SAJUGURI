@@ -68,7 +68,7 @@ export default async function Home({
   const repProfile = profiles.find((p) => p.is_representative) ?? null
 
   // 흰 바탕 진열대 — 레이아웃 래퍼의 여백까지 덮는다 (가로 폭은 래퍼와 같다)
-  const shell = '-mx-4 -mb-8 -mt-2 min-h-[calc(100dvh-3.5rem)] bg-c-bg px-4 pb-10'
+  const shell = '-mx-4 -mb-8 -mt-2 min-h-[calc(100dvh-3.5rem)] px-4 pb-10'
 
   if (isCategory(cat)) {
     return (
