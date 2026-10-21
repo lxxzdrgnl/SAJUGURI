@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import type { Viewport } from 'next'
 import { NextIntlClientProvider, hasLocale } from 'next-intl'
 import { notFound } from 'next/navigation'
-import { Noto_Serif_KR } from 'next/font/google'
+import { Noto_Serif_KR, Jua } from 'next/font/google'
 import { routing } from '@/i18n/routing'
 import AppHeader from '@/components/nav/AppHeader'
 import { currentUser, serverAuthApi } from '@/lib/serverAuth'
@@ -18,6 +18,15 @@ import '../globals.css'
 const notoSerifKR = Noto_Serif_KR({
   weight: ['700', '900'],
   variable: '--font-serif-kr',
+  display: 'swap',
+  preload: false,
+})
+
+// 디스플레이 글꼴 주아 — globals.css의 --font-display(Tailwind font-display)가 소비한다.
+// Noto_Serif_KR과 같은 이유로 CJK 글리프 preload는 끈다(필요 시 unicode-range로 로드).
+const jua = Jua({
+  weight: '400',
+  variable: '--font-jua',
   display: 'swap',
   preload: false,
 })
@@ -71,7 +80,7 @@ export default async function LocaleLayout({
   }
   const repProfile = profiles.find((p) => p.is_representative) ?? null
   return (
-    <html lang={locale} className={notoSerifKR.variable}>
+    <html lang={locale} className={`${notoSerifKR.variable} ${jua.variable}`}>
       <body>
         <NextIntlClientProvider>
           {/* 저장된 언어 선택을 부팅 시 강제 (영어 기기여도 한국어 유지) */}

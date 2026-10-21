@@ -91,7 +91,7 @@
   --color-c-counsel-bg: var(--c-counsel-bg);
   --color-c-counsel-fg: var(--c-counsel-fg);
   --color-c-scrim: var(--c-scrim);
-  --font-display: var(--font-sans);
+  --font-display: var(--font-jua), var(--font-sans);
   --radius-card: 20px;
   --radius-pill: 999px;
 }
