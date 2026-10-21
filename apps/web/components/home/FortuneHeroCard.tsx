@@ -54,7 +54,7 @@ export default function FortuneHeroCard({
             <img src="/mascot/fortune.png" alt="" width={88} height={88} className="h-22 w-22 shrink-0 object-contain" />
           </div>
         ) : (
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">
               <span className="inline-block rounded-pill bg-c-accent px-2.5 py-0.5 text-xs font-extrabold text-c-on-accent">
                 {t('freeDaily')}
@@ -62,11 +62,12 @@ export default function FortuneHeroCard({
               <p className="mt-2 font-display text-xl font-normal">{t('unseen')}</p>
               <span className={`${buttonClass('primary', 'md')} mt-3`}>{t('cta')}</span>
             </div>
-            <div className="relative shrink-0">
-              <span className="absolute -top-3 right-full mr-1 hidden whitespace-nowrap min-[420px]:inline-block rounded-card border border-c-line bg-c-surface px-2.5 py-1 text-xs font-bold">
+            {/* 말풍선은 마스코트 위 같은 열에 둔다 — 영어 문구도 열 안에서 줄바꿈되어 왼쪽 글과 겹치지 않는다 */}
+            <div className="flex w-24 shrink-0 flex-col items-center gap-1">
+              <span className="max-w-full rounded-card border border-c-line bg-c-surface px-2 py-1 text-center text-[11px] font-bold leading-tight">
                 {t('bubble')}
               </span>
-              <img src="/mascot/fortune.png" alt="" width={88} height={88} className="h-22 w-22 object-contain" />
+              <img src="/mascot/fortune.png" alt="" width={80} height={80} className="h-20 w-20 object-contain" />
             </div>
           </div>
         )}
