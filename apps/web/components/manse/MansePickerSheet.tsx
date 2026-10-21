@@ -268,7 +268,7 @@ export default function MansePickerSheet({
                 className="flex w-full items-center gap-3 rounded-card bg-c-accent p-4 text-left font-extrabold text-c-on-accent transition-transform active:scale-[0.98]"
                 onClick={() => setShowForm(true)}
               >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-c-surface text-lg">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-c-surface text-lg text-c-text">
                   +
                 </span>
                 <span className="text-[14px] font-extrabold">{t('directInput')}</span>

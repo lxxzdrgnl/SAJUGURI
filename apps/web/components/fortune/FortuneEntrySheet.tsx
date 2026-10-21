@@ -250,7 +250,7 @@ export default function FortuneEntrySheet({ open, onClose, profiles, isLoggedIn 
             className="flex w-full items-center gap-3 rounded-card bg-c-accent p-4 text-left font-bold text-c-on-accent transition-opacity hover:opacity-90"
             onClick={() => setShowForm(true)}
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-c-surface text-lg">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-c-surface text-lg text-c-text">
               +
             </span>
             <span className="text-[14px] font-bold">{t('directInput')}</span>
