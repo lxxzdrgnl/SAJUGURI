@@ -47,7 +47,7 @@ export default function FortuneHeroCard({
           <div className="flex items-center gap-4">
             <div className="min-w-0 flex-1">
               <p className="text-xs font-bold text-c-text-sub">{t('seenTitle')}</p>
-              <p className="mt-1 font-display text-3xl font-extrabold">{summary.score}</p>
+              <p className="mt-1 font-display text-3xl font-normal">{summary.score}</p>
               <p className="mt-1 text-sm font-bold">{summary.headline}</p>
               <span className={`${buttonClass('secondary', 'sm')} mt-3`}>{t('again')}</span>
             </div>
@@ -59,7 +59,7 @@ export default function FortuneHeroCard({
               <span className="inline-block rounded-pill bg-c-accent px-2.5 py-0.5 text-xs font-extrabold text-c-on-accent">
                 {t('freeDaily')}
               </span>
-              <p className="mt-2 font-display text-xl font-extrabold">{t('unseen')}</p>
+              <p className="mt-2 font-display text-xl font-normal">{t('unseen')}</p>
               <span className={`${buttonClass('primary', 'md')} mt-3`}>{t('cta')}</span>
             </div>
             <div className="relative shrink-0">

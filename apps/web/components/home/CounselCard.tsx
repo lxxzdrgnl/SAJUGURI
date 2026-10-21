@@ -24,7 +24,7 @@ export default function CounselCard({
         <Card tone="counsel" className="flex items-center gap-3 p-4">
           <img src="/mascot/thumbsup.png" alt="" width={48} height={48} className="h-12 w-12 shrink-0 object-contain" />
           <div className="min-w-0 flex-1">
-            <p className="font-display text-sm font-extrabold">{t('title')}</p>
+            <p className="font-display text-sm font-normal">{t('title')}</p>
             <p className="mt-0.5 text-xs opacity-80">{t('desc')}</p>
           </div>
         </Card>
@@ -36,7 +36,7 @@ export default function CounselCard({
     <Card tone="counsel" className="flex h-full flex-col justify-between gap-4 p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-display text-xl font-extrabold leading-snug">{t('title')}</p>
+          <p className="font-display text-xl font-normal leading-snug">{t('title')}</p>
           <p className="mt-2 text-sm opacity-80">{t('desc')}</p>
         </div>
         <img src="/mascot/thumbsup.png" alt="" width={96} height={96} className="h-24 w-24 shrink-0 object-contain" />

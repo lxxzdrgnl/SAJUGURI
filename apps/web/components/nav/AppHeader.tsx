@@ -47,7 +47,7 @@ export default function AppHeader({
   }
 
   const logo = (
-    <Link href="/" className="font-display text-lg font-black text-c-text">
+    <Link href="/" className="font-display text-lg font-normal text-c-text">
       {t('logo')}
     </Link>
   )
