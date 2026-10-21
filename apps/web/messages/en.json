@@ -430,6 +430,45 @@
       "deleteConfirm": "Delete this chart?",
       "deleteConfirmYes": "Delete",
       "deleteConfirmCancel": "Cancel"
+    },
+    "terms": {
+      "plain": {
+        "목": "Wood",
+        "화": "Fire",
+        "토": "Earth",
+        "금": "Metal",
+        "수": "Water",
+        "비견": "Bigyeon",
+        "겁재": "Geopjae",
+        "식신": "Siksin",
+        "상관": "Sanggwan",
+        "편재": "Pyeonjae",
+        "정재": "Jeongjae",
+        "편관": "Pyeongwan",
+        "칠살": "Chilsal",
+        "정관": "Jeonggwan",
+        "편인": "Pyeonin",
+        "정인": "Jeongin",
+        "균형": "Balanced",
+        "보통": "Normal",
+        "불균형": "Imbalanced"
+      },
+      "sinsal": {
+        "화개": "Hwagae",
+        "양인": "Yangin",
+        "도화": "Dohwa",
+        "역마": "Yeokma",
+        "천을귀인": "Cheonul Gwiin",
+        "공망": "Gongmang"
+      },
+      "groupLabel": {
+        "비겁": "Self · Independence",
+        "식상": "Expression · Creativity",
+        "재성": "Wealth · Reality",
+        "관성": "Honor · Norms",
+        "인성": "Learning · Protection"
+      },
+      "gyeokgukOf": "{name} Gyeokguk"
     }
   },
   "mansePicker": {

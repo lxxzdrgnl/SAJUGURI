@@ -1,4 +1,6 @@
+import { useTranslations } from 'next-intl'
 import type { Pillar } from '@sajuguri/api-client'
+import { termLabel } from '@/lib/manse/termLabel'
 import { ohaengVar, ohaengTintVar } from '@/lib/ohaeng'
 
 /** 기둥 카드 1장 — kind: 'stem'(천간) | 'branch'(지지). 일주 기둥은 본문색 라인으로 강조 */
@@ -10,6 +12,7 @@ export default function PillarCard({
   label?: string
   isDay?: boolean
 }) {
+  const tt = useTranslations('manse.terms')
   const hanja = kind === 'stem' ? pillar.stem_hanja : pillar.branch_hanja
   const kor = kind === 'stem' ? pillar.stem : pillar.branch
   const element = kind === 'stem' ? pillar.stem_element : pillar.branch_element
@@ -25,8 +28,8 @@ export default function PillarCard({
         </p>
       )}
       <p className="font-serif text-[26px] font-black leading-tight" style={{ color }}>{hanja}</p>
-      <p className="text-[11px] font-extrabold" style={{ color }}>{kor} · {element}</p>
-      <p className="mt-0.5 text-[10px] text-c-text-sub">{tenGod}</p>
+      <p className="text-[11px] font-extrabold" style={{ color }}>{kor} · {termLabel(tt, element)}</p>
+      <p className="mt-0.5 text-[10px] text-c-text-sub">{termLabel(tt, tenGod)}</p>
     </div>
   )
 }

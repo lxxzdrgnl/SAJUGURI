@@ -26,6 +26,7 @@ function formatDate(date: string, locale: string): string {
 export default async function MyPage() {
   const t = await getTranslations('my')
   const locale = await getLocale()
+  const tr = await getTranslations('manse.result')
   const user = await currentUser()
 
   if (!user) {
@@ -76,7 +77,7 @@ export default async function MyPage() {
                 <p className="text-[18px] font-black leading-tight text-c-text">{repProfile.name}</p>
                 {repProfile.day_stem && repProfile.day_branch && (
                   <p className="mt-0.5 text-[13px] font-extrabold text-c-text">
-                    {repProfile.day_stem}{repProfile.day_branch}일주
+                    {tr('iljuName', { name: `${repProfile.day_stem}${repProfile.day_branch}` })}
                   </p>
                 )}
                 <p className="mt-1 text-[12px] font-semibold text-c-text-sub">
