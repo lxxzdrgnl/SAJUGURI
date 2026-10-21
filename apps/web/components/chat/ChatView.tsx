@@ -81,9 +81,11 @@ interface Props {
   partnerName?: string | null
   /** 세션의 사주(생년월일 등) — 보러가기 CTA가 이 사람으로 리포트·운세를 열게 한다. */
   birthInfo?: Record<string, unknown> | null
+  /** 입력창에 미리 채워 둘 문구 (?q=) — 자동 전송하지 않는다 */
+  initialInput?: string | null
 }
 
-export default function ChatView({ sessionId, initialTitle, profiles, partnerName: initialPartnerName, birthInfo }: Props) {
+export default function ChatView({ sessionId, initialTitle, profiles, partnerName: initialPartnerName, birthInfo, initialInput = null }: Props) {
   const t = useTranslations('chat')
   const router = useRouter()
 
@@ -97,7 +99,7 @@ export default function ChatView({ sessionId, initialTitle, profiles, partnerNam
   const [title, setTitle] = useState(initialTitle)
   const [messages, setMessages] = useState<DisplayMessage[]>([])
   const [partnerName, setPartnerName] = useState(initialPartnerName ?? null)
-  const [input, setInput] = useState('')
+  const [input, setInput] = useState(initialInput ?? '')
   const [streaming, setStreaming] = useState(false)
   const [attachOpen, setAttachOpen] = useState(false)
   const [myManseOpen, setMyManseOpen] = useState(false)
@@ -343,6 +345,13 @@ export default function ChatView({ sessionId, initialTitle, profiles, partnerNam
       textRef.current.style.height = `${Math.min(textRef.current.scrollHeight, 120)}px`
     }
   }, [])
+
+  // ?q= 힌트로 들어왔으면 입력창 높이를 맞추고, 새로고침 때 다시 채워지지 않게 쿼리를 지운다
+  useEffect(() => {
+    if (!initialInput) return
+    autoResize()
+    window.history.replaceState(window.history.state, '', window.location.pathname)
+  }, [initialInput, autoResize])
 
   // 마지막 check_compatibility tool_result 블록 위치 계산 (CTA 단일 렌더용)
   let lastCheckCompatIdx: { mi: number; bi: number } | null = null

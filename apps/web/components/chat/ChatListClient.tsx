@@ -12,6 +12,8 @@ import PageHeading from '@/components/ui/PageHeading'
 interface Props {
   sessions: ChatSession[]
   profiles: ProfileResponse[]
+  /** 새 상담 첫 입력 힌트 (?topic= / ?q=) — 있으면 새 상담 시트를 바로 연다 */
+  prefill?: string | null
 }
 
 const SESSION_COLORS = ['var(--orange)', 'var(--yellow)', 'var(--sky)', 'var(--teal)']
@@ -94,9 +96,9 @@ function DeleteModal({ sessionTitle, onConfirm, onClose, t }: DeleteModalProps) 
   )
 }
 
-export default function ChatListClient({ sessions: initialSessions, profiles }: Props) {
+export default function ChatListClient({ sessions: initialSessions, profiles, prefill = null }: Props) {
   const t = useTranslations('chat')
-  const [sheetOpen, setSheetOpen] = useState(false)
+  const [sheetOpen, setSheetOpen] = useState(!!prefill)
   const [sessions, setSessions] = useState(initialSessions)
   const [deletingSession, setDeletingSession] = useState<ChatSession | null>(null)
   const [editMode, setEditMode] = useState(false)
@@ -214,6 +216,7 @@ export default function ChatListClient({ sessions: initialSessions, profiles }: 
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
         profiles={profiles}
+        prefill={prefill}
       />
 
       {deletingSession && (

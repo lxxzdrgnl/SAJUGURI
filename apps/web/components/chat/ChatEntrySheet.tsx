@@ -15,9 +15,11 @@ interface Props {
   open: boolean
   onClose: () => void
   profiles: ProfileResponse[]
+  /** 새 세션 첫 입력창에 채워 둘 문구 — /chat/[id]?q= 로 넘긴다 */
+  prefill?: string | null
 }
 
-export default function ChatEntrySheet({ open, onClose, profiles }: Props) {
+export default function ChatEntrySheet({ open, onClose, profiles, prefill = null }: Props) {
   const t = useTranslations('chat')
   const locale = useLocale()
   const router = useRouter()
@@ -30,12 +32,13 @@ export default function ChatEntrySheet({ open, onClose, profiles }: Props) {
       try {
         const session = await createSession(api, body)
         onClose()
-        router.push(`/chat/${session.id}`)
+        const qs = prefill ? `?q=${encodeURIComponent(prefill)}` : ''
+        router.push(`/chat/${session.id}${qs}`)
       } catch {
         setCreating(false)
       }
     },
-    [creating, onClose, router],
+    [creating, onClose, router, prefill],
   )
 
   const handlePick = useCallback(
