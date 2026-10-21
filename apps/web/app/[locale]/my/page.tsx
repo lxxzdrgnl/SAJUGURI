@@ -10,6 +10,7 @@ import { listProfiles } from '@sajuguri/api-client'
 import type { ProfileResponse } from '@sajuguri/api-client'
 import { fetchAllRecords } from '@/lib/records/registry'
 import GoogleLoginLink from '@/components/auth/GoogleLoginLink'
+import ScreenShell from '@/components/ui/ScreenShell'
 
 // 브라우저가 직접 여는 풀 URL — next.config rewrites를 타지 않도록 백엔드 절대 주소 사용.
 
@@ -29,7 +30,7 @@ export default async function MyPage() {
 
   if (!user) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] flex-col gap-5 px-4 pb-8 pt-4">
+      <ScreenShell className="flex flex-col gap-5 pt-2">
         <h1 className="font-display text-xl font-normal text-c-text">{t('title')}</h1>
         <Card className="flex flex-col items-center gap-4 py-8 text-center">
           <MascotTinted width={72} height={72} />
@@ -41,7 +42,7 @@ export default async function MyPage() {
             {t('loginWithGoogle')}
           </GoogleLoginLink>
         </Card>
-      </main>
+      </ScreenShell>
     )
   }
 
@@ -62,7 +63,7 @@ export default async function MyPage() {
   const records = await fetchAllRecords(authApi)
 
   return (
-    <main className="-mx-4 -mt-2 -mb-8 flex min-h-[calc(100dvh-3.5rem)] flex-col gap-5 px-4 pb-8 pt-4">
+    <ScreenShell className="flex flex-col gap-5 pt-2">
       {/* ── 상단 히어로: 대표 만세력 카드 (이메일 포함) ─── */}
       <section>
         {repProfile ? (
@@ -114,6 +115,6 @@ export default async function MyPage() {
       <MyRecordsClient records={records} repProfileName={repProfile?.name ?? null} />
 
       {/* 언어·로그아웃은 ≡ 드로어에서 */}
-    </main>
+    </ScreenShell>
   )
 }

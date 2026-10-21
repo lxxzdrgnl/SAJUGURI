@@ -3,6 +3,7 @@ import { serverAuthApi } from '@/lib/serverAuth'
 import { getCompatibilityReport } from '@sajuguri/api-client'
 import Card from '@/components/ui/Card'
 import CompatibilityView from '@/components/compatibility/CompatibilityView'
+import ScreenShell from '@/components/ui/ScreenShell'
 
 export default async function CompatibilityDetailPage({
   params,
@@ -22,9 +23,9 @@ export default async function CompatibilityDetailPage({
 
   if (!detail) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 px-4 pb-8 pt-4 text-center">
+      <ScreenShell className="pt-2 text-center">
         <p className="text-[15px] font-extrabold text-c-text-sub">{t('view.errorFallback')}</p>
-      </main>
+      </ScreenShell>
     )
   }
 
@@ -32,7 +33,7 @@ export default async function CompatibilityDetailPage({
   const nameB = detail.person_b.name ?? t('scoreOverview.personB')
 
   return (
-    <main className="-mx-4 -mt-2 -mb-8 px-4 pb-8 pt-4 flex flex-col gap-4">
+    <ScreenShell className="pt-2 flex flex-col gap-4">
       {/* 두 사람 요약 헤더 */}
       <Card className="flex items-center gap-2 px-4 py-3">
         <div className="flex flex-1 flex-col min-w-0">
@@ -54,6 +55,6 @@ export default async function CompatibilityDetailPage({
 
       {/* 안내 — 콘텐츠 하단 */}
       <p className="pb-2 text-center text-[13px] text-c-text-sub">{t('view.guideText')}</p>
-    </main>
+    </ScreenShell>
   )
 }

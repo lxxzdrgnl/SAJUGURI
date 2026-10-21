@@ -5,6 +5,7 @@ import { serverApi } from '@/lib/api'
 import { getSharedFortune } from '@sajuguri/api-client'
 import type { DailyStoryResponse } from '@sajuguri/api-client'
 import FortuneStoryPage from '@/components/fortune/FortuneStoryPage'
+import ScreenShell from '@/components/ui/ScreenShell'
 
 export const dynamic = 'force-dynamic'
 
@@ -90,10 +91,10 @@ export default async function SharedFortunePage({
   if (!story) {
     const t = await getTranslations('fortune.shared')
     return (
-      <main className="-mx-4 -mt-2 -mb-8 min-h-[calc(100vh-56px)] px-4 pb-8 pt-16 text-center">
+      <ScreenShell className="pt-14 text-center">
         <p className="text-[15px] font-extrabold text-c-text-sub">{t('notFoundTitle')}</p>
         <p className="mt-2 text-[13px] text-c-text-sub">{t('notFoundBody')}</p>
-      </main>
+      </ScreenShell>
     )
   }
 

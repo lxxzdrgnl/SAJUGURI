@@ -8,6 +8,7 @@ import ChatListClient from '@/components/chat/ChatListClient'
 import PageHeading from '@/components/ui/PageHeading'
 import { firstParam, resolvePrefill } from '@/lib/chat/prefill'
 import GoogleLoginLink from '@/components/auth/GoogleLoginLink'
+import ScreenShell from '@/components/ui/ScreenShell'
 
 // 백엔드 직결 URL — 서버 컴포넌트는 next.config rewrites를 안 탄다
 
@@ -27,7 +28,7 @@ export default async function ChatPage({ searchParams }: Props) {
 
   if (!user) {
     return (
-      <main className="-mx-4 -mb-8 -mt-2 min-h-[calc(100dvh-3.5rem)] px-4 pb-10 pt-4">
+      <ScreenShell className="pb-2 pt-2">
         <div className="mb-4">
           <PageHeading title={t('title')} accent="teal" />
         </div>
@@ -43,7 +44,7 @@ export default async function ChatPage({ searchParams }: Props) {
             {t('loginWithGoogle')}
           </GoogleLoginLink>
         </Card>
-      </main>
+      </ScreenShell>
     )
   }
 
@@ -59,8 +60,8 @@ export default async function ChatPage({ searchParams }: Props) {
   ])
 
   return (
-    <main className="-mx-4 -mb-8 -mt-2 min-h-[calc(100dvh-3.5rem)] px-4 pb-10 pt-4">
+    <ScreenShell className="pb-2 pt-2">
       <ChatListClient sessions={sessions} profiles={profiles} prefill={prefill} />
-    </main>
+    </ScreenShell>
   )
 }

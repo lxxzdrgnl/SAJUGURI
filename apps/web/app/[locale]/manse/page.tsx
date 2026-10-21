@@ -5,6 +5,7 @@ import SavedList from '@/components/manse/SavedList'
 import { buttonClass } from '@/components/ui/Button'
 import { currentUser, serverAuthApi } from '@/lib/serverAuth'
 import { listProfiles, type ProfileResponse } from '@sajuguri/api-client'
+import ScreenShell from '@/components/ui/ScreenShell'
 
 // 브라우저가 직접 여는 풀 URL — next.config rewrites를 타지 않도록 백엔드 절대 주소 사용.
 
@@ -23,7 +24,7 @@ export default async function ManseIndex() {
   }
 
   return (
-    <main className="-mx-4 -mb-8 -mt-2 min-h-[calc(100dvh-3.5rem)] px-4 pb-10 pt-4 text-c-text">
+    <ScreenShell className="pb-2 pt-2 text-c-text">
       <h1 className="mb-4 font-display text-2xl font-normal leading-tight">{t('title')}</h1>
       <Link href="/manse/new" className={`${buttonClass('primary', 'md')} mb-6 w-full`}>
         {t('new')}
@@ -40,6 +41,6 @@ export default async function ManseIndex() {
         isLoggedIn={!!user}
         savedKeys={profiles.map((p) => `${p.birth_date}|${p.birth_time ?? ''}|${p.gender}`)}
       />
-    </main>
+    </ScreenShell>
   )
 }

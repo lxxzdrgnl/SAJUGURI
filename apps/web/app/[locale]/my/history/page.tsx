@@ -6,6 +6,7 @@ import MascotTinted from '@/components/ui/MascotTinted'
 import HistoryFeedClient from '@/components/my/HistoryFeedClient'
 import { fetchAllRecords } from '@/lib/records/registry'
 import GoogleLoginLink from '@/components/auth/GoogleLoginLink'
+import ScreenShell from '@/components/ui/ScreenShell'
 
 export default async function HistoryPage({
   searchParams,
@@ -18,7 +19,7 @@ export default async function HistoryPage({
 
   if (!user) {
     return (
-      <main className="-mx-4 -mt-2 -mb-8 px-4 pb-8 pt-4 flex flex-col gap-4">
+      <ScreenShell className="pt-2 flex flex-col gap-4">
         <h1 className="font-display text-xl font-normal text-c-text">{t('history.title')}</h1>
         <Card className="flex flex-col items-center gap-4 py-8 text-center">
           <MascotTinted width={72} height={72} />
@@ -30,7 +31,7 @@ export default async function HistoryPage({
             {t('history.loginWithGoogle')}
           </GoogleLoginLink>
         </Card>
-      </main>
+      </ScreenShell>
     )
   }
 
@@ -38,10 +39,10 @@ export default async function HistoryPage({
   const records = await fetchAllRecords(authApi)
 
   return (
-    <main className="-mx-4 -mt-2 -mb-8 px-4 pb-8 pt-4 flex flex-col gap-4">
+    <ScreenShell className="pt-2 flex flex-col gap-4">
       <h1 className="font-display text-xl font-normal text-c-text">{t('history.title')}</h1>
 
       <HistoryFeedClient records={records} initialType={type} />
-    </main>
+    </ScreenShell>
   )
 }
