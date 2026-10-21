@@ -18,7 +18,7 @@ def _patch_oauth(monkeypatch):
     async def _fake_authorize_access_token(request):
         return {"userinfo": {"email": "native@example.com", "sub": "native-sub-1"}}
 
-    async def _fake_social_login(db, email, social_id):
+    async def _fake_social_login(db, email, social_id, name=None):
         return "fake-access", "fake-refresh"
 
     monkeypatch.setattr(
